@@ -96,7 +96,7 @@ export default function AsistenciaControlPage() {
 
                     // Contar por roles
                     const stats = asistencias_list.reduce((acc: any, curr: any) => {
-                        const rol = curr.personas?.rol || 'Sin asignar';
+                        const rol = (curr.personas?.rol || 'Sin asignar').toLowerCase().trim();
                         acc[rol] = (acc[rol] || 0) + 1;
                         return acc;
                     }, {});
@@ -112,7 +112,7 @@ export default function AsistenciaControlPage() {
                         'Docentes': stats['docente'] || 0,
                         'Directivos': stats['directivo'] || 0,
                         'Estud. Avanzados': stats['estudiante avanzado'] || 0,
-                        'Sin Rol': stats['Sin asignar'] || 0,
+                        'Sin Rol': stats['sin asignar'] || 0,
                         'Porcentaje Participación': `${percentage}%`
                     };
                 });
