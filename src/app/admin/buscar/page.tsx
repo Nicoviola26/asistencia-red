@@ -476,7 +476,7 @@ export default function BuscarPersonaPage() {
 
             {/* Modal de Confirmación de Eliminación */}
             {isDeleteModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/80">
                     <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-200 dark:border-slate-800 animate-scale-in">
                         <div className="p-6">
                             <div className="flex items-center gap-4 mb-6">
