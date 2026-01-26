@@ -102,6 +102,41 @@ export default function BuscarPersonaPage() {
         }
     };
 
+    const [selectedIds, setSelectedIds] = useState<string[]>([]);
+
+    const toggleSelect = (id: string) => {
+        setSelectedIds(prev =>
+            prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+        );
+    };
+
+    const toggleSelectAll = () => {
+        if (selectedIds.length === searchResults.length) {
+            setSelectedIds([]);
+        } else {
+            setSelectedIds(searchResults.map(p => p.id));
+        }
+    };
+
+    const handleBulkDelete = async () => {
+        if (!confirm(`¿Estás SEGURO de eliminar a las ${selectedIds.length} personas seleccionadas? Se borrarán todos sus registros de asistencia para siempre.`)) return;
+
+        setLoading(true);
+        try {
+            const { error } = await supabase.from('personas').delete().in('id', selectedIds);
+            if (error) throw error;
+
+            setSearchResults(prev => prev.filter(p => !selectedIds.includes(p.id)));
+            setSelectedIds([]);
+            setPersona(null);
+            alert('Personas eliminadas correctamente');
+        } catch (err: any) {
+            alert('Error al eliminar: ' + err.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const handleSearch = async (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -109,6 +144,7 @@ export default function BuscarPersonaPage() {
         setError('');
         setPersona(null);
         setSearchResults([]);
+        setSelectedIds([]);
         setAsistencias([]);
 
         try {
@@ -145,6 +181,7 @@ export default function BuscarPersonaPage() {
     const selectPersona = async (personaData: any) => {
         setPersona(personaData);
         setSearchResults([]);
+        setSelectedIds([]);
         setLoading(true);
         try {
             const { data: asistenciasData } = await supabase
@@ -203,23 +240,53 @@ export default function BuscarPersonaPage() {
 
             {/* Multiple Search Results */}
             {searchResults.length > 0 && (
-                <div className="max-w-xl mx-auto space-y-3">
-                    <p className="text-sm font-medium text-slate-500">
-                        {query.trim() ? 'Múltiples coincidencias encontradas:' : 'Listado completo de personas:'}
-                    </p>
+                <div className="max-w-xl mx-auto space-y-3 px-4 md:px-0">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <input
+                                type="checkbox"
+                                checked={selectedIds.length === searchResults.length}
+                                onChange={toggleSelectAll}
+                                className="w-5 h-5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
+                            />
+                            <p className="text-sm font-medium text-slate-500">
+                                {query.trim() ? 'Múltiples coincidencias encontradas:' : 'Listado completo de personas:'}
+                            </p>
+                        </div>
+                        {selectedIds.length > 0 && (
+                            <button
+                                onClick={handleBulkDelete}
+                                className="flex items-center gap-2 px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white rounded-md text-xs font-bold transition-all shadow-sm animate-fade-in"
+                            >
+                                <Trash2 size={14} /> Eliminar ({selectedIds.length})
+                            </button>
+                        )}
+                    </div>
                     <div className="card divide-y divide-slate-100 dark:divide-slate-800">
                         {searchResults.map((p) => (
-                            <button
+                            <div
                                 key={p.id}
-                                onClick={() => selectPersona(p)}
-                                className="w-full p-4 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors text-left"
+                                className="w-full flex items-center hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors"
                             >
-                                <div>
-                                    <p className="font-bold uppercase leading-tight">{p.nombre} {p.apellido}</p>
-                                    <p className="text-xs text-slate-500 font-mono mt-1">DNI: {p.dni}</p>
+                                <div className="pl-4">
+                                    <input
+                                        type="checkbox"
+                                        checked={selectedIds.includes(p.id)}
+                                        onChange={() => toggleSelect(p.id)}
+                                        className="w-5 h-5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
+                                    />
                                 </div>
-                                <User size={20} className="text-slate-300" />
-                            </button>
+                                <button
+                                    onClick={() => selectPersona(p)}
+                                    className="flex-1 p-4 flex items-center justify-between text-left"
+                                >
+                                    <div>
+                                        <p className="font-bold uppercase leading-tight">{p.nombre} {p.apellido}</p>
+                                        <p className="text-xs text-slate-500 font-mono mt-1">DNI: {p.dni}</p>
+                                    </div>
+                                    <User size={20} className="text-slate-300" />
+                                </button>
+                            </div>
                         ))}
                     </div>
                 </div>
