@@ -96,7 +96,10 @@ export default function AsistenciaControlPage() {
 
                     // Contar por roles
                     const stats = asistencias_list.reduce((acc: any, curr: any) => {
-                        const rol = (curr.personas?.rol || 'Sin asignar').toLowerCase().trim();
+                        let rol = (curr.personas?.rol || 'Sin asignar').toLowerCase().trim();
+                        // Normalizar para incluir datos viejos que solo decían "estudiante"
+                        if (rol.includes('estudiante')) rol = 'estudiante avanzado';
+
                         acc[rol] = (acc[rol] || 0) + 1;
                         return acc;
                     }, {});
