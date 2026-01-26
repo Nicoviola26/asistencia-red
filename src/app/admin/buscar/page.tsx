@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import { UserSearch, Search, Loader2, User, Clock, MapPin, Building2, Download, Trash2, CheckCircle2 } from 'lucide-react';
+import { UserSearch, Search, Loader2, User, Clock, MapPin, Building2, Download, Trash2, CheckCircle2, AlertTriangle } from 'lucide-react';
 import * as XLSX from 'xlsx';
 
 export default function BuscarPersonaPage() {
@@ -73,22 +73,7 @@ export default function BuscarPersonaPage() {
         setLoading(false);
     };
 
-    const handleDeletePersona = async (id: string) => {
-        if (!confirm('¿Estás SEGURO de eliminar a esta persona? Se borrarán todos sus registros de asistencia para siempre.')) return;
 
-        setLoading(true);
-        const { error } = await supabase.from('personas').delete().eq('id', id);
-
-        if (error) {
-            alert('Error al eliminar: ' + error.message);
-        } else {
-            setPersona(null);
-            setAsistencias([]);
-            setQuery('');
-            alert('Persona eliminada correctamente');
-        }
-        setLoading(false);
-    };
 
     const handleDeleteAsistencia = async (asistenciaId: string) => {
         if (!confirm('¿Eliminar este registro de asistencia?')) return;
@@ -103,6 +88,8 @@ export default function BuscarPersonaPage() {
     };
 
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [deleteConfig, setDeleteConfig] = useState<{ type: 'single' | 'bulk', id?: string, count: number }>({ type: 'single', count: 0 });
 
     const toggleSelect = (id: string) => {
         setSelectedIds(prev =>
@@ -118,18 +105,35 @@ export default function BuscarPersonaPage() {
         }
     };
 
-    const handleBulkDelete = async () => {
-        if (!confirm(`¿Estás SEGURO de eliminar a las ${selectedIds.length} personas seleccionadas? Se borrarán todos sus registros de asistencia para siempre.`)) return;
+    const handleDeletePersona = (id: string) => {
+        setDeleteConfig({ type: 'single', id, count: 1 });
+        setIsDeleteModalOpen(true);
+    };
 
+    const handleBulkDelete = () => {
+        setDeleteConfig({ type: 'bulk', count: selectedIds.length });
+        setIsDeleteModalOpen(true);
+    };
+
+    const confirmDelete = async () => {
         setLoading(true);
+        setIsDeleteModalOpen(false);
         try {
-            const { error } = await supabase.from('personas').delete().in('id', selectedIds);
-            if (error) throw error;
-
-            setSearchResults(prev => prev.filter(p => !selectedIds.includes(p.id)));
-            setSelectedIds([]);
-            setPersona(null);
-            alert('Personas eliminadas correctamente');
+            if (deleteConfig.type === 'single' && deleteConfig.id) {
+                const { error } = await supabase.from('personas').delete().eq('id', deleteConfig.id);
+                if (error) throw error;
+                setPersona(null);
+                setAsistencias([]);
+                setSearchResults(prev => prev.filter(p => p.id !== deleteConfig.id));
+                alert('Persona eliminada correctamente');
+            } else if (deleteConfig.type === 'bulk') {
+                const { error } = await supabase.from('personas').delete().in('id', selectedIds);
+                if (error) throw error;
+                setSearchResults(prev => prev.filter(p => !selectedIds.includes(p.id)));
+                setSelectedIds([]);
+                setPersona(null);
+                alert('Personas eliminadas correctamente');
+            }
         } catch (err: any) {
             alert('Error al eliminar: ' + err.message);
         } finally {
@@ -465,6 +469,44 @@ export default function BuscarPersonaPage() {
                                     ))}
                                 </div>
                             )}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal de Confirmación de Eliminación */}
+            {isDeleteModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+                    <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-200 dark:border-slate-800 animate-scale-in">
+                        <div className="p-6">
+                            <div className="flex items-center gap-4 mb-6">
+                                <div className="p-3 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-full">
+                                    <AlertTriangle size={32} />
+                                </div>
+                                <div>
+                                    <h3 className="text-xl font-bold text-slate-900 dark:text-white">Confirmar Eliminación</h3>
+                                    <p className="text-sm text-slate-500">Esta acción no se puede deshacer.</p>
+                                </div>
+                            </div>
+
+                            <p className="text-slate-600 dark:text-slate-300 leading-relaxed mb-8">
+                                Estás por eliminar definitivamente a <span className="font-bold text-red-600 dark:text-red-400">{deleteConfig.count === 1 ? 'esta persona' : `${deleteConfig.count} personas`}</span>, ¿estás seguro?
+                            </p>
+
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={() => setIsDeleteModalOpen(false)}
+                                    className="flex-1 px-4 py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-xl font-bold transition-colors"
+                                >
+                                    Cancelar
+                                </button>
+                                <button
+                                    onClick={confirmDelete}
+                                    className="flex-1 px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold transition-all shadow-lg active:scale-95"
+                                >
+                                    Eliminar
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
