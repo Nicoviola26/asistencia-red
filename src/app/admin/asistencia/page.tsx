@@ -42,7 +42,7 @@ export default function AsistenciaControlPage() {
             .select(`
         id,
         fecha_registro,
-        personas (dni, nombre, apellido, rol, institucion)
+        personas (dni, nombre, apellido, rol, institucion, celular, eje)
       `)
             .eq('capacitacion_id', id);
 
@@ -60,6 +60,8 @@ export default function AsistenciaControlPage() {
             Apellido: a.personas.apellido,
             Rol: a.personas.rol,
             Institución: a.personas.institucion,
+            Eje: a.personas.eje || '-',
+            WhatsApp: a.personas.celular || '-',
             'Fecha Registro': new Date(a.fecha_registro).toLocaleString(),
         }));
 

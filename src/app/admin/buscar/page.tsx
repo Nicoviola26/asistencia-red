@@ -31,8 +31,9 @@ export default function BuscarPersonaPage() {
                     Apellido: p.apellido,
                     Rol: p.rol,
                     Institución: p.institucion || '-',
+                    Eje: p.eje || '-',
                     Email: p.correo || '-',
-                    Celular: p.celular || '-',
+                    WhatsApp: p.celular || '-',
                 }));
 
                 const worksheet = XLSX.utils.json_to_sheet(worksheetData);
@@ -239,6 +240,7 @@ export default function BuscarPersonaPage() {
                             <div className="w-full pt-4 space-y-3 text-left">
                                 <InfoItem icon={<Building2 size={16} />} label="Institución" value={persona.institucion || 'No especificada'} />
                                 <InfoItem icon={<User size={16} />} label="Rol" value={persona.rol} />
+                                <InfoItem icon={<MapPin size={16} />} label="Eje" value={persona.eje || 'No especificado'} />
                                 <InfoItem icon={<Clock size={16} />} label="Email" value={persona.correo || '-'} />
                             </div>
                         </div>
@@ -295,6 +297,20 @@ export default function BuscarPersonaPage() {
                                     </select>
                                 </div>
                                 <div className="space-y-1">
+                                    <label className="text-[10px] font-bold uppercase text-slate-400">Eje</label>
+                                    <select
+                                        className="input-field py-1 px-3 text-sm"
+                                        value={persona.eje || ''}
+                                        onChange={(e) => setPersona({ ...persona, eje: e.target.value })}
+                                    >
+                                        <option value="Educación Ambiental">Educación Ambiental</option>
+                                        <option value="Educación Digital Integral">Educación Digital Integral</option>
+                                        <option value="Infancias Diversas">Infancias Diversas</option>
+                                        <option value="Alfabetización Inicial">Alfabetización Inicial</option>
+                                        <option value="Lenguajes Artísticos Integrales">Lenguajes Artísticos Integrales</option>
+                                    </select>
+                                </div>
+                                <div className="space-y-1">
                                     <label className="text-[10px] font-bold uppercase text-slate-400">Email</label>
                                     <input
                                         type="email"
@@ -304,11 +320,12 @@ export default function BuscarPersonaPage() {
                                     />
                                 </div>
                                 <div className="space-y-1">
-                                    <label className="text-[10px] font-bold uppercase text-slate-400">Celular</label>
+                                    <label className="text-[10px] font-bold uppercase text-slate-400">Número de contacto (WhatsApp)</label>
                                     <input
                                         className="input-field py-1 px-3 text-sm"
                                         value={persona.celular || ''}
                                         onChange={(e) => setPersona({ ...persona, celular: e.target.value })}
+                                        placeholder="Ej: 3624123456"
                                     />
                                 </div>
                                 <div className="md:col-span-2 space-y-1">

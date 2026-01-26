@@ -17,7 +17,8 @@ export default function CargarPersonaPage() {
         correo: '',
         celular: '',
         institucion: '',
-        rol: 'docente'
+        rol: 'docente',
+        eje: 'Educación Ambiental'
     });
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -36,7 +37,7 @@ export default function CargarPersonaPage() {
         } else {
             setMessage({ type: 'success', text: 'Persona registrada correctamente.' });
             setFormData({
-                dni: '', nombre: '', apellido: '', correo: '', celular: '', institucion: '', rol: 'docente'
+                dni: '', nombre: '', apellido: '', correo: '', celular: '', institucion: '', rol: 'docente', eje: 'Educación Ambiental'
             });
         }
         setLoading(false);
@@ -70,7 +71,8 @@ export default function CargarPersonaPage() {
                     correo: String(item.correo || item.Email || item.Mail || '').trim(),
                     celular: String(item.celular || item.Telefono || item.Celular || '').trim(),
                     institucion: String(item.institucion || item.Institucion || item.Organizacion || '').trim(),
-                    rol: String(item.rol || item.Rol || 'docente').toLowerCase().trim()
+                    rol: String(item.rol || item.Rol || 'docente').toLowerCase().trim(),
+                    eje: String(item.eje || item.Eje || 'Educación Ambiental').trim()
                 })).filter(p => p.dni && p.nombre);
 
                 if (personasToInsert.length === 0) {
@@ -160,6 +162,19 @@ export default function CargarPersonaPage() {
                                     </select>
                                 </div>
                                 <div className="space-y-2">
+                                    <label className="text-sm font-semibold">¿En cuál de los ejes desea inscribirse? *</label>
+                                    <select
+                                        name="eje" required className="input-field"
+                                        value={formData.eje} onChange={handleChange}
+                                    >
+                                        <option value="Educación Ambiental">Educación Ambiental</option>
+                                        <option value="Educación Digital Integral">Educación Digital Integral</option>
+                                        <option value="Infancias Diversas">Infancias Diversas</option>
+                                        <option value="Alfabetización Inicial">Alfabetización Inicial</option>
+                                        <option value="Lenguajes Artísticos Integrales">Lenguajes Artísticos Integrales</option>
+                                    </select>
+                                </div>
+                                <div className="space-y-2">
                                     <label className="text-sm font-semibold">Nombre *</label>
                                     <input
                                         name="nombre" required className="input-field"
@@ -185,10 +200,11 @@ export default function CargarPersonaPage() {
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <label className="text-sm font-semibold">Celular</label>
+                                        <label className="text-sm font-semibold">Número de contacto (WhatsApp) *</label>
                                         <input
-                                            name="celular" className="input-field"
+                                            name="celular" required className="input-field"
                                             value={formData.celular} onChange={handleChange}
+                                            placeholder="Ej: 3624123456"
                                         />
                                     </div>
                                 </div>
@@ -225,7 +241,7 @@ export default function CargarPersonaPage() {
                                 </p>
                             </div>
                             <div className="flex flex-wrap justify-center gap-2">
-                                {['dni', 'nombre', 'apellido', 'institucion', 'rol'].map(tag => (
+                                {['dni', 'nombre', 'apellido', 'institucion', 'rol', 'celular', 'eje'].map(tag => (
                                     <span key={tag} className="px-2 py-1 bg-white dark:bg-slate-800 rounded text-[10px] font-mono border border-slate-200 dark:border-slate-700">
                                         {tag}
                                     </span>
@@ -247,8 +263,8 @@ export default function CargarPersonaPage() {
                         </div>
                     )}
                 </div>
-            </div>
-        </div>
+            </div >
+        </div >
     );
 }
 
