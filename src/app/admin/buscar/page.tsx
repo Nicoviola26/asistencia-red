@@ -289,9 +289,9 @@ export default function BuscarPersonaPage() {
                                         value={persona.rol}
                                         onChange={(e) => setPersona({ ...persona, rol: e.target.value })}
                                     >
-                                        <option value="estudiante">Estudiante</option>
                                         <option value="docente">Docente</option>
-                                        <option value="asistente">Asistente</option>
+                                        <option value="directivo">Directivo</option>
+                                        <option value="estudiante avanzado">Estudiante Avanzado</option>
                                     </select>
                                 </div>
                                 <div className="space-y-1">

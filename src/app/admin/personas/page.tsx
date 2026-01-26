@@ -17,7 +17,7 @@ export default function CargarPersonaPage() {
         correo: '',
         celular: '',
         institucion: '',
-        rol: 'estudiante'
+        rol: 'docente'
     });
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -36,7 +36,7 @@ export default function CargarPersonaPage() {
         } else {
             setMessage({ type: 'success', text: 'Persona registrada correctamente.' });
             setFormData({
-                dni: '', nombre: '', apellido: '', correo: '', celular: '', institucion: '', rol: 'estudiante'
+                dni: '', nombre: '', apellido: '', correo: '', celular: '', institucion: '', rol: 'docente'
             });
         }
         setLoading(false);
@@ -70,7 +70,7 @@ export default function CargarPersonaPage() {
                     correo: String(item.correo || item.Email || item.Mail || '').trim(),
                     celular: String(item.celular || item.Telefono || item.Celular || '').trim(),
                     institucion: String(item.institucion || item.Institucion || item.Organizacion || '').trim(),
-                    rol: String(item.rol || item.Rol || 'estudiante').toLowerCase().trim()
+                    rol: String(item.rol || item.Rol || 'docente').toLowerCase().trim()
                 })).filter(p => p.dni && p.nombre);
 
                 if (personasToInsert.length === 0) {
@@ -154,9 +154,9 @@ export default function CargarPersonaPage() {
                                         name="rol" className="input-field"
                                         value={formData.rol} onChange={handleChange}
                                     >
-                                        <option value="estudiante">Estudiante</option>
                                         <option value="docente">Docente</option>
-                                        <option value="asistente">Asistente</option>
+                                        <option value="directivo">Directivo</option>
+                                        <option value="estudiante avanzado">Estudiante Avanzado</option>
                                     </select>
                                 </div>
                                 <div className="space-y-2">
