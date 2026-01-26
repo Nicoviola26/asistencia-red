@@ -6,10 +6,11 @@ import { UserSearch, Search, Loader2, User, Clock, MapPin, Building2, Download, 
 import * as XLSX from 'xlsx';
 
 export default function BuscarPersonaPage() {
-    const [dni, setDni] = useState('');
+    const [query, setQuery] = useState('');
     const [loading, setLoading] = useState(false);
     const [exporting, setExporting] = useState(false);
     const [persona, setPersona] = useState<any>(null);
+    const [searchResults, setSearchResults] = useState<any[]>([]);
     const [asistencias, setAsistencias] = useState<any[]>([]);
     const [error, setError] = useState('');
 
@@ -82,7 +83,7 @@ export default function BuscarPersonaPage() {
         } else {
             setPersona(null);
             setAsistencias([]);
-            setDni('');
+            setQuery('');
             alert('Persona eliminada correctamente');
         }
         setLoading(false);
@@ -102,41 +103,58 @@ export default function BuscarPersonaPage() {
 
     const handleSearch = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!dni) return;
+        if (!query) return;
 
         setLoading(true);
         setError('');
         setPersona(null);
+        setSearchResults([]);
         setAsistencias([]);
 
         try {
-            const { data: personaData, error: personaError } = await supabase
+            // Search by DNI (exact) OR Name (ilike) OR Surname (ilike)
+            const { data: results, error: searchError } = await supabase
                 .from('personas')
                 .select('*')
-                .eq('dni', dni.trim())
-                .single();
+                .or(`dni.eq.${query.trim()},nombre.ilike.%${query.trim()}%,apellido.ilike.%${query.trim()}%`);
 
-            if (personaError || !personaData) {
-                setError('Persona no encontrada con ese DNI.');
-                setLoading(false);
+            if (searchError) throw searchError;
+
+            if (!results || results.length === 0) {
+                setError('No se encontraron participantes con ese criterio.');
                 return;
             }
 
-            setPersona(personaData);
+            if (results.length === 1) {
+                selectPersona(results[0]);
+            } else {
+                setSearchResults(results);
+            }
+        } catch (err) {
+            setError('Ocurrió un error al buscar los datos.');
+        } finally {
+            setLoading(false);
+        }
+    };
 
+    const selectPersona = async (personaData: any) => {
+        setPersona(personaData);
+        setSearchResults([]);
+        setLoading(true);
+        try {
             const { data: asistenciasData } = await supabase
                 .from('asistencias')
                 .select(`
-          id,
-          fecha_registro,
-          capacitaciones (nombre, dia, hora, lugar, disertante)
-        `)
+                    id,
+                    fecha_registro,
+                    capacitaciones (nombre, dia, hora, lugar, disertante)
+                `)
                 .eq('persona_id', personaData.id)
                 .order('fecha_registro', { ascending: false });
 
             setAsistencias(asistenciasData || []);
         } catch (err) {
-            setError('Ocurrió un error al buscar los datos.');
+            setError('Error al cargar historial.');
         } finally {
             setLoading(false);
         }
@@ -165,10 +183,10 @@ export default function BuscarPersonaPage() {
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                         <input
                             type="text"
-                            placeholder="Ingrese el DNI..."
+                            placeholder="Buscar por DNI, Nombre o Apellido..."
                             className="input-field pl-10"
-                            value={dni}
-                            onChange={(e) => setDni(e.target.value)}
+                            value={query}
+                            onChange={(e) => setQuery(e.target.value)}
                         />
                     </div>
                     <button type="submit" disabled={loading} className="btn-primary">
@@ -177,6 +195,28 @@ export default function BuscarPersonaPage() {
                 </form>
                 {error && <p className="text-red-500 text-sm mt-2 text-center">{error}</p>}
             </div>
+
+            {/* Multiple Search Results */}
+            {searchResults.length > 0 && (
+                <div className="max-w-xl mx-auto space-y-3">
+                    <p className="text-sm font-medium text-slate-500">Múltiples coincidencias encontradas:</p>
+                    <div className="card divide-y divide-slate-100 dark:divide-slate-800">
+                        {searchResults.map((p) => (
+                            <button
+                                key={p.id}
+                                onClick={() => selectPersona(p)}
+                                className="w-full p-4 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors text-left"
+                            >
+                                <div>
+                                    <p className="font-bold uppercase leading-tight">{p.nombre} {p.apellido}</p>
+                                    <p className="text-xs text-slate-500 font-mono mt-1">DNI: {p.dni}</p>
+                                </div>
+                                <User size={20} className="text-slate-300" />
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            )}
 
             {persona && (
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-fade-in">
