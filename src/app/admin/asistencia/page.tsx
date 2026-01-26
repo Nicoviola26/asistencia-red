@@ -125,15 +125,7 @@ export default function AsistenciaControlPage() {
                     <p className="text-slate-500">Monitorea y exporta los registros en tiempo real.</p>
                 </div>
 
-                {selectedCapacitacion ? (
-                    <button
-                        onClick={exportToExcel}
-                        className="btn-success flex items-center gap-2"
-                    >
-                        <Download size={18} />
-                        Exportar a Excel
-                    </button>
-                ) : (
+                <div className="flex flex-wrap gap-2">
                     <button
                         onClick={exportGeneralStats}
                         disabled={loading || capacitaciones.length === 0}
@@ -142,7 +134,17 @@ export default function AsistenciaControlPage() {
                         {loading ? <Loader2 className="animate-spin" size={18} /> : <Download size={18} />}
                         Exportar Estadísticas Generales
                     </button>
-                )}
+
+                    {selectedCapacitacion && (
+                        <button
+                            onClick={exportToExcel}
+                            className="btn-success flex items-center gap-2"
+                        >
+                            <Download size={18} />
+                            Exportar Asistencia Actual
+                        </button>
+                    )}
+                </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">

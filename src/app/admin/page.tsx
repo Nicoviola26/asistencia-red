@@ -42,23 +42,19 @@ export default function AdminDashboard() {
 
             {/* Basic Stats Mockup or placeholder */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-2 card p-6">
-                    <h3 className="text-lg font-semibold mb-4">Información del Sistema</h3>
-                    <div className="space-y-4">
-                        <div className="p-4 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800 flex items-center justify-between">
-                            <div>
-                                <p className="text-sm font-medium text-slate-500">Estado del Servidor</p>
-                                <p className="text-lg font-bold text-emerald-500 flex items-center gap-2">
-                                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                                    Conectado a Supabase
-                                </p>
-                            </div>
-                            <p className="text-xs text-slate-400 font-mono">v1.0.0</p>
-                        </div>
-                        <p className="text-sm text-slate-600 dark:text-slate-400">
-                            Usa el menú lateral para acceder a las diferentes funcionalidades. El sistema está optimizado para dispositivos móviles para facilitar la toma de asistencia.
+                <div className="lg:col-span-2 card p-6 flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div className="space-y-2">
+                        <h3 className="text-lg font-bold">Resumen de Gestión</h3>
+                        <p className="text-sm text-slate-500">
+                            Descarga un reporte consolidado con el total de asistentes y porcentajes de todas las capacitaciones.
                         </p>
                     </div>
+                    <Link
+                        href="/admin/asistencia"
+                        className="w-full md:w-auto flex items-center justify-center gap-2 px-6 py-3 bg-slate-800 text-white rounded-xl font-bold hover:bg-slate-700 transition-all shadow-lg active:scale-95"
+                    >
+                        Ir a Descargar Estadísticas
+                    </Link>
                 </div>
 
                 <div className="card p-6 flex flex-col items-center justify-center text-center">
