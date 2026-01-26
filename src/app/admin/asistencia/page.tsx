@@ -188,8 +188,8 @@ export default function AsistenciaControlPage() {
                             <div className="p-4 bg-slate-50 dark:bg-slate-900 rounded-xl">
                                 <p className="text-xs text-slate-500 font-medium uppercase tracking-wider mb-1">Participación</p>
                                 <div className="flex items-end gap-2">
-                                    <p className="text-3xl font-bold text-slate-800 dark:text-white">{asistenciaPercentage}%</p>
-                                    <p className="text-sm text-slate-500 mb-1">del total ({asistencias.length}/{totalPersonas})</p>
+                                    <p className="text-3xl font-bold text-[var(--foreground)]">{asistenciaPercentage}%</p>
+                                    <p className="text-sm text-[var(--muted)] mb-1">del total ({asistencias.length}/{totalPersonas})</p>
                                 </div>
                                 <div className="mt-3 w-full bg-slate-200 dark:bg-slate-700 h-2 rounded-full overflow-hidden">
                                     <div
