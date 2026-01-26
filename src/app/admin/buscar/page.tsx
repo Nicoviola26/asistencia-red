@@ -302,7 +302,7 @@ export default function BuscarPersonaPage() {
                     <div className="card p-6 h-fit bg-slate-800 text-white">
                         <div className="flex flex-col items-center text-center space-y-4">
                             <div className="w-20 h-20 bg-slate-700 rounded-full flex items-center justify-center border-4 border-slate-600 shadow-lg">
-                                <User size={40} className="text-emerald-400" />
+                                <User size={40} className="text-[var(--primary)]" />
                             </div>
                             <div>
                                 <h3 className="text-xl font-bold uppercase">{persona.nombre} {persona.apellido}</h3>
@@ -320,7 +320,7 @@ export default function BuscarPersonaPage() {
                     {/* Attendance History */}
                     <div className="lg:col-span-2 space-y-6">
                         {/* Edit Persona Section */}
-                        <div className="card p-6 bg-white dark:bg-slate-900 border-t-4 border-emerald-500">
+                        <div className="card p-6 bg-white dark:bg-slate-900 border-t-4 border-[var(--primary)]">
                             <div className="flex items-center justify-between mb-4">
                                 <h3 className="text-lg font-bold">Editar Datos de la Persona</h3>
                                 <button
@@ -455,7 +455,7 @@ export default function BuscarPersonaPage() {
                                             <div className="flex items-center gap-4">
                                                 <div className="text-right">
                                                     <p className="text-xs font-medium text-slate-400 uppercase">Registrado</p>
-                                                    <p className="font-semibold text-emerald-500">{new Date(asistencia.fecha_registro).toLocaleTimeString()}</p>
+                                                    <p className="font-semibold text-[var(--primary)]">{new Date(asistencia.fecha_registro).toLocaleTimeString()}</p>
                                                 </div>
                                                 <button
                                                     onClick={() => handleDeleteAsistencia(asistencia.id)}

@@ -3,9 +3,9 @@
 :root {
   --background: #f8fafc;
   --foreground: #1e293b;
-  --primary: #1e293b;
+  --primary: #49b38d;
   --primary-foreground: #ffffff;
-  --success: #10b981;
+  --success: #49b38d;
   --success-foreground: #ffffff;
   --card: #ffffff;
   --card-foreground: #1e293b;
@@ -16,8 +16,8 @@
   :root {
     --background: #0f172a;
     --foreground: #f8fafc;
-    --primary: #334155;
-    --primary-foreground: #f8fafc;
+    --primary: #49b38d;
+    --primary-foreground: #ffffff;
     --card: #1e293b;
     --card-foreground: #f8fafc;
     --border: #334155;
@@ -32,7 +32,7 @@ body {
 
 @layer components {
   .btn-primary {
-    @apply px-4 py-2 bg-slate-800 text-white rounded-lg font-medium transition-all hover:bg-slate-700 active:scale-95 disabled:opacity-50 disabled:pointer-events-none;
+    @apply px-4 py-2 bg-[var(--primary)] text-white rounded-lg font-medium transition-all hover:opacity-90 active:scale-95 disabled:opacity-50 disabled:pointer-events-none shadow-md shadow-emerald-500/10;
   }
 
   .btn-success {

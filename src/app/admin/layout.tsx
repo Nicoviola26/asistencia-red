@@ -92,8 +92,10 @@ export default function AdminLayout({
             <aside className="w-full md:w-64 bg-slate-800 text-white flex flex-col shadow-xl z-10">
                 <div className="p-6">
                     <Link href="/admin" className="flex items-center gap-3 text-xl font-bold tracking-tight">
-                        <LayoutDashboard className="text-emerald-400" />
-                        <span>Panel Admin</span>
+                        <div className="w-10 h-10 rounded-lg bg-white overflow-hidden shadow-lg border border-slate-700">
+                            <img src="/logo.png" alt="Logo" className="w-full h-full object-cover" />
+                        </div>
+                        <span>Antigravity</span>
                     </Link>
                 </div>
 
@@ -129,9 +131,9 @@ function SidebarLink({ href, icon, label }: { href: string, icon: React.ReactNod
     return (
         <Link
             href={href}
-            className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-700 transition-colors font-medium"
+            className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/10 active:bg-white/20 transition-all font-medium group"
         >
-            {icon}
+            <div className="text-emerald-400 group-hover:scale-110 transition-transform">{icon}</div>
             <span>{label}</span>
         </Link>
     );

@@ -92,14 +92,14 @@ export default function RegistrationPage() {
     <main className="min-h-screen flex flex-col items-center justify-center p-4 bg-slate-50 dark:bg-slate-950">
       <div className="w-full max-w-md animate-fade-in">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-slate-800 text-white mb-4 shadow-lg">
-            <UserCheck size={32} />
+          <div className="inline-flex items-center justify-center w-24 h-24 rounded-3xl bg-white overflow-hidden mb-4 shadow-xl border-4 border-slate-100 dark:border-slate-800">
+            <img src="/logo.png" alt="Antigravity Logo" className="w-full h-full object-cover" />
           </div>
-          <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Registro de Asistencia</h1>
-          <p className="text-slate-500 dark:text-slate-400 mt-2">Ingresa tus datos para confirmar tu participación</p>
+          <h1 className="text-4xl font-black text-slate-900 dark:text-white tracking-tight">Antigravity</h1>
+          <p className="text-slate-500 dark:text-slate-400 mt-2 font-medium">Registro de Asistencia</p>
         </div>
 
-        <div className="card p-6 shadow-xl border-t-4 border-slate-800">
+        <div className="card p-8 shadow-2xl border-t-4 border-[var(--primary)]">
           <form onSubmit={handleRegister} className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">

@@ -193,7 +193,7 @@ export default function AsistenciaControlPage() {
                                 </div>
                                 <div className="mt-3 w-full bg-slate-200 dark:bg-slate-700 h-2 rounded-full overflow-hidden">
                                     <div
-                                        className="bg-emerald-500 h-full transition-all duration-1000"
+                                        className="bg-[var(--primary)] h-full transition-all duration-1000"
                                         style={{ width: `${asistenciaPercentage}%` }}
                                     />
                                 </div>
