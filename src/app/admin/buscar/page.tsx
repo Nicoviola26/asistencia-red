@@ -370,6 +370,7 @@ export default function BuscarPersonaPage() {
                                         value={persona.eje || ''}
                                         onChange={(e) => setPersona({ ...persona, eje: e.target.value })}
                                     >
+                                        <option value="">Sin asignar</option>
                                         <option value="Educación Ambiental">Educación Ambiental</option>
                                         <option value="Educación Digital Integral">Educación Digital Integral</option>
                                         <option value="Infancias Diversas">Infancias Diversas</option>

@@ -18,7 +18,7 @@ export default function CargarPersonaPage() {
         celular: '',
         institucion: '',
         rol: 'docente',
-        eje: 'Educación Ambiental'
+        eje: ''
     });
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -37,7 +37,7 @@ export default function CargarPersonaPage() {
         } else {
             setMessage({ type: 'success', text: 'Persona registrada correctamente.' });
             setFormData({
-                dni: '', nombre: '', apellido: '', correo: '', celular: '', institucion: '', rol: 'docente', eje: 'Educación Ambiental'
+                dni: '', nombre: '', apellido: '', correo: '', celular: '', institucion: '', rol: 'docente', eje: ''
             });
         }
         setLoading(false);
@@ -72,7 +72,7 @@ export default function CargarPersonaPage() {
                     celular: String(item.celular || item.Telefono || item.Celular || '').trim(),
                     institucion: String(item.institucion || item.Institucion || item.Organizacion || '').trim(),
                     rol: String(item.rol || item.Rol || 'docente').toLowerCase().trim(),
-                    eje: String(item.eje || item.Eje || 'Educación Ambiental').trim()
+                    eje: String(item.eje || item.Eje || '').trim()
                 })).filter(p => p.dni && p.nombre);
 
                 if (personasToInsert.length === 0) {
@@ -164,9 +164,10 @@ export default function CargarPersonaPage() {
                                 <div className="space-y-2">
                                     <label className="text-sm font-semibold">¿En cuál de los ejes desea inscribirse? *</label>
                                     <select
-                                        name="eje" required className="input-field"
+                                        name="eje" className="input-field"
                                         value={formData.eje} onChange={handleChange}
                                     >
+                                        <option value="">Sin asignar</option>
                                         <option value="Educación Ambiental">Educación Ambiental</option>
                                         <option value="Educación Digital Integral">Educación Digital Integral</option>
                                         <option value="Infancias Diversas">Infancias Diversas</option>
