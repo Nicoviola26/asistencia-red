@@ -103,7 +103,6 @@ export default function BuscarPersonaPage() {
 
     const handleSearch = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!query) return;
 
         setLoading(true);
         setError('');
@@ -112,11 +111,16 @@ export default function BuscarPersonaPage() {
         setAsistencias([]);
 
         try {
-            // Search by DNI (exact) OR Name (ilike) OR Surname (ilike)
-            const { data: results, error: searchError } = await supabase
+            let queryBuilder = supabase
                 .from('personas')
                 .select('*')
-                .or(`dni.eq.${query.trim()},nombre.ilike.%${query.trim()}%,apellido.ilike.%${query.trim()}%`);
+                .order('apellido', { ascending: true });
+
+            if (query.trim()) {
+                queryBuilder = queryBuilder.or(`dni.eq.${query.trim()},nombre.ilike.%${query.trim()}%,apellido.ilike.%${query.trim()}%`);
+            }
+
+            const { data: results, error: searchError } = await queryBuilder;
 
             if (searchError) throw searchError;
 
@@ -125,7 +129,7 @@ export default function BuscarPersonaPage() {
                 return;
             }
 
-            if (results.length === 1) {
+            if (results.length === 1 && query.trim()) {
                 selectPersona(results[0]);
             } else {
                 setSearchResults(results);
@@ -199,7 +203,9 @@ export default function BuscarPersonaPage() {
             {/* Multiple Search Results */}
             {searchResults.length > 0 && (
                 <div className="max-w-xl mx-auto space-y-3">
-                    <p className="text-sm font-medium text-slate-500">Múltiples coincidencias encontradas:</p>
+                    <p className="text-sm font-medium text-slate-500">
+                        {query.trim() ? 'Múltiples coincidencias encontradas:' : 'Listado completo de personas:'}
+                    </p>
                     <div className="card divide-y divide-slate-100 dark:divide-slate-800">
                         {searchResults.map((p) => (
                             <button
