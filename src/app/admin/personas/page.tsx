@@ -71,7 +71,7 @@ export default function CargarPersonaPage() {
                     correo: String(item.correo || item.Email || item.Mail || '').trim(),
                     celular: String(item.celular || item.Telefono || item.Celular || '').trim(),
                     institucion: String(item.institucion || item.Institucion || item.Organizacion || '').trim(),
-                    rol: String(item.rol || item.Rol || 'docente').toLowerCase().trim(),
+                    rol: String(item.rol || item.Rol || item.Categoria || item.Categoría || item.Cargo || item.Funcion || 'docente').toLowerCase().trim(),
                     eje: String(item.eje || item.Eje || '').trim()
                 })).filter(p => p.dni && p.nombre);
 
@@ -242,7 +242,7 @@ export default function CargarPersonaPage() {
                                 </p>
                             </div>
                             <div className="flex flex-wrap justify-center gap-2">
-                                {['dni', 'nombre', 'apellido', 'institucion', 'rol', 'celular', 'eje'].map(tag => (
+                                {['dni', 'nombre', 'apellido', 'institucion', 'rol', 'categoria', 'celular', 'eje'].map(tag => (
                                     <span key={tag} className="px-2 py-1 bg-white dark:bg-slate-800 rounded text-[10px] font-mono border border-slate-200 dark:border-slate-700">
                                         {tag}
                                     </span>
