@@ -69,6 +69,50 @@ export default function AsistenciaControlPage() {
         XLSX.writeFile(workbook, `${capName.replace(/\s+/g, '_')}_asistencia.xlsx`);
     };
 
+    const exportGeneralStats = async () => {
+        setLoading(true);
+        try {
+            const { data, error } = await supabase
+                .from('capacitaciones')
+                .select(`
+                    nombre,
+                    dia,
+                    lugar,
+                    disertante,
+                    asistencias(count)
+                `)
+                .order('dia', { ascending: false });
+
+            if (error) throw error;
+
+            if (data) {
+                const worksheetData = data.map((c: any) => {
+                    const count = c.asistencias[0]?.count || 0;
+                    const percentage = totalPersonas > 0 ? Math.round((count / totalPersonas) * 100) : 0;
+
+                    return {
+                        Capacitación: c.nombre,
+                        Fecha: new Date(c.dia).toLocaleDateString(),
+                        Lugar: c.lugar || 'S/D',
+                        Disertante: c.disertante || 'S/D',
+                        'Total Asistentes': count,
+                        'Porcentaje Participación': `${percentage}%`
+                    };
+                });
+
+                const worksheet = XLSX.utils.json_to_sheet(worksheetData);
+                const workbook = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(workbook, worksheet, "Estadísticas Generales");
+                XLSX.writeFile(workbook, "estadisticas_generales_capacitaciones.xlsx");
+            }
+        } catch (err) {
+            console.error('Error al exportar:', err);
+            alert('No se pudieron exportar las estadísticas.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const asistenciaPercentage = totalPersonas > 0
         ? Math.round((asistencias.length / totalPersonas) * 100)
         : 0;
@@ -81,13 +125,22 @@ export default function AsistenciaControlPage() {
                     <p className="text-slate-500">Monitorea y exporta los registros en tiempo real.</p>
                 </div>
 
-                {selectedCapacitacion && (
+                {selectedCapacitacion ? (
                     <button
                         onClick={exportToExcel}
                         className="btn-success flex items-center gap-2"
                     >
                         <Download size={18} />
                         Exportar a Excel
+                    </button>
+                ) : (
+                    <button
+                        onClick={exportGeneralStats}
+                        disabled={loading || capacitaciones.length === 0}
+                        className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg font-medium transition-all shadow-sm disabled:opacity-50"
+                    >
+                        {loading ? <Loader2 className="animate-spin" size={18} /> : <Download size={18} />}
+                        Exportar Estadísticas Generales
                     </button>
                 )}
             </div>
