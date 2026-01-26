@@ -91,7 +91,7 @@ export default function ChecklistPage() {
                     </div>
                     <div>
                         <h2 className="text-2xl font-bold">Cosas a Tener en Cuenta</h2>
-                        <p className="text-slate-500">Cronograma de tareas para que la Capacitación sea un ÉXITO</p>
+                        <p className="text-[var(--muted)]">Cronograma de tareas para que la Capacitación sea un ÉXITO</p>
                     </div>
                 </div>
                 <button
@@ -144,7 +144,7 @@ export default function ChecklistPage() {
             <div className="space-y-6">
                 {categories.map(cat => (
                     <div key={cat.id} className="space-y-3">
-                        <div className={`flex items-center gap-2 font-bold uppercase text-[11px] tracking-widest pl-2 ${cat.id === 'previo' ? 'text-amber-500' :
+                        <div className={`flex items-center gap-2 font-bold uppercase text-[11px] tracking-widest pl-2 opacity-80 ${cat.id === 'previo' ? 'text-amber-500' :
                             cat.id === 'durante' ? 'text-blue-500' :
                                 'text-emerald-500'
                             }`}>

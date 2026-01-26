@@ -2,7 +2,7 @@
 
 :root {
   --background: #f8fafc;
-  --foreground: #1e293b;
+  --foreground: #0f172a;
   --primary: #49b38d;
   --primary-foreground: #ffffff;
   --success: #49b38d;
@@ -10,16 +10,18 @@
   --card: #ffffff;
   --card-foreground: #1e293b;
   --border: #e2e8f0;
+  --muted: #64748b;
 }
 
 .dark {
   --background: #0f172a;
-  --foreground: #f8fafc;
+  --foreground: #f1f5f9;
   --primary: #49b38d;
   --primary-foreground: #ffffff;
   --card: #1e293b;
   --card-foreground: #f8fafc;
   --border: #334155;
+  --muted: #94a3b8;
 }
 
 body {
