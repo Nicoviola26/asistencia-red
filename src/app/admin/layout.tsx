@@ -92,8 +92,8 @@ export default function AdminLayout({
             <aside className="w-full md:w-64 bg-slate-800 text-white flex flex-col shadow-xl z-10">
                 <div className="p-6">
                     <Link href="/admin" className="flex items-center gap-3 text-xl font-bold tracking-tight">
-                        <div className="w-10 h-10 rounded-lg bg-white overflow-hidden shadow-lg border border-slate-700">
-                            <img src="/logo.png" alt="Logo" className="w-full h-full object-cover" />
+                        <div className="w-12 h-12 rounded-full bg-white overflow-hidden shadow-lg border-2 border-[var(--primary)] p-0.5">
+                            <img src="/logo.png" alt="Logo" className="w-full h-full object-cover rounded-full" />
                         </div>
                         <span>Antigravity</span>
                     </Link>
