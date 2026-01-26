@@ -104,7 +104,7 @@ export default function AdminLayout({
                     <SidebarLink href="/admin/buscar" icon={<Search size={20} />} label="Buscar Persona" />
                     <SidebarLink href="/admin/personas" icon={<FilePlus size={20} />} label="Cargar Persona" />
                     <SidebarLink href="/admin/capacitaciones" icon={<Calendar size={20} />} label="Gestionar Capacitaciones" />
-                    <SidebarLink href="/admin/checklist" icon={<ClipboardList size={20} />} label="Cosas a tener en cuenta" />
+                    <SidebarLink href="/admin/checklist" icon={<ClipboardList size={20} />} label="Cosas a Tener en Cuenta" />
                 </nav>
 
                 <div className="p-4 mt-auto border-t border-slate-700">
