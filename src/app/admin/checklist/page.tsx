@@ -91,7 +91,7 @@ export default function ChecklistPage() {
                     </div>
                     <div>
                         <h2 className="text-2xl font-bold">Cosas a Tener en Cuenta</h2>
-                        <p className="text-slate-500">Cronograma de tareas para la organización del evento.</p>
+                        <p className="text-slate-500">Cronograma de tareas para que la Capacitación sea un ÉXITO</p>
                     </div>
                 </div>
                 <button
@@ -133,7 +133,7 @@ export default function ChecklistPage() {
                 >
                     <option value="previo">Previos</option>
                     <option value="durante">Durante</option>
-                    <option value="despues">Despúes</option>
+                    <option value="despues">Después</option>
                 </select>
                 <button type="submit" className="btn-primary flex items-center gap-2">
                     <Plus size={18} /> Agregar
@@ -145,8 +145,8 @@ export default function ChecklistPage() {
                 {categories.map(cat => (
                     <div key={cat.id} className="space-y-3">
                         <div className={`flex items-center gap-2 font-bold uppercase text-[11px] tracking-widest pl-2 ${cat.id === 'previo' ? 'text-amber-500' :
-                                cat.id === 'durante' ? 'text-blue-500' :
-                                    'text-emerald-500'
+                            cat.id === 'durante' ? 'text-blue-500' :
+                                'text-emerald-500'
                             }`}>
                             {cat.icon}
                             {cat.label}

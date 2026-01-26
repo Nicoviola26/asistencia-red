@@ -128,7 +128,7 @@ export default function RegistrationPage() {
                 value={capacitacionId}
                 onChange={(e) => setCapacitacionId(e.target.value)}
               >
-                <option value="">Selecciona una opción...</option>
+                <option value="">Seleccioná una opción...</option>
                 {capacitaciones.map((cap) => (
                   <option key={cap.id} value={cap.id}>
                     {cap.nombre} - {new Date(cap.dia).toLocaleDateString()}

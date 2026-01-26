@@ -113,7 +113,7 @@ export default function CargarPersonaPage() {
                     </div>
                     <div>
                         <h2 className="text-2xl font-bold">Gestión de Personas</h2>
-                        <p className="text-slate-500">Registra participantes o importa una lista completa.</p>
+                        <p className="text-slate-500">Registrá participantes o importá una lista completa.</p>
                     </div>
                 </div>
 
