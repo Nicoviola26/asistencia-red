@@ -81,7 +81,9 @@ export default function AsistenciaControlPage() {
                     dia,
                     lugar,
                     disertante,
-                    asistencias(count)
+                    asistencias(
+                        personas(rol)
+                    )
                 `)
                 .order('dia', { ascending: false });
 
@@ -89,7 +91,16 @@ export default function AsistenciaControlPage() {
 
             if (data) {
                 const worksheetData = data.map((c: any) => {
-                    const count = c.asistencias[0]?.count || 0;
+                    const asistencias_list = c.asistencias || [];
+                    const count = asistencias_list.length;
+
+                    // Contar por roles
+                    const stats = asistencias_list.reduce((acc: any, curr: any) => {
+                        const rol = curr.personas?.rol || 'Sin asignar';
+                        acc[rol] = (acc[rol] || 0) + 1;
+                        return acc;
+                    }, {});
+
                     const percentage = totalPersonas > 0 ? Math.round((count / totalPersonas) * 100) : 0;
 
                     return {
@@ -98,6 +109,10 @@ export default function AsistenciaControlPage() {
                         Lugar: c.lugar || 'S/D',
                         Disertante: c.disertante || 'S/D',
                         'Total Asistentes': count,
+                        'Docentes': stats['docente'] || 0,
+                        'Directivos': stats['directivo'] || 0,
+                        'Estud. Avanzados': stats['estudiante avanzado'] || 0,
+                        'Sin Rol': stats['Sin asignar'] || 0,
                         'Porcentaje Participación': `${percentage}%`
                     };
                 });
