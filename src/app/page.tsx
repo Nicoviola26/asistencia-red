@@ -95,8 +95,8 @@ export default function RegistrationPage() {
           <div className="inline-flex items-center justify-center w-28 h-28 rounded-full bg-white overflow-hidden mb-6 shadow-2xl border-4 border-[var(--primary)] animate-float p-1 ring-8 ring-[var(--primary)]/10">
             <img src="/logo.png" alt="Antigravity Logo" className="w-full h-full object-cover rounded-full" />
           </div>
-          <h1 className="text-5xl font-black text-slate-900 dark:text-white tracking-tighter">Antigravity</h1>
-          <p className="text-slate-500 dark:text-slate-400 mt-2 font-semibold uppercase tracking-widest text-xs">Sistema de Asistencia</p>
+          <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight leading-tight max-w-[280px] mx-auto">Red Municipal de Formación Docente</h1>
+          <p className="text-slate-500 dark:text-slate-400 mt-3 font-semibold uppercase tracking-widest text-[10px]">Registro de Asistencia</p>
         </div>
 
         <div className="card p-8 shadow-2xl border-t-4 border-[var(--primary)]">
