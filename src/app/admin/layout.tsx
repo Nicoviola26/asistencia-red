@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { LayoutDashboard, Users, FilePlus, Calendar, Search, LogOut, Lock, Loader2, ClipboardList } from 'lucide-react';
+import { LayoutDashboard, Users, FilePlus, Calendar, Search, LogOut, Lock, Loader2, ClipboardList, Sun, Moon } from 'lucide-react';
 import Link from 'next/link';
 
 export default function AdminLayout({
@@ -12,15 +12,39 @@ export default function AdminLayout({
     const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const [darkMode, setDarkMode] = useState<boolean>(false);
 
     useEffect(() => {
+        // Auth check
         const auth = localStorage.getItem('admin_auth');
         if (auth === 'true') {
             setIsAuthenticated(true);
         } else {
             setIsAuthenticated(false);
         }
+
+        // Dark mode check
+        const savedTheme = localStorage.getItem('admin_theme');
+        if (savedTheme === 'dark') {
+            setDarkMode(true);
+            document.documentElement.classList.add('dark');
+        } else {
+            setDarkMode(false);
+            document.documentElement.classList.remove('dark');
+        }
     }, []);
+
+    const toggleDarkMode = () => {
+        const newMode = !darkMode;
+        setDarkMode(newMode);
+        if (newMode) {
+            document.documentElement.classList.add('dark');
+            localStorage.setItem('admin_theme', 'dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+            localStorage.setItem('admin_theme', 'light');
+        }
+    };
 
     const handleLogin = (e: React.FormEvent) => {
         e.preventDefault();
@@ -107,7 +131,14 @@ export default function AdminLayout({
                     <SidebarLink href="/admin/checklist" icon={<ClipboardList size={20} />} label="Cosas a Tener en Cuenta" />
                 </nav>
 
-                <div className="p-4 mt-auto border-t border-slate-700">
+                <div className="p-4 mt-auto border-t border-slate-700 space-y-2">
+                    <button
+                        onClick={toggleDarkMode}
+                        className="w-full flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white transition-colors text-sm"
+                    >
+                        {darkMode ? <Sun size={18} /> : <Moon size={18} />}
+                        Modo {darkMode ? 'Claro' : 'Oscuro'}
+                    </button>
                     <button
                         onClick={handleLogout}
                         className="w-full flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white transition-colors text-sm"
