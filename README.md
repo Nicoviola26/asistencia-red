@@ -1,36 +1,65 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Sistema de Gestión de Asistencia
 
-## Getting Started
+Aplicación web moderna para la toma de asistencia en capacitaciones y eventos.
 
-First, run the development server:
+## Tecnologías
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- **Frontend**: Next.js 15 (App Router), TypeScript, Tailwind CSS.
+- **Backend / DB**: Supabase.
+- **Iconografía**: Lucide React.
+- **Exportación**: XLSX.
+
+## Configuración de la Base de Datos (Supabase)
+
+Ejecuta el siguiente SQL en el SQL Editor de tu proyecto Supabase:
+
+```sql
+-- Tabla: personas
+CREATE TABLE personas (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  dni TEXT UNIQUE NOT NULL,
+  nombre TEXT NOT NULL,
+  apellido TEXT NOT NULL,
+  correo TEXT,
+  celular TEXT,
+  institucion TEXT,
+  rol TEXT DEFAULT 'estudiante' -- estudiante, docente, asistente
+);
+
+-- Tabla: capacitaciones
+CREATE TABLE capacitaciones (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  nombre TEXT NOT NULL,
+  dia DATE NOT NULL,
+  hora TIME NOT NULL,
+  lugar TEXT,
+  disertante TEXT
+);
+
+-- Tabla: asistencias
+CREATE TABLE asistencias (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  persona_id UUID REFERENCES personas(id) ON DELETE CASCADE,
+  capacitacion_id UUID REFERENCES capacitaciones(id) ON DELETE CASCADE,
+  fecha_registro TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()),
+  UNIQUE(persona_id, capacitacion_id)
+);
+
+-- Habilitar RLS (Opcional, pero recomendado)
+-- Para este ejemplo, asegúrate de configurar las políticas de acceso (Policies) 
+-- para permitir lectura/escritura anónima o autenticada según sea necesario.
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Configuración del Entorno
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. Renombra `.env.local.example` a `.env.local`.
+2. Completa las variables `NEXT_PUBLIC_SUPABASE_URL` y `NEXT_PUBLIC_SUPABASE_ANON_KEY` con las credenciales de tu proyecto.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Despliegue
 
-## Learn More
+La aplicación está lista para ser desplegada en **Vercel**:
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. Sube el código a un repositorio de GitHub.
+2. Importa el proyecto en Vercel.
+3. Configura las variables de entorno en el panel de Vercel.
+4. ¡Listo!
