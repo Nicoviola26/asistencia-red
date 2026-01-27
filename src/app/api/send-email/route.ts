@@ -27,7 +27,8 @@ export async function POST(request: Request) {
         } else {
             return NextResponse.json({ success: false, error: result.error }, { status: 500 });
         }
-    } catch (error: any) {
-        return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    } catch (error: unknown) {
+        const err = error as Error;
+        return NextResponse.json({ success: false, error: err.message }, { status: 500 });
     }
 }

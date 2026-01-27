@@ -11,7 +11,14 @@ export default function MensajeriaPage() {
 
     // Individual Mail State
     const [dni, setDni] = useState('');
-    const [targetPersona, setTargetPersona] = useState<any>(null);
+    const [targetPersona, setTargetPersona] = useState<any>(null); // eslint-disable-line @typescript-eslint/no-explicit-any
+    // For build stability, let's define what we expect from a person
+    type PersonaSimple = {
+        id: string;
+        nombre: string;
+        apellido: string;
+        correo: string | null;
+    };
     const [subject, setSubject] = useState('');
     const [message, setMessage] = useState('');
 
@@ -92,8 +99,9 @@ export default function MensajeriaPage() {
             } else {
                 throw new Error(data.error);
             }
-        } catch (err: any) {
-            setStatus({ type: 'error', text: 'Error al enviar el correo: ' + err.message });
+        } catch (err: unknown) {
+            const error = err as Error;
+            setStatus({ type: 'error', text: 'Error al enviar el correo: ' + error.message });
         } finally {
             setSending(false);
         }
@@ -119,9 +127,9 @@ export default function MensajeriaPage() {
                 return;
             }
 
-            const recipients = asistencias
-                .map((a: any) => a.personas)
-                .filter((p: any) => p && p.correo);
+            const recipients = (asistencias as any[])
+                .map(a => a.personas)
+                .filter((p): p is PersonaSimple => !!p && !!p.correo);
 
             let successCount = 0;
             for (const person of recipients) {
@@ -145,8 +153,9 @@ export default function MensajeriaPage() {
             });
             setBroadcastSubject('');
             setBroadcastMessage('');
-        } catch (err: any) {
-            setStatus({ type: 'error', text: 'Error en el envío masivo: ' + err.message });
+        } catch (err: unknown) {
+            const error = err as Error;
+            setStatus({ type: 'error', text: 'Error en el envío masivo: ' + error.message });
         } finally {
             setSending(false);
         }
@@ -161,8 +170,8 @@ export default function MensajeriaPage() {
 
             {status && (
                 <div className={`p-4 rounded-xl flex items-start gap-3 transition-all ${status.type === 'success'
-                        ? 'bg-emerald-50 text-emerald-800 border border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800'
-                        : 'bg-red-50 text-red-800 border border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800'
+                    ? 'bg-emerald-50 text-emerald-800 border border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800'
+                    : 'bg-red-50 text-red-800 border border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800'
                     }`}>
                     {status.type === 'success' ? <CheckCircle2 className="shrink-0" /> : <AlertCircle className="shrink-0" />}
                     <p className="font-medium text-sm">{status.text}</p>

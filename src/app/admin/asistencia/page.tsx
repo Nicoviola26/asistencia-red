@@ -8,7 +8,7 @@ import * as XLSX from 'xlsx';
 export default function AsistenciaControlPage() {
     const [capacitaciones, setCapacitaciones] = useState<Capacitacion[]>([]);
     const [selectedCapacitacion, setSelectedCapacitacion] = useState('');
-    const [asistencias, setAsistencias] = useState<any[]>([]);
+    const [asistencias, setAsistencias] = useState<any[]>([]); // eslint-disable-line @typescript-eslint/no-explicit-any
     const [loading, setLoading] = useState(false);
     const [totalPersonas, setTotalPersonas] = useState(0);
 
@@ -37,14 +37,14 @@ export default function AsistenciaControlPage() {
 
     async function fetchAsistencias(id: string) {
         setLoading(true);
-        const { data, error } = await supabase
+        const { data } = await supabase
             .from('asistencias')
             .select(`
         id,
         fecha_registro,
         personas (dni, nombre, apellido, rol, institucion, celular, eje)
       `)
-            .eq('capacitacion_id', id);
+            .eq('capacitacion_id', id) as any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
         if (data) setAsistencias(data);
         setLoading(false);
@@ -54,7 +54,7 @@ export default function AsistenciaControlPage() {
         if (asistencias.length === 0) return;
 
         const capName = capacitaciones.find(c => c.id === selectedCapacitacion)?.nombre || 'asistencia';
-        const worksheetData = asistencias.map((a: any) => ({
+        const worksheetData = asistencias.map((a: any) => ({ // eslint-disable-line @typescript-eslint/no-explicit-any
             DNI: a.personas.dni,
             Nombre: a.personas.nombre,
             Apellido: a.personas.apellido,
@@ -90,12 +90,12 @@ export default function AsistenciaControlPage() {
             if (error) throw error;
 
             if (data) {
-                const worksheetData = data.map((c: any) => {
+                const worksheetData = data.map((c: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
                     const asistencias_list = c.asistencias || [];
                     const count = asistencias_list.length;
 
                     // Contar por roles
-                    const stats = asistencias_list.reduce((acc: any, curr: any) => {
+                    const stats = asistencias_list.reduce((acc: any, curr: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
                         let rol = (curr.personas?.rol || 'Sin asignar').toLowerCase().trim();
                         // Normalizar para incluir datos viejos que solo decían "estudiante"
                         if (rol.includes('estudiante')) rol = 'estudiante avanzado';

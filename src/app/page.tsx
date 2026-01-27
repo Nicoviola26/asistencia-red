@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase, type Capacitacion } from '@/lib/supabase';
-import { UserCheck, Search, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Search, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 
 export default function RegistrationPage() {
@@ -14,6 +14,16 @@ export default function RegistrationPage() {
   const [showModal, setShowModal] = useState(false);
   const [userName, setUserName] = useState('');
 
+  const fetchCapacitaciones = async () => {
+    const { data } = await supabase
+      .from('capacitaciones')
+      .select('*')
+      .eq('activa', true)
+      .order('dia', { ascending: false });
+
+    if (data) setCapacitaciones(data);
+  };
+
   useEffect(() => {
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
       setMessage({
@@ -24,16 +34,6 @@ export default function RegistrationPage() {
     }
     fetchCapacitaciones();
   }, []);
-
-  async function fetchCapacitaciones() {
-    const { data, error } = await supabase
-      .from('capacitaciones')
-      .select('*')
-      .eq('activa', true)
-      .order('dia', { ascending: false });
-
-    if (data) setCapacitaciones(data);
-  }
 
   async function handleRegister(e: React.FormEvent) {
     e.preventDefault();
