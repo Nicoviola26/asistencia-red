@@ -63,17 +63,47 @@ export default function CargarPersonaPage() {
                     throw new Error('El archivo está vacío');
                 }
 
-                // Normalizar datos (mapear columnas comunes)
-                const personasToInsert = data.map((item: any) => ({
-                    dni: String(item.dni || item.DNI || item.Documento || '').trim(),
-                    nombre: String(item.nombre || item.Nombre || '').trim(),
-                    apellido: String(item.apellido || item.Apellido || '').trim(),
-                    correo: String(item.correo || item.Email || item.Mail || '').trim(),
-                    celular: String(item.celular || item.Telefono || item.Celular || '').trim(),
-                    institucion: String(item.institucion || item.Institucion || item.Organizacion || item['institucion a la que pertenece'] || item['institución a la que pertenece'] || item['Institucion a la que pertenece'] || item['Institución a la que pertenece'] || '').trim(),
-                    rol: String(item.rol || item.Rol || item.Categoria || item.Categoría || item.Cargo || item.Funcion || 'docente').toLowerCase().trim(),
-                    eje: String(item.eje || item.Eje || '').trim()
-                })).filter(p => p.dni && p.nombre);
+                // Normalizar datos (mapear columnas comunes ignorando mayúsculas, espacios y acentos)
+                const personasToInsert = data.map((item: any) => {
+                    const normalized: Record<string, unknown> = {};
+                    Object.entries(item).forEach(([key, value]) => {
+                        const k = key
+                            .toString()
+                            .toLowerCase()
+                            .normalize('NFD')
+                            .replace(/[\u0300-\u036f]/g, '') // quitar acentos
+                            .replace(/\s+/g, ''); // quitar espacios
+                        normalized[k] = value;
+                    });
+
+                    const get = (...candidates: string[]) => {
+                        for (const c of candidates) {
+                            if (normalized[c] != null && normalized[c] !== '') return normalized[c];
+                        }
+                        return '';
+                    };
+
+                    return {
+                        dni: String(get('dni', 'documento')).trim(),
+                        nombre: String(get('nombre')).trim(),
+                        apellido: String(get('apellido')).trim(),
+                        correo: String(get('correo', 'email', 'mail', 'correoelectronico')).trim(),
+                        celular: String(get('celular', 'telefono', 'whatsapp')).trim(),
+                        institucion: String(
+                            get(
+                                'institucion',
+                                'organizacion',
+                                'institucionalaquepertenece'
+                            )
+                        ).trim(),
+                        rol: String(
+                            get('rol', 'categoria', 'cargo', 'funcion') || 'docente'
+                        )
+                            .toLowerCase()
+                            .trim(),
+                        eje: String(get('eje')).trim()
+                    };
+                }).filter(p => p.dni && p.nombre);
 
                 if (personasToInsert.length === 0) {
                     throw new Error('No se encontraron datos válidos (faltan DNI o Nombre)');
