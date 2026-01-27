@@ -11,6 +11,8 @@ export default function RegistrationPage() {
   const [capacitaciones, setCapacitaciones] = useState<Capacitacion[]>([]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+  const [showModal, setShowModal] = useState(false);
+  const [userName, setUserName] = useState('');
 
   useEffect(() => {
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
@@ -44,7 +46,7 @@ export default function RegistrationPage() {
       // 1. Buscar persona por DNI
       const { data: persona, error: personaError } = await supabase
         .from('personas')
-        .select('id')
+        .select('id, nombre, apellido')
         .eq('dni', dni.trim())
         .single();
 
@@ -78,7 +80,8 @@ export default function RegistrationPage() {
 
       if (insertError) throw insertError;
 
-      setMessage({ type: 'success', text: '¡Asistencia registrada con éxito!' });
+      setUserName(`${persona.nombre} ${persona.apellido}`);
+      setShowModal(true);
       setDni('');
     } catch (error) {
       console.error(error);
@@ -157,6 +160,24 @@ export default function RegistrationPage() {
           )}
         </div>
       </div>
+
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl p-8 max-w-sm w-full text-center border border-slate-200 dark:border-slate-800 animate-zoom-in">
+            <div className="w-20 h-20 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
+              <CheckCircle2 className="text-emerald-500 w-10 h-10" />
+            </div>
+            <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">{userName}</h2>
+            <p className="text-slate-600 dark:text-slate-400 mb-8 font-medium italic">Asistencia confirmada</p>
+            <button
+              onClick={() => setShowModal(false)}
+              className="w-full btn-primary h-12 text-lg font-semibold"
+            >
+              Aceptar
+            </button>
+          </div>
+        </div>
+      )}
 
       <footer className="mt-12 text-center">
         <Link
