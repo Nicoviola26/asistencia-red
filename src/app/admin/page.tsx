@@ -1,4 +1,4 @@
-import { ClipboardCheck, UserPlus, GraduationCap, UserSearch } from 'lucide-react';
+import { ClipboardCheck, UserPlus, GraduationCap, UserSearch, Mail } from 'lucide-react';
 import Link from 'next/link';
 
 export default function AdminDashboard() {
@@ -37,6 +37,13 @@ export default function AdminDashboard() {
                     title="Cargar Capacitación"
                     description="Crear nuevos eventos de capacitación."
                     color="border-purple-500"
+                />
+                <DashboardCard
+                    href="/admin/correo"
+                    icon={<Mail className="text-indigo-500" size={32} />}
+                    title="Mensajería"
+                    description="Envía comunicados individuales o masivos."
+                    color="border-indigo-500"
                 />
             </div>
 
