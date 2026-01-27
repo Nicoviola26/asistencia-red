@@ -24,15 +24,10 @@ export default function MensajeriaPage() {
 
     // Broadcast Mail State
     const [selectedCapacitacion, setSelectedCapacitacion] = useState('');
+    const [selectedEje, setSelectedEje] = useState('');
     const [attendeesCount, setAttendeesCount] = useState(0);
     const [broadcastSubject, setBroadcastSubject] = useState('');
     const [broadcastMessage, setBroadcastMessage] = useState('');
-
-    // Role-based broadcast state
-    const [selectedRole, setSelectedRole] = useState('todos');
-    const [roleCount, setRoleCount] = useState(0);
-    const [roleSubject, setRoleSubject] = useState('');
-    const [roleMessage, setRoleMessage] = useState('');
 
     const [status, setStatus] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
@@ -75,40 +70,27 @@ export default function MensajeriaPage() {
         }
     }
 
-    async function fetchAttendeesCount(id: string) {
-        if (!id) {
+    async function fetchAttendeesCount() {
+        if (!selectedCapacitacion) {
             setAttendeesCount(0);
             return;
         }
-        const { count } = await supabase
+        let query = supabase
             .from('asistencias')
-            .select('*', { count: 'exact', head: true })
-            .eq('capacitacion_id', id);
+            .select('id, personas(eje)', { count: 'exact', head: true })
+            .eq('capacitacion_id', selectedCapacitacion);
+
+        if (selectedEje) {
+            query = query.eq('personas.eje', selectedEje);
+        }
+
+        const { count } = await query;
         setAttendeesCount(count || 0);
     }
 
-    async function fetchRoleCount(role: string) {
-        if (role === 'todos') {
-            const { count } = await supabase
-                .from('personas')
-                .select('*', { count: 'exact', head: true });
-            setRoleCount(count || 0);
-        } else {
-            const { count } = await supabase
-                .from('personas')
-                .select('*', { count: 'exact', head: true })
-                .eq('rol', role);
-            setRoleCount(count || 0);
-        }
-    }
-
     useEffect(() => {
-        fetchAttendeesCount(selectedCapacitacion);
-    }, [selectedCapacitacion]);
-
-    useEffect(() => {
-        fetchRoleCount(selectedRole);
-    }, [selectedRole]);
+        fetchAttendeesCount();
+    }, [selectedCapacitacion, selectedEje]);
 
     async function sendIndividualEmail(e: React.FormEvent) {
         e.preventDefault();
@@ -152,10 +134,16 @@ export default function MensajeriaPage() {
 
         try {
             // 1. Fetch all attendees with emails
-            const { data: asistencias } = await supabase
+            let query = supabase
                 .from('asistencias')
-                .select('personas(id, nombre, correo)')
+                .select('personas(id, nombre, correo, eje)')
                 .eq('capacitacion_id', selectedCapacitacion);
+
+            if (selectedEje) {
+                query = query.eq('personas.eje', selectedEje);
+            }
+
+            const { data: asistencias } = await query;
 
             if (!asistencias || asistencias.length === 0) {
                 setStatus({ type: 'error', text: 'No hay asistentes con correo para esta capacitación.' });
@@ -300,26 +288,47 @@ export default function MensajeriaPage() {
                     </div>
 
                     <div className="space-y-4 flex-1">
-                        <div>
-                            <label className="block text-sm font-medium mb-1.5 text-slate-700 dark:text-slate-300">Seleccionar Capacitación</label>
-                            <select
-                                className="input-field"
-                                value={selectedCapacitacion}
-                                onChange={(e) => setSelectedCapacitacion(e.target.value)}
-                            >
-                                <option value="">Seleccione una capacitación...</option>
-                                {capacitaciones.map(c => (
-                                    <option key={c.id} value={c.id}>{c.nombre}</option>
-                                ))}
-                            </select>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-sm font-medium mb-1.5 text-slate-700 dark:text-slate-300">Seleccionar Capacitación</label>
+                                <select
+                                    className="input-field"
+                                    value={selectedCapacitacion}
+                                    onChange={(e) => setSelectedCapacitacion(e.target.value)}
+                                >
+                                    <option value="">Seleccione una capacitación...</option>
+                                    {capacitaciones.map(c => (
+                                        <option key={c.id} value={c.id}>{c.nombre}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium mb-1.5 text-slate-700 dark:text-slate-300">Filtrar por eje (opcional)</label>
+                                <select
+                                    className="input-field"
+                                    value={selectedEje}
+                                    onChange={(e) => setSelectedEje(e.target.value)}
+                                >
+                                    <option value="">Todos los ejes</option>
+                                    <option value="Educación Ambiental">Educación Ambiental</option>
+                                    <option value="Educación Digital Integral">Educación Digital Integral</option>
+                                    <option value="Infancias Diversas">Infancias Diversas</option>
+                                    <option value="Alfabetización Inicial">Alfabetización Inicial</option>
+                                    <option value="Lenguajes Artísticos Integrales">Lenguajes Artísticos Integrales</option>
+                                </select>
+                            </div>
                         </div>
 
                         <div className="p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl border border-emerald-100 dark:border-emerald-800/50">
                             <div className="flex items-center justify-between">
-                                <p className="text-sm font-medium text-emerald-800 dark:text-emerald-400">Asistentes registrados:</p>
+                                <p className="text-sm font-medium text-emerald-800 dark:text-emerald-400">
+                                    Asistentes registrados{selectedEje ? ` en el eje seleccionado` : ''}:
+                                </p>
                                 <p className="text-2xl font-bold text-emerald-900 dark:text-emerald-300">{attendeesCount}</p>
                             </div>
-                            <p className="text-[10px] text-emerald-600 mt-1 uppercase tracking-wider font-bold">Se enviará un correo a cada uno</p>
+                            <p className="text-[10px] text-emerald-600 mt-1 uppercase tracking-wider font-bold">
+                                Se enviará un correo a cada uno de los asistentes filtrados
+                            </p>
                         </div>
 
                         <form onSubmit={sendBroadcastEmail} className="space-y-4 pt-4 border-t border-slate-100 dark:border-slate-800">
