@@ -128,7 +128,7 @@ export default function AdminLayout({
                     <SidebarLink href="/admin/buscar" icon={<Search size={20} />} label="Buscar Persona" />
                     <SidebarLink href="/admin/personas" icon={<FilePlus size={20} />} label="Cargar Persona" />
                     <SidebarLink href="/admin/capacitaciones" icon={<Calendar size={20} />} label="Gestionar Capacitaciones" />
-                    <SidebarLink href="/admin/correo" icon={<Mail size={20} />} label="Mensajería" />
+                    <SidebarLink href="/admin/mensajeria" icon={<Mail size={20} />} label="Mensajería" />
                     <SidebarLink href="/admin/checklist" icon={<ClipboardList size={20} />} label="Cosas a Tener en Cuenta" />
                 </nav>
 

@@ -39,7 +39,7 @@ export default function AdminDashboard() {
                     color="border-purple-500"
                 />
                 <DashboardCard
-                    href="/admin/correo"
+                    href="/admin/mensajeria"
                     icon={<Mail className="text-indigo-500" size={32} />}
                     title="Mensajería"
                     description="Envía comunicados individuales o masivos."
