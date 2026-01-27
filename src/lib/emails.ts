@@ -1,9 +1,17 @@
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Lazy initialization to avoid build-time errors
+function getResendClient() {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    throw new Error('RESEND_API_KEY is not configured');
+  }
+  return new Resend(apiKey);
+}
 
 export async function sendConfirmationEmail(email: string, name: string, trainingName: string, date: string) {
   try {
+    const resend = getResendClient();
     const { data, error } = await resend.emails.send({
       from: 'Red Municipal de Formación Docente <onboarding@resend.dev>',
       to: [email],
@@ -37,6 +45,7 @@ export async function sendConfirmationEmail(email: string, name: string, trainin
 
 export async function sendCustomEmail(email: string, name: string, subject: string, body: string) {
   try {
+    const resend = getResendClient();
     const { data, error } = await resend.emails.send({
       from: 'Red Municipal de Formación Docente <onboarding@resend.dev>',
       to: [email],
