@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { LayoutDashboard, Users, FilePlus, Calendar, Search, LogOut, Lock, Loader2, ClipboardList, Sun, Moon } from 'lucide-react';
+import { LayoutDashboard, Users, FilePlus, Calendar, Search, LogOut, Lock, Loader2, ClipboardList, Sun, Moon, Mail } from 'lucide-react';
 import Link from 'next/link';
 
 export default function AdminLayout({
@@ -128,6 +128,7 @@ export default function AdminLayout({
                     <SidebarLink href="/admin/buscar" icon={<Search size={20} />} label="Buscar Persona" />
                     <SidebarLink href="/admin/personas" icon={<FilePlus size={20} />} label="Cargar Persona" />
                     <SidebarLink href="/admin/capacitaciones" icon={<Calendar size={20} />} label="Gestionar Capacitaciones" />
+                    <SidebarLink href="/admin/correo" icon={<Mail size={20} />} label="Mensajería" />
                     <SidebarLink href="/admin/checklist" icon={<ClipboardList size={20} />} label="Cosas a Tener en Cuenta" />
                 </nav>
 
