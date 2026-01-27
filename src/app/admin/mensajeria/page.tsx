@@ -10,7 +10,7 @@ export default function MensajeriaPage() {
     const [sending, setSending] = useState(false);
 
     // Individual Mail State
-    const [dni, setDni] = useState('');
+    const [searchTerm, setSearchTerm] = useState('');
     const [targetPersona, setTargetPersona] = useState<any>(null); // eslint-disable-line @typescript-eslint/no-explicit-any
     // For build stability, let's define what we expect from a person
     type PersonaSimple = {
@@ -46,22 +46,33 @@ export default function MensajeriaPage() {
     }
 
     async function handlePersonaSearch() {
-        if (!dni) return;
-        setLoading(true);
-        const { data, error } = await supabase
-            .from('personas')
-            .select('*')
-            .eq('dni', dni.trim())
-            .single();
+        const term = searchTerm.trim();
+        if (!term) return;
 
-        if (data) {
-            setTargetPersona(data);
-            setStatus(null);
-        } else {
-            setTargetPersona(null);
-            setStatus({ type: 'error', text: 'No se encontró ninguna persona con ese DNI.' });
+        setLoading(true);
+        try {
+            const { data, error } = await supabase
+                .from('personas')
+                .select('*')
+                .or(
+                    `dni.eq.${term},correo.eq.${term},nombre.ilike.%${term}%,apellido.ilike.%${term}%`
+                )
+                .order('apellido', { ascending: true });
+
+            if (error || !data || data.length === 0) {
+                setTargetPersona(null);
+                setStatus({
+                    type: 'error',
+                    text: 'No se encontró ninguna persona con esos datos.',
+                });
+            } else {
+                // Si hay varias coincidencias, tomamos la primera para el envío rápido
+                setTargetPersona(data[0]);
+                setStatus(null);
+            }
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     }
 
     async function fetchAttendeesCount(id: string) {
@@ -215,16 +226,18 @@ export default function MensajeriaPage() {
 
                     <div className="space-y-4 flex-1">
                         <div>
-                            <label className="block text-sm font-medium mb-1.5 text-slate-700 dark:text-slate-300">Buscar por DNI</label>
+                            <label className="block text-sm font-medium mb-1.5 text-slate-700 dark:text-slate-300">
+                                Buscar por DNI, correo, nombre o apellido
+                            </label>
                             <div className="flex gap-2">
                                 <div className="relative flex-1">
                                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                                     <input
-                                        type="number"
+                                        type="text"
                                         className="input-field pl-10"
-                                        placeholder="Ingrese DNI..."
-                                        value={dni}
-                                        onChange={(e) => setDni(e.target.value)}
+                                        placeholder="Ej: 12345678, alguien@mail.com, Juan, Pérez..."
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
                                         onKeyDown={(e) => e.key === 'Enter' && handlePersonaSearch()}
                                     />
                                 </div>
