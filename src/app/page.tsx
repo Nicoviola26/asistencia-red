@@ -46,7 +46,7 @@ export default function RegistrationPage() {
       // 1. Buscar persona por DNI
       const { data: persona, error: personaError } = await supabase
         .from('personas')
-        .select('id, nombre, apellido')
+        .select('id, nombre, apellido, correo')
         .eq('dni', dni.trim())
         .single();
 
@@ -83,6 +83,23 @@ export default function RegistrationPage() {
       setUserName(`${persona.nombre} ${persona.apellido}`);
       setShowModal(true);
       setDni('');
+
+      // 4. Enviar correo si tiene uno registrado
+      if (persona.correo) {
+        const capacitacion = capacitaciones.find(c => c.id === capacitacionId);
+        if (capacitacion) {
+          fetch('/api/send-email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              email: persona.correo,
+              name: persona.nombre,
+              trainingName: capacitacion.nombre,
+              date: new Date(capacitacion.dia).toLocaleDateString(),
+            }),
+          }).catch(err => console.error('Error al disparar el envío de correo:', err));
+        }
+      }
     } catch (error) {
       console.error(error);
       setMessage({ type: 'error', text: 'Ocurrió un error al registrar la asistencia.' });
