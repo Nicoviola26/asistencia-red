@@ -28,6 +28,12 @@ export default function MensajeriaPage() {
     const [broadcastSubject, setBroadcastSubject] = useState('');
     const [broadcastMessage, setBroadcastMessage] = useState('');
 
+    // Role-based broadcast state
+    const [selectedRole, setSelectedRole] = useState('todos');
+    const [roleCount, setRoleCount] = useState(0);
+    const [roleSubject, setRoleSubject] = useState('');
+    const [roleMessage, setRoleMessage] = useState('');
+
     const [status, setStatus] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
     useEffect(() => {
@@ -70,9 +76,28 @@ export default function MensajeriaPage() {
         setAttendeesCount(count || 0);
     }
 
+    async function fetchRoleCount(role: string) {
+        if (role === 'todos') {
+            const { count } = await supabase
+                .from('personas')
+                .select('*', { count: 'exact', head: true });
+            setRoleCount(count || 0);
+        } else {
+            const { count } = await supabase
+                .from('personas')
+                .select('*', { count: 'exact', head: true })
+                .eq('rol', role);
+            setRoleCount(count || 0);
+        }
+    }
+
     useEffect(() => {
         fetchAttendeesCount(selectedCapacitacion);
     }, [selectedCapacitacion]);
+
+    useEffect(() => {
+        fetchRoleCount(selectedRole);
+    }, [selectedRole]);
 
     async function sendIndividualEmail(e: React.FormEvent) {
         e.preventDefault();
