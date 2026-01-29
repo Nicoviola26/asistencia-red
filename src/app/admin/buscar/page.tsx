@@ -51,6 +51,12 @@ export default function BuscarPersonaPage() {
 
     const handleUpdatePersona = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (persona.dni.length < 7 || persona.dni.length > 8) {
+            alert('Por favor, ingresá un formato de DNI correcto.');
+            return;
+        }
+
         setLoading(true);
         const { error } = await supabase
             .from('personas')

@@ -23,6 +23,12 @@ export default function CargarPersonaPage() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (formData.dni.length < 7 || formData.dni.length > 8) {
+            setMessage({ type: 'error', text: 'Por favor, ingresá un formato de DNI correcto.' });
+            return;
+        }
+
         setLoading(true);
         setMessage(null);
 

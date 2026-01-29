@@ -40,7 +40,7 @@ export default function RegistrationPage() {
     if (!dni || !capacitacionId) return;
 
     if (dni.length < 7 || dni.length > 8) {
-      setMessage({ type: 'error', text: 'El DNI debe tener entre 7 y 8 números.' });
+      setMessage({ type: 'error', text: 'Por favor, ingresá un formato de DNI correcto.' });
       return;
     }
 
