@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase, type Capacitacion } from '@/lib/supabase';
-import { Mail, Search, Users, Loader2, Send, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Mail, Search, Users, Loader2, Send, CheckCircle2, AlertCircle, X } from 'lucide-react';
 
 export default function MensajeriaPage() {
     const [capacitaciones, setCapacitaciones] = useState<Capacitacion[]>([]);
@@ -12,7 +12,8 @@ export default function MensajeriaPage() {
     // Individual Mail State
     const [searchTerm, setSearchTerm] = useState('');
     const [searchResults, setSearchResults] = useState<PersonaSimple[]>([]);
-    const [targetPersona, setTargetPersona] = useState<any>(null); // eslint-disable-line @typescript-eslint/no-explicit-any
+
+    const [selectedPersonas, setSelectedPersonas] = useState<PersonaSimple[]>([]);
     // For build stability, let's define what we expect from a person
     type PersonaSimple = {
         id: string;
@@ -49,7 +50,7 @@ export default function MensajeriaPage() {
         }
         setLoading(true);
         setStatus(null);
-        setTargetPersona(null);
+        // setTargetPersona(null); // No need to reset selection on new search
 
         // Search by DNI (exact) or Name/Surname (partial)
         let query = supabase
@@ -85,11 +86,27 @@ export default function MensajeriaPage() {
         setLoading(false);
     }
 
-    function selectPersona(persona: any) {
-        setTargetPersona(persona);
-        setSearchResults([]);
-        setSearchTerm('');
-        setStatus(null);
+    function togglePersonaSelection(persona: PersonaSimple) {
+        // Check if already selected
+        const isSelected = selectedPersonas.some(p => p.id === persona.id);
+
+        if (isSelected) {
+            // Remove
+            setSelectedPersonas(prev => prev.filter(p => p.id !== persona.id));
+        } else {
+            // Add
+            setSelectedPersonas(prev => [...prev, persona]);
+            setSearchTerm(''); // Clear search after adding one? Maybe user wants to add more. Let's keep search active but clear results if desired. 
+            // Better UX: keep search results open to pick more, or clear?
+            // User request: "que me deje seleccionar mas de un contacto" -> imply searching and picking multiple.
+            // Let's clear the search term to let them search for the next person easily.
+            setSearchTerm('');
+            setSearchResults([]);
+        }
+    }
+
+    function removePersona(id: string) {
+        setSelectedPersonas(prev => prev.filter(p => p.id !== id));
     }
 
 
@@ -139,32 +156,49 @@ export default function MensajeriaPage() {
 
     async function sendIndividualEmail(e: React.FormEvent) {
         e.preventDefault();
-        if (!targetPersona || !targetPersona.correo) return;
+        if (selectedPersonas.length === 0) return;
 
         setSending(true);
+        setStatus({ type: 'success', text: 'Enviando correos...' });
+
         try {
-            const res = await fetch('/api/send-email', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    type: 'custom',
-                    email: targetPersona.correo,
-                    name: targetPersona.nombre,
-                    subject: subject,
-                    message: message
-                })
-            });
-            const data = await res.json();
-            if (data.success) {
-                setStatus({ type: 'success', text: 'Correo enviado correctamente.' });
+            let successCount = 0;
+            let errorCount = 0;
+
+            for (const person of selectedPersonas) {
+                if (!person.correo) continue;
+
+                const res = await fetch('/api/send-email', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        type: 'custom',
+                        email: person.correo,
+                        name: person.nombre,
+                        subject: subject,
+                        message: message
+                    })
+                });
+
+                if (res.ok) {
+                    successCount++;
+                } else {
+                    errorCount++;
+                }
+            }
+
+            if (successCount > 0) {
+                setStatus({ type: 'success', text: `Se enviaron ${successCount} correos correctamente.${errorCount > 0 ? ` Fallaron ${errorCount}.` : ''}` });
                 setSubject('');
                 setMessage('');
+                setSelectedPersonas([]); // Clear selection after successful send
             } else {
-                throw new Error(data.error);
+                setStatus({ type: 'error', text: 'No se pudo enviar ningún correo. Verifique los errores.' });
             }
+
         } catch (err: unknown) {
             const error = err as Error;
-            setStatus({ type: 'error', text: 'Error al enviar el correo: ' + error.message });
+            setStatus({ type: 'error', text: 'Error procesando el envío: ' + error.message });
         } finally {
             setSending(false);
         }
@@ -302,41 +336,59 @@ export default function MensajeriaPage() {
                             </div>
 
                             {/* Search Results List */}
-                            {searchResults.length > 0 && !targetPersona && (
+                            {searchResults.length > 0 && (
                                 <div className="mt-2 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700 max-h-60 overflow-y-auto">
-                                    {searchResults.map((p: any) => (
-                                        <button
-                                            key={p.id}
-                                            onClick={() => selectPersona(p)}
-                                            className="w-full text-left p-3 hover:bg-slate-50 dark:hover:bg-slate-700 border-b border-slate-100 dark:border-slate-700 last:border-0 transition-colors flex justify-between items-center group"
-                                        >
-                                            <div>
-                                                <p className="font-semibold text-slate-900 dark:text-slate-200">{p.nombre} {p.apellido}</p>
-                                                <p className="text-xs text-slate-500">{p.dni}</p>
-                                            </div>
-                                            {p.correo ? (
-                                                <span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full">{p.correo}</span>
-                                            ) : (
-                                                <span className="text-xs bg-red-100 text-red-700 px-2 py-1 rounded-full">Sin correo</span>
-                                            )}
-                                        </button>
-                                    ))}
+                                    {searchResults.map((p) => {
+                                        const isSelected = selectedPersonas.some(selected => selected.id === p.id);
+                                        return (
+                                            <button
+                                                key={p.id}
+                                                onClick={() => togglePersonaSelection(p)}
+                                                disabled={isSelected}
+                                                className={`w-full text-left p-3 border-b border-slate-100 dark:border-slate-700 last:border-0 transition-colors flex justify-between items-center group ${isSelected
+                                                    ? 'bg-emerald-50 dark:bg-emerald-900/10 opacity-60 cursor-default'
+                                                    : 'hover:bg-slate-50 dark:hover:bg-slate-700'
+                                                    }`}
+                                            >
+                                                <div>
+                                                    <p className="font-semibold text-slate-900 dark:text-slate-200">
+                                                        {p.nombre} {p.apellido} {isSelected && <span className="text-emerald-600 ml-2 text-xs font-bold">(Seleccionado)</span>}
+                                                    </p>
+                                                    <p className="text-xs text-slate-500">{p.id}</p>
+                                                </div>
+                                                {p.correo ? (
+                                                    <span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full">{p.correo}</span>
+                                                ) : (
+                                                    <span className="text-xs bg-red-100 text-red-700 px-2 py-1 rounded-full">Sin correo</span>
+                                                )}
+                                            </button>
+                                        );
+                                    })}
                                 </div>
                             )}
                         </div>
 
-                        {targetPersona && (
-                            <div className="p-4 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-100 dark:border-slate-800 animate-in slide-in-from-top-2 relative group">
-                                <button
-                                    onClick={() => setTargetPersona(null)}
-                                    className="absolute top-2 right-2 p-1 text-slate-400 hover:text-red-500 transition-colors"
-                                    title="Cambiar persona"
-                                >
-                                    <AlertCircle size={16} />
-                                </button>
-                                <p className="font-bold text-slate-900 dark:text-white uppercase">{targetPersona.nombre} {targetPersona.apellido}</p>
-                                <p className="text-sm text-slate-500 dark:text-slate-400">{targetPersona.correo || '⚠️ No tiene correo registrado'}</p>
-                                <p className="text-xs text-slate-400 mt-1">DNI: {targetPersona.dni}</p>
+                        {/* Selected List */}
+                        {selectedPersonas.length > 0 && (
+                            <div className="space-y-2">
+                                <p className="text-xs font-bold uppercase text-slate-400 tracking-wider">Destinatarios seleccionados ({selectedPersonas.length})</p>
+                                <div className="flex flex-wrap gap-2">
+                                    {selectedPersonas.map(persona => (
+                                        <div key={persona.id} className="flex items-center gap-2 p-2 bg-slate-50 dark:bg-slate-900/50 rounded-lg border border-slate-200 dark:border-slate-800 animate-in fade-in zoom-in duration-200">
+                                            <div className="flex flex-col">
+                                                <span className="text-sm font-bold text-slate-700 dark:text-slate-200">{persona.nombre} {persona.apellido}</span>
+                                                <span className="text-[10px] text-slate-500">{persona.correo || '⚠️ Sin mail'}</span>
+                                            </div>
+                                            <button
+                                                onClick={() => removePersona(persona.id)}
+                                                className="p-1 hover:bg-red-100 dark:hover:bg-red-900/30 text-slate-400 hover:text-red-500 rounded-full transition-colors"
+                                                title="Quitar"
+                                            >
+                                                <X size={14} />
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
                         )}
 
@@ -363,10 +415,10 @@ export default function MensajeriaPage() {
                             </div>
                             <button
                                 type="submit"
-                                disabled={sending || !targetPersona || !targetPersona.correo}
+                                disabled={sending || selectedPersonas.length === 0}
                                 className="w-full btn-primary h-12 flex items-center justify-center gap-2"
                             >
-                                {sending ? <Loader2 className="animate-spin" /> : <><Send size={18} /> Enviar Correo</>}
+                                {sending ? <Loader2 className="animate-spin" /> : <><Send size={18} /> Enviar a {selectedPersonas.length} Persona(s)</>}
                             </button>
                         </form>
                     </div>
