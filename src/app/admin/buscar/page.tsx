@@ -158,7 +158,7 @@ export default function BuscarPersonaPage() {
                 .order('apellido', { ascending: true });
 
             if (query.trim()) {
-                queryBuilder = queryBuilder.or(`dni.eq.${query.trim()},nombre.ilike.%${query.trim()}%,apellido.ilike.%${query.trim()}%`);
+                queryBuilder = queryBuilder.or(`dni.eq.${query.trim()},nombre.ilike.%${query.trim()}%,apellido.ilike.%${query.trim()}%,rol.ilike.%${query.trim()}%`);
             }
 
             const { data: results, error: searchError } = await queryBuilder;
@@ -229,7 +229,7 @@ export default function BuscarPersonaPage() {
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                         <input
                             type="text"
-                            placeholder="Buscar por DNI, Nombre o Apellido..."
+                            placeholder="Buscar por DNI, Nombre, Apellido o Rol..."
                             className="input-field pl-10"
                             value={query}
                             onChange={(e) => setQuery(e.target.value)}
@@ -286,7 +286,10 @@ export default function BuscarPersonaPage() {
                                 >
                                     <div>
                                         <p className="font-bold uppercase leading-tight">{p.nombre} {p.apellido}</p>
-                                        <p className="text-xs text-slate-500 font-mono mt-1">DNI: {p.dni}</p>
+                                        <div className="flex gap-2 text-xs text-slate-500 mt-1">
+                                            {p.rol && <span className="uppercase bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded text-[10px] font-bold tracking-wide border border-blue-200 dark:border-blue-800">{p.rol}</span>}
+                                            <span className="font-mono pt-0.5">DNI: {p.dni}</span>
+                                        </div>
                                     </div>
                                     <User size={20} className="text-slate-300" />
                                 </button>
