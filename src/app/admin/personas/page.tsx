@@ -89,9 +89,38 @@ export default function CargarPersonaPage() {
                         return '';
                     };
 
+                    // Lógica para detectar género y normalizar rol
+                    const nombreStr = String(get('nombre')).trim();
+                    const rawRol = String(get('rol', 'categoria', 'cargo', 'funcion')).toLowerCase().trim();
+                    const generoExcel = String(get('sexo', 'genero', 'genero')).toLowerCase().trim();
+
+                    // Heurística simple para género si no viene en el Excel
+                    let esFemenino = generoExcel.startsWith('f') || generoExcel.startsWith('mue'); // 'femenino' o 'mujer'
+                    if (!generoExcel) {
+                        const primerNombre = nombreStr.split(' ')[0].toLowerCase();
+                        // Si termina en 'a', suele ser femenino (con excepciones, pero es la mejor apuesta simple)
+                        if (primerNombre.endsWith('a') && !['lucas', 'nicolas', 'matias', 'tomas'].includes(primerNombre)) {
+                            esFemenino = true;
+                        }
+                    }
+
+                    // Mapeo y normalización de roles
+                    let rolFinal = 'Docente';
+                    if (rawRol.includes('dir')) {
+                        rolFinal = esFemenino ? 'Directora' : 'Director';
+                    } else if (rawRol.includes('vice')) {
+                        rolFinal = esFemenino ? 'Vicedirectora' : 'Vicedirector';
+                    } else if (rawRol.includes('sec')) {
+                        rolFinal = esFemenino ? 'Secretaria' : 'Secretario';
+                    } else if (rawRol.includes('estud')) {
+                        rolFinal = 'Estudiante Avanzado';
+                    } else if (rawRol.includes('docen') || rawRol.includes('prof')) {
+                        rolFinal = 'Docente';
+                    }
+
                     return {
                         dni: String(get('dni', 'documento')).trim(),
-                        nombre: String(get('nombre')).trim(),
+                        nombre: nombreStr,
                         apellido: String(get('apellido')).trim(),
                         correo: String(get('correo', 'email', 'mail', 'correoelectronico')).trim(),
                         celular: String(get('celular', 'telefono', 'whatsapp')).trim(),
@@ -102,11 +131,7 @@ export default function CargarPersonaPage() {
                                 'institucionalaquepertenece'
                             )
                         ).trim(),
-                        rol: String(
-                            get('rol', 'categoria', 'cargo', 'funcion') || 'docente'
-                        )
-                            .toLowerCase()
-                            .trim(),
+                        rol: rolFinal,
                         eje: String(get('eje')).trim()
                     };
                 }).filter(p => p.dni && p.nombre);
