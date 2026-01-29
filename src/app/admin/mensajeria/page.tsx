@@ -10,7 +10,7 @@ export default function MensajeriaPage() {
     const [sending, setSending] = useState(false);
 
     // Individual Mail State
-    const [searchTerm, setSearchTerm] = useState('');
+    const [dni, setDni] = useState('');
     const [targetPersona, setTargetPersona] = useState<any>(null); // eslint-disable-line @typescript-eslint/no-explicit-any
     // For build stability, let's define what we expect from a person
     type PersonaSimple = {
@@ -23,9 +23,10 @@ export default function MensajeriaPage() {
     const [message, setMessage] = useState('');
 
     // Broadcast Mail State
+    const [broadcastType, setBroadcastType] = useState<'capacitacion' | 'rol'>('capacitacion');
+    const [selectedRole, setSelectedRole] = useState('');
     const [selectedCapacitacion, setSelectedCapacitacion] = useState('');
-    const [selectedEje, setSelectedEje] = useState('');
-    const [attendeesCount, setAttendeesCount] = useState(0);
+    const [recipientCount, setRecipientCount] = useState(0);
     const [broadcastSubject, setBroadcastSubject] = useState('');
     const [broadcastMessage, setBroadcastMessage] = useState('');
 
@@ -41,56 +42,68 @@ export default function MensajeriaPage() {
     }
 
     async function handlePersonaSearch() {
-        const term = searchTerm.trim();
-        if (!term) return;
-
+        if (!dni) return;
         setLoading(true);
-        try {
-            const { data, error } = await supabase
-                .from('personas')
-                .select('*')
-                .or(
-                    `dni.eq.${term},correo.eq.${term},nombre.ilike.%${term}%,apellido.ilike.%${term}%`
-                )
-                .order('apellido', { ascending: true });
+        const { data, error } = await supabase
+            .from('personas')
+            .select('*')
+            .eq('dni', dni.trim())
+            .single();
 
-            if (error || !data || data.length === 0) {
-                setTargetPersona(null);
-                setStatus({
-                    type: 'error',
-                    text: 'No se encontró ninguna persona con esos datos.',
-                });
-            } else {
-                // Si hay varias coincidencias, tomamos la primera para el envío rápido
-                setTargetPersona(data[0]);
-                setStatus(null);
-            }
-        } finally {
-            setLoading(false);
+        if (data) {
+            setTargetPersona(data);
+            setStatus(null);
+        } else {
+            setTargetPersona(null);
+            setStatus({ type: 'error', text: 'No se encontró ninguna persona con ese DNI.' });
         }
+        setLoading(false);
     }
 
-    async function fetchAttendeesCount() {
-        if (!selectedCapacitacion) {
-            setAttendeesCount(0);
-            return;
-        }
-        let query = supabase
-            .from('asistencias')
-            .select('id, personas(eje)', { count: 'exact', head: true })
-            .eq('capacitacion_id', selectedCapacitacion);
 
-        if (selectedEje) {
-            query = query.eq('personas.eje', selectedEje);
-        }
 
-        const { count } = await query;
-        setAttendeesCount(count || 0);
+    async function fetchRecipientCount() {
+        setRecipientCount(0);
+
+        if (broadcastType === 'capacitacion') {
+            if (!selectedCapacitacion) return;
+            // Count unique people with emails in the training
+            const { data } = await supabase
+                .from('asistencias')
+                .select('personas(id, correo)')
+                .eq('capacitacion_id', selectedCapacitacion);
+
+            if (data) {
+                const uniqueEmails = new Set(
+                    (data as any[])
+                        .map(a => a.personas?.correo)
+                        .filter(bit => bit && bit.length > 0)
+                );
+                setRecipientCount(uniqueEmails.size);
+            }
+        } else {
+            // Role based count
+            if (!selectedRole) return;
+
+            let query = supabase
+                .from('personas')
+                .select('id', { count: 'exact', head: true })
+                .neq('correo', null)
+                .neq('correo', '');
+
+            if (selectedRole !== 'todos') {
+                // Assuming rol is stored as simple text. Using ilike for better matching
+                query = query.ilike('rol', `%${selectedRole}%`);
+            }
+
+            const { count } = await query;
+            setRecipientCount(count || 0);
+        }
     }
 
     useEffect(() => {
-        fetchAttendeesCount();
-    }, [selectedCapacitacion, selectedEje]);
+        fetchRecipientCount();
+    }, [broadcastType, selectedCapacitacion, selectedRole]);
 
     async function sendIndividualEmail(e: React.FormEvent) {
         e.preventDefault();
@@ -127,36 +140,56 @@ export default function MensajeriaPage() {
 
     async function sendBroadcastEmail(e: React.FormEvent) {
         e.preventDefault();
-        if (!selectedCapacitacion) return;
+        if (broadcastType === 'capacitacion' && !selectedCapacitacion) return;
+        if (broadcastType === 'rol' && !selectedRole) return;
 
         setSending(true);
         setStatus({ type: 'success', text: 'Iniciando envío masivo... Por favor espera.' });
 
         try {
-            // 1. Fetch all attendees with emails
-            let query = supabase
-                .from('asistencias')
-                .select('personas(id, nombre, correo, eje)')
-                .eq('capacitacion_id', selectedCapacitacion);
 
-            if (selectedEje) {
-                query = query.eq('personas.eje', selectedEje);
+            let recipients: PersonaSimple[] = [];
+
+            if (broadcastType === 'capacitacion') {
+                // 1. Fetch from attendance
+                const { data: asistencias } = await supabase
+                    .from('asistencias')
+                    .select('personas(id, nombre, correo)')
+                    .eq('capacitacion_id', selectedCapacitacion);
+
+                if (asistencias) {
+                    recipients = (asistencias as any[])
+                        .map(a => a.personas)
+                        .filter((p): p is PersonaSimple => !!p && !!p.correo);
+                }
+            } else {
+                // 2. Fetch from people table directly
+                let query = supabase
+                    .from('personas')
+                    .select('id, nombre, apellido, correo')
+                    .neq('correo', null)
+                    .neq('correo', '');
+
+                if (selectedRole !== 'todos') {
+                    query = query.ilike('rol', `%${selectedRole}%`);
+                }
+
+                const { data } = await query;
+                if (data) recipients = data as PersonaSimple[];
             }
 
-            const { data: asistencias } = await query;
+            // Deduplicate recipients by email just in case
+            const uniqueRecipients = Array.from(new Map(recipients.map(item => [item.correo, item])).values());
 
-            if (!asistencias || asistencias.length === 0) {
-                setStatus({ type: 'error', text: 'No hay asistentes con correo para esta capacitación.' });
+            if (uniqueRecipients.length === 0) {
+                setStatus({ type: 'error', text: 'No hay destinatarios con correo válidos para esta selección.' });
                 setSending(false);
                 return;
             }
 
-            const recipients = (asistencias as any[])
-                .map(a => a.personas)
-                .filter((p): p is PersonaSimple => !!p && !!p.correo);
-
             let successCount = 0;
-            for (const person of recipients) {
+            for (const person of uniqueRecipients) {
+                if (!person.correo) continue;
                 const res = await fetch('/api/send-email', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -173,7 +206,7 @@ export default function MensajeriaPage() {
 
             setStatus({
                 type: 'success',
-                text: `Se enviaron ${successCount} correos de ${recipients.length} destinatarios encontrados.`
+                text: `Se enviaron ${successCount} correos de ${uniqueRecipients.length} destinatarios encontrados.`
             });
             setBroadcastSubject('');
             setBroadcastMessage('');
@@ -214,18 +247,16 @@ export default function MensajeriaPage() {
 
                     <div className="space-y-4 flex-1">
                         <div>
-                            <label className="block text-sm font-medium mb-1.5 text-slate-700 dark:text-slate-300">
-                                Buscar por DNI, correo, nombre o apellido
-                            </label>
+                            <label className="block text-sm font-medium mb-1.5 text-slate-700 dark:text-slate-300">Buscar por DNI</label>
                             <div className="flex gap-2">
                                 <div className="relative flex-1">
                                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                                     <input
-                                        type="text"
+                                        type="number"
                                         className="input-field pl-10"
-                                        placeholder="Ej: 12345678, alguien@mail.com, Juan, Pérez..."
-                                        value={searchTerm}
-                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                        placeholder="Ingrese DNI..."
+                                        value={dni}
+                                        onChange={(e) => setDni(e.target.value)}
                                         onKeyDown={(e) => e.key === 'Enter' && handlePersonaSearch()}
                                     />
                                 </div>
@@ -284,51 +315,74 @@ export default function MensajeriaPage() {
                         <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-lg">
                             <Users size={24} />
                         </div>
-                        <h3 className="text-xl font-bold">Envío por Capacitación</h3>
+                        <h3 className="text-xl font-bold">Envío Masivo</h3>
                     </div>
 
                     <div className="space-y-4 flex-1">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-sm font-medium mb-1.5 text-slate-700 dark:text-slate-300">Seleccionar Capacitación</label>
-                                <select
-                                    className="input-field"
-                                    value={selectedCapacitacion}
-                                    onChange={(e) => setSelectedCapacitacion(e.target.value)}
-                                >
-                                    <option value="">Seleccione una capacitación...</option>
-                                    {capacitaciones.map(c => (
-                                        <option key={c.id} value={c.id}>{c.nombre}</option>
-                                    ))}
-                                </select>
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium mb-1.5 text-slate-700 dark:text-slate-300">Filtrar por eje (opcional)</label>
-                                <select
-                                    className="input-field"
-                                    value={selectedEje}
-                                    onChange={(e) => setSelectedEje(e.target.value)}
-                                >
-                                    <option value="">Todos los ejes</option>
-                                    <option value="Educación Ambiental">Educación Ambiental</option>
-                                    <option value="Educación Digital Integral">Educación Digital Integral</option>
-                                    <option value="Infancias Diversas">Infancias Diversas</option>
-                                    <option value="Alfabetización Inicial">Alfabetización Inicial</option>
-                                    <option value="Lenguajes Artísticos Integrales">Lenguajes Artísticos Integrales</option>
-                                </select>
-                            </div>
+                        {/* Selector de Modo */}
+                        <div className="flex p-1 bg-slate-100 dark:bg-slate-800 rounded-lg">
+                            <button
+                                type="button"
+                                onClick={() => setBroadcastType('capacitacion')}
+                                className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${broadcastType === 'capacitacion'
+                                    ? 'bg-white dark:bg-slate-700 shadow text-emerald-600 dark:text-emerald-400'
+                                    : 'text-slate-500 hover:text-slate-700 dark:text-slate-400'
+                                    }`}
+                            >
+                                Por Capacitación
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setBroadcastType('rol')}
+                                className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${broadcastType === 'rol'
+                                    ? 'bg-white dark:bg-slate-700 shadow text-emerald-600 dark:text-emerald-400'
+                                    : 'text-slate-500 hover:text-slate-700 dark:text-slate-400'
+                                    }`}
+                            >
+                                Por Rol / Global
+                            </button>
+                        </div>
+
+                        <div>
+                            {broadcastType === 'capacitacion' ? (
+                                <>
+                                    <label className="block text-sm font-medium mb-1.5 text-slate-700 dark:text-slate-300">Seleccionar Capacitación</label>
+                                    <select
+                                        className="input-field"
+                                        value={selectedCapacitacion}
+                                        onChange={(e) => setSelectedCapacitacion(e.target.value)}
+                                    >
+                                        <option value="">Seleccione una capacitación...</option>
+                                        {capacitaciones.map(c => (
+                                            <option key={c.id} value={c.id}>{c.nombre}</option>
+                                        ))}
+                                    </select>
+                                </>
+                            ) : (
+                                <>
+                                    <label className="block text-sm font-medium mb-1.5 text-slate-700 dark:text-slate-300">Seleccionar Audiencia</label>
+                                    <select
+                                        className="input-field"
+                                        value={selectedRole}
+                                        onChange={(e) => setSelectedRole(e.target.value)}
+                                    >
+                                        <option value="">Seleccione un grupo...</option>
+                                        <option value="todos">🌍 TODOS LOS REGISTRADOS</option>
+                                        <option value="docente">🧑‍🏫 Docentes</option>
+                                        <option value="directivo">👔 Directivos</option>
+                                        <option value="asistente">👥 Asistentes</option>
+                                        <option value="estudiante">🎓 Estudiantes</option>
+                                    </select>
+                                </>
+                            )}
                         </div>
 
                         <div className="p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl border border-emerald-100 dark:border-emerald-800/50">
                             <div className="flex items-center justify-between">
-                                <p className="text-sm font-medium text-emerald-800 dark:text-emerald-400">
-                                    Asistentes registrados{selectedEje ? ` en el eje seleccionado` : ''}:
-                                </p>
-                                <p className="text-2xl font-bold text-emerald-900 dark:text-emerald-300">{attendeesCount}</p>
+                                <p className="text-sm font-medium text-emerald-800 dark:text-emerald-400">Destinatarios estimados:</p>
+                                <p className="text-2xl font-bold text-emerald-900 dark:text-emerald-300">{recipientCount}</p>
                             </div>
-                            <p className="text-[10px] text-emerald-600 mt-1 uppercase tracking-wider font-bold">
-                                Se enviará un correo a cada uno de los asistentes filtrados
-                            </p>
+                            <p className="text-[10px] text-emerald-600 mt-1 uppercase tracking-wider font-bold">Se enviará un correo a cada uno</p>
                         </div>
 
                         <form onSubmit={sendBroadcastEmail} className="space-y-4 pt-4 border-t border-slate-100 dark:border-slate-800">
@@ -354,7 +408,7 @@ export default function MensajeriaPage() {
                             </div>
                             <button
                                 type="submit"
-                                disabled={sending || !selectedCapacitacion || attendeesCount === 0}
+                                disabled={sending || recipientCount === 0 || (broadcastType === 'capacitacion' && !selectedCapacitacion) || (broadcastType === 'rol' && !selectedRole)}
                                 className="w-full btn-primary h-12 flex items-center justify-center gap-2 !bg-emerald-600 hover:!bg-emerald-700 shadow-emerald-500/20"
                             >
                                 {sending ? <Loader2 className="animate-spin" /> : <><Users size={18} /> Enviar a Todos</>}
