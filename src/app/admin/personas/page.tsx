@@ -184,7 +184,6 @@ export default function CargarPersonaPage() {
                                         name="dni"
                                         type="text"
                                         inputMode="numeric"
-                                        pattern="[0-9]{7,8}"
                                         maxLength={8}
                                         required
                                         className="input-field"

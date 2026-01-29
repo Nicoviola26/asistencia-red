@@ -135,7 +135,6 @@ export default function RegistrationPage() {
                 <input
                   type="text"
                   inputMode="numeric"
-                  pattern="[0-9]{7,8}"
                   maxLength={8}
                   required
                   placeholder="Ej: 12345678"

@@ -361,7 +361,6 @@ export default function BuscarPersonaPage() {
                                     <input
                                         type="text"
                                         inputMode="numeric"
-                                        pattern="[0-9]{7,8}"
                                         maxLength={8}
                                         className="input-field py-1 px-3 text-sm"
                                         value={persona.dni}
