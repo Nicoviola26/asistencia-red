@@ -12,6 +12,8 @@ export default function RegistrationPage() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
   const [showModal, setShowModal] = useState(false);
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
   const [userName, setUserName] = useState('');
 
   const fetchCapacitaciones = async () => {
@@ -40,7 +42,8 @@ export default function RegistrationPage() {
     if (!dni || !capacitacionId) return;
 
     if (dni.length < 7 || dni.length > 8) {
-      setMessage({ type: 'error', text: 'Por favor, ingresá un formato de DNI correcto.' });
+      setErrorMessage('Por favor, ingresá un formato de DNI correcto.');
+      setShowErrorModal(true);
       return;
     }
 
@@ -56,7 +59,8 @@ export default function RegistrationPage() {
         .single();
 
       if (personaError || !persona) {
-        setMessage({ type: 'error', text: 'DNI no registrado en el sistema.' });
+        setErrorMessage('DNI no registrado en el sistema.');
+        setShowErrorModal(true);
         setLoading(false);
         return;
       }
@@ -70,7 +74,8 @@ export default function RegistrationPage() {
         .single();
 
       if (existingAsistencia) {
-        setMessage({ type: 'error', text: 'Esta asistencia ya fue registrada anteriormente.' });
+        setErrorMessage('Esta asistencia ya fue registrada anteriormente.');
+        setShowErrorModal(true);
         setLoading(false);
         return;
       }
@@ -203,6 +208,24 @@ export default function RegistrationPage() {
               className="w-full btn-primary h-12 text-lg font-semibold"
             >
               Aceptar
+            </button>
+          </div>
+        </div>
+      )}
+
+      {showErrorModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl p-8 max-w-sm w-full text-center border border-slate-200 dark:border-slate-800 animate-zoom-in">
+            <div className="w-20 h-20 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
+              <AlertCircle className="text-red-500 w-10 h-10" />
+            </div>
+            <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">¡Atención!</h2>
+            <p className="text-slate-600 dark:text-slate-400 mb-8 font-medium">{errorMessage}</p>
+            <button
+              onClick={() => setShowErrorModal(false)}
+              className="w-full bg-red-600 hover:bg-red-700 text-white h-12 rounded-xl text-lg font-semibold transition-all shadow-lg active:scale-95"
+            >
+              Reintentar
             </button>
           </div>
         </div>
