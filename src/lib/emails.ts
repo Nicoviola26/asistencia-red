@@ -43,10 +43,10 @@ export async function sendConfirmationEmail(email: string, name: string, trainin
   }
 }
 
-export async function sendCustomEmail(email: string, name: string, subject: string, body: string) {
+export async function sendCustomEmail(email: string, name: string, subject: string, body: string, attachments?: { filename: string, content: string }[]) {
   try {
     const resend = getResendClient();
-    const { data, error } = await resend.emails.send({
+    const payload: any = {
       from: 'Red Municipal de Formación Docente <onboarding@resend.dev>',
       to: [email],
       subject: subject,
@@ -60,7 +60,16 @@ export async function sendCustomEmail(email: string, name: string, subject: stri
           <p style="font-size: 12px; color: #94a3b8; text-align: center;">Red Municipal de Formación Docente</p>
         </div>
       `,
-    });
+    };
+
+    if (attachments && attachments.length > 0) {
+      payload.attachments = attachments.map(a => ({
+        filename: a.filename,
+        content: Buffer.from(a.content, 'base64')
+      }));
+    }
+
+    const { data, error } = await resend.emails.send(payload);
 
     if (error) return { success: false, error };
     return { success: true, data };

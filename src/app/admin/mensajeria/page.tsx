@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase, type Capacitacion } from '@/lib/supabase';
-import { Mail, Search, Users, Loader2, Send, CheckCircle2, AlertCircle, X } from 'lucide-react';
+import { Mail, Search, Users, Loader2, Send, CheckCircle2, AlertCircle, X, Paperclip, FileIcon } from 'lucide-react';
 
 export default function MensajeriaPage() {
     const [capacitaciones, setCapacitaciones] = useState<Capacitacion[]>([]);
@@ -24,6 +24,7 @@ export default function MensajeriaPage() {
     };
     const [subject, setSubject] = useState('');
     const [message, setMessage] = useState('');
+    const [individualAttachments, setIndividualAttachments] = useState<{ filename: string, content: string }[]>([]);
 
     // Broadcast Mail State
     const [broadcastType, setBroadcastType] = useState<'capacitacion' | 'rol'>('capacitacion');
@@ -32,6 +33,7 @@ export default function MensajeriaPage() {
     const [recipientCount, setRecipientCount] = useState(0);
     const [broadcastSubject, setBroadcastSubject] = useState('');
     const [broadcastMessage, setBroadcastMessage] = useState('');
+    const [broadcastAttachments, setBroadcastAttachments] = useState<{ filename: string, content: string }[]>([]);
 
     const [status, setStatus] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
@@ -110,6 +112,39 @@ export default function MensajeriaPage() {
         setSelectedPersonas(prev => prev.filter(p => p.id !== id));
     }
 
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>, isBroadcast: boolean) => {
+        if (e.target.files && e.target.files.length > 0) {
+            const files = Array.from(e.target.files);
+            const newAttachments = await Promise.all(files.map(async (file) => {
+                return new Promise<{ filename: string, content: string }>((resolve) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const result = e.target?.result as string;
+                        const base64Content = result.split(',')[1];
+                        resolve({ filename: file.name, content: base64Content });
+                    };
+                    reader.readAsDataURL(file);
+                });
+            }));
+
+            if (isBroadcast) {
+                setBroadcastAttachments(prev => [...prev, ...newAttachments]);
+            } else {
+                setIndividualAttachments(prev => [...prev, ...newAttachments]);
+            }
+            // Reset input
+            e.target.value = '';
+        }
+    };
+
+    const removeAttachment = (index: number, isBroadcast: boolean) => {
+        if (isBroadcast) {
+            setBroadcastAttachments(prev => prev.filter((_, i) => i !== index));
+        } else {
+            setIndividualAttachments(prev => prev.filter((_, i) => i !== index));
+        }
+    };
+
 
 
     async function fetchRecipientCount() {
@@ -177,9 +212,10 @@ export default function MensajeriaPage() {
                         email: person.correo,
                         name: person.nombre,
                         subject: subject,
-                        message: message
+                        message: message,
+                        attachments: individualAttachments
                     })
-                });
+                })
 
                 if (res.ok) {
                     successCount++;
@@ -192,6 +228,7 @@ export default function MensajeriaPage() {
                 setStatus({ type: 'success', text: `Se enviaron ${successCount} correos correctamente.${errorCount > 0 ? ` Fallaron ${errorCount}.` : ''}` });
                 setSubject('');
                 setMessage('');
+                setIndividualAttachments([]);
                 setSelectedPersonas([]); // Clear selection after successful send
             } else {
                 setStatus({ type: 'error', text: 'No se pudo enviar ningún correo. Verifique los errores.' });
@@ -265,9 +302,10 @@ export default function MensajeriaPage() {
                         email: person.correo,
                         name: person.nombre,
                         subject: broadcastSubject,
-                        message: broadcastMessage
+                        message: broadcastMessage,
+                        attachments: broadcastAttachments
                     })
-                });
+                })
                 if (res.ok) successCount++;
             }
 
@@ -277,6 +315,7 @@ export default function MensajeriaPage() {
             });
             setBroadcastSubject('');
             setBroadcastMessage('');
+            setBroadcastAttachments([]);
         } catch (err: unknown) {
             const error = err as Error;
             setStatus({ type: 'error', text: 'Error en el envío masivo: ' + error.message });
@@ -420,6 +459,41 @@ export default function MensajeriaPage() {
                                     onChange={(e) => setMessage(e.target.value)}
                                 />
                             </div>
+
+                            {/* Attachments UI - Individual */}
+                            <div>
+                                <div className="flex items-center gap-2 mb-2">
+                                    <label className="btn-secondary text-xs px-3 py-1.5 cursor-pointer flex items-center gap-1.5">
+                                        <Paperclip size={14} /> Adjuntar archivo
+                                        <input
+                                            type="file"
+                                            multiple
+                                            className="hidden"
+                                            onChange={(e) => handleFileChange(e, false)}
+                                        />
+                                    </label>
+                                    <span className="text-[10px] text-slate-400">PDF, Imágenes, etc.</span>
+                                </div>
+                                {individualAttachments.length > 0 && (
+                                    <div className="space-y-1">
+                                        {individualAttachments.map((att, i) => (
+                                            <div key={i} className="flex items-center justify-between p-2 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-lg text-sm">
+                                                <div className="flex items-center gap-2 overflow-hidden">
+                                                    <FileIcon size={14} className="text-slate-400 shrink-0" />
+                                                    <span className="truncate text-slate-600 dark:text-slate-300">{att.filename}</span>
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => removeAttachment(i, false)}
+                                                    className="p-1 text-slate-400 hover:text-red-500 transition-colors"
+                                                >
+                                                    <X size={14} />
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
                             <button
                                 type="submit"
                                 disabled={sending || selectedPersonas.length === 0}
@@ -527,6 +601,41 @@ export default function MensajeriaPage() {
                                     value={broadcastMessage}
                                     onChange={(e) => setBroadcastMessage(e.target.value)}
                                 />
+                            </div>
+
+                            {/* Attachments UI - Broadcast */}
+                            <div>
+                                <div className="flex items-center gap-2 mb-2">
+                                    <label className="btn-secondary text-xs px-3 py-1.5 cursor-pointer flex items-center gap-1.5">
+                                        <Paperclip size={14} /> Adjuntar archivo
+                                        <input
+                                            type="file"
+                                            multiple
+                                            className="hidden"
+                                            onChange={(e) => handleFileChange(e, true)}
+                                        />
+                                    </label>
+                                    <span className="text-[10px] text-slate-400">PDF, Imágenes, etc.</span>
+                                </div>
+                                {broadcastAttachments.length > 0 && (
+                                    <div className="space-y-1">
+                                        {broadcastAttachments.map((att, i) => (
+                                            <div key={i} className="flex items-center justify-between p-2 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-lg text-sm">
+                                                <div className="flex items-center gap-2 overflow-hidden">
+                                                    <FileIcon size={14} className="text-slate-400 shrink-0" />
+                                                    <span className="truncate text-slate-600 dark:text-slate-300">{att.filename}</span>
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => removeAttachment(i, true)}
+                                                    className="p-1 text-slate-400 hover:text-red-500 transition-colors"
+                                                >
+                                                    <X size={14} />
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                             <button
                                 type="submit"

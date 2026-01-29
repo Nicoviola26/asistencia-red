@@ -9,11 +9,11 @@ export async function POST(request: Request) {
         let result;
 
         if (type === 'custom') {
-            const { subject, message } = body;
+            const { subject, message, attachments } = body;
             if (!email || !name || !subject || !message) {
                 return NextResponse.json({ error: 'Faltan parámetros' }, { status: 400 });
             }
-            result = await sendCustomEmail(email, name, subject, message);
+            result = await sendCustomEmail(email, name, subject, message, attachments);
         } else {
             const { trainingName, date } = body;
             if (!email || !name || !trainingName || !date) {
