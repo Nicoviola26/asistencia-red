@@ -113,7 +113,7 @@ export default function AdminLayout({
     return (
         <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] flex flex-col md:flex-row transition-colors duration-300">
             {/* Sidebar for Desktop */}
-            <aside className="w-full md:w-64 bg-slate-800 text-white flex flex-col shadow-xl z-20 shrink-0">
+            <aside className="w-full md:w-64 bg-slate-800 text-white flex flex-col shadow-xl z-20 shrink-0 print:hidden">
                 <div className="p-6">
                     <Link href="/admin" className="flex items-center gap-3 text-xl font-bold tracking-tight">
                         <div className="w-10 h-10 rounded-full bg-white overflow-hidden shadow-lg border-2 border-[var(--primary)] p-0.5 shrink-0">
@@ -151,8 +151,8 @@ export default function AdminLayout({
             </aside>
 
             {/* Main Content */}
-            <main className="flex-1 overflow-y-auto p-4 md:p-8">
-                <div className="max-w-6xl mx-auto">
+            <main className="flex-1 overflow-y-auto p-4 md:p-8 print:p-0">
+                <div className="max-w-6xl mx-auto print:max-w-none">
                     {children}
                 </div>
             </main>

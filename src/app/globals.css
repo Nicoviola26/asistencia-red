@@ -173,3 +173,42 @@ input::-webkit-inner-spin-button {
 input[type=number] {
   -moz-appearance: textfield;
 }
+
+/* Print Enhancements */
+@media print {
+  @page {
+    margin: 1.5cm;
+  }
+
+  body {
+    background: white !important;
+    color: black !important;
+  }
+
+  .card {
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+  }
+
+  /* Ocultar elementos de interfaz en la impresión */
+  .input-field,
+  button,
+  select,
+  nav,
+  footer,
+  aside,
+  .print\:hidden {
+    display: none !important;
+  }
+
+  /* Asegurar que el contenido use todo el ancho */
+  main {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .print\:hidden {
+    display: none !important;
+  }
+}

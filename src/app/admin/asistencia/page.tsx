@@ -204,8 +204,8 @@ export default function AsistenciaControlPage() {
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-                <div className="card p-6 lg:col-span-1 space-y-4">
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 print:block">
+                <div className="card p-6 lg:col-span-1 space-y-4 print:hidden">
                     <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
                         Seleccionar Capacitación
                     </label>
@@ -239,7 +239,7 @@ export default function AsistenciaControlPage() {
                     )}
                 </div>
 
-                <div className="card lg:col-span-3 overflow-hidden">
+                <div className="card lg:col-span-3 overflow-hidden print:border-0 print:shadow-none">
                     {loading ? (
                         <div className="h-64 flex flex-col items-center justify-center text-slate-400">
                             <Loader2 className="animate-spin mb-2" size={32} />
