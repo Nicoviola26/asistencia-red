@@ -10,11 +10,18 @@ export default function RegistrationPage() {
   const [capacitacionId, setCapacitacionId] = useState('');
   const [capacitaciones, setCapacitaciones] = useState<Capacitacion[]>([]);
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
-  const [showModal, setShowModal] = useState(false);
-  const [showErrorModal, setShowErrorModal] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
-  const [userName, setUserName] = useState('');
+  const [modal, setModal] = useState<{
+    show: boolean;
+    type: 'success' | 'error' | 'warning';
+    title: string;
+    message: string;
+    user?: string;
+  }>({
+    show: false,
+    type: 'success',
+    title: '',
+    message: ''
+  });
 
   const fetchCapacitaciones = async () => {
     const { data } = await supabase
@@ -28,9 +35,11 @@ export default function RegistrationPage() {
 
   useEffect(() => {
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-      setMessage({
+      setModal({
+        show: true,
         type: 'error',
-        text: 'Error de configuración: Las variables de entorno de Supabase no están configuradas. Por favor, revisa el archivo .env.local'
+        title: 'Error de Configuración',
+        message: 'Las variables de entorno de Supabase no están configuradas.'
       });
       return;
     }
@@ -39,16 +48,17 @@ export default function RegistrationPage() {
 
   async function handleRegister(e: React.FormEvent) {
     e.preventDefault();
-    if (!dni || !capacitacionId) return;
-
     if (dni.length < 7 || dni.length > 8) {
-      setErrorMessage('Por favor, ingresá un formato de DNI correcto.');
-      setShowErrorModal(true);
+      setModal({
+        show: true,
+        type: 'error',
+        title: 'Formato Incorrecto',
+        message: 'Por favor, ingresá un formato de DNI correcto.'
+      });
       return;
     }
 
     setLoading(true);
-    setMessage(null);
 
     try {
       // 1. Buscar persona por DNI
@@ -59,8 +69,12 @@ export default function RegistrationPage() {
         .single();
 
       if (personaError || !persona) {
-        setErrorMessage('DNI no registrado en el sistema.');
-        setShowErrorModal(true);
+        setModal({
+          show: true,
+          type: 'warning',
+          title: 'DNI no encontrado',
+          message: 'El DNI ingresado no se encuentra registrado en nuestro sistema de docentes.'
+        });
         setLoading(false);
         return;
       }
@@ -74,8 +88,12 @@ export default function RegistrationPage() {
         .single();
 
       if (existingAsistencia) {
-        setErrorMessage('Esta asistencia ya fue registrada anteriormente.');
-        setShowErrorModal(true);
+        setModal({
+          show: true,
+          type: 'error',
+          title: 'Registro Duplicado',
+          message: 'Esta asistencia ya fue registrada anteriormente para esta capacitación.'
+        });
         setLoading(false);
         return;
       }
@@ -90,8 +108,13 @@ export default function RegistrationPage() {
 
       if (insertError) throw insertError;
 
-      setUserName(`${persona.nombre} ${persona.apellido}`);
-      setShowModal(true);
+      setModal({
+        show: true,
+        type: 'success',
+        title: '¡Registro Exitoso!',
+        message: 'Tu asistencia ha sido confirmada correctamente.',
+        user: `${persona.nombre} ${persona.apellido}`
+      });
       setDni('');
 
       // 4. Enviar correo si tiene uno registrado
@@ -112,7 +135,12 @@ export default function RegistrationPage() {
       }
     } catch (error) {
       console.error(error);
-      setMessage({ type: 'error', text: 'Ocurrió un error al registrar la asistencia.' });
+      setModal({
+        show: true,
+        type: 'error',
+        title: 'Error de Sistema',
+        message: 'Ocurrió un error inesperado. Por favor, intentá nuevamente más tarde.'
+      });
     } finally {
       setLoading(false);
     }
@@ -182,54 +210,45 @@ export default function RegistrationPage() {
               {loading ? <Loader2 className="animate-spin" /> : 'Registrar Asistencia'}
             </button>
           </form>
-
-          {message && (
-            <div className={`mt-6 p-4 rounded-lg flex items-start gap-3 animate-fade-in ${message.type === 'success'
-              ? 'bg-emerald-50 text-emerald-800 border border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800'
-              : 'bg-red-50 text-red-800 border border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800'
-              }`}>
-              {message.type === 'success' ? <CheckCircle2 className="shrink-0" /> : <AlertCircle className="shrink-0" />}
-              <p className="text-sm font-medium">{message.text}</p>
-            </div>
-          )}
         </div>
       </div>
 
-      {showModal && (
+      {modal.show && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl p-8 max-w-sm w-full text-center border border-slate-200 dark:border-slate-800 animate-zoom-in">
-            <div className="w-20 h-20 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
-              <CheckCircle2 className="text-emerald-500 w-10 h-10" />
+          <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl p-10 max-w-sm w-full text-center border border-slate-200 dark:border-slate-800 animate-zoom-in relative overflow-hidden">
+            {/* Background Accent */}
+            <div className={`absolute top-0 left-0 w-full h-2 ${modal.type === 'success' ? 'bg-emerald-500' :
+              modal.type === 'warning' ? 'bg-amber-500' : 'bg-red-500'
+              }`} />
+
+            <div className={`w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6 ${modal.type === 'success' ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-500' :
+              modal.type === 'warning' ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-500' :
+                'bg-red-100 dark:bg-red-900/30 text-red-500'
+              }`}>
+              {modal.type === 'success' ? <CheckCircle2 size={48} /> : <AlertCircle size={48} />}
             </div>
-            <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">{userName}</h2>
-            <p className="text-slate-600 dark:text-slate-400 mb-8 font-medium italic">Asistencia confirmada</p>
+
+            <h2 className="text-2xl font-black text-slate-900 dark:text-white mb-2 leading-tight">
+              {modal.user ? modal.user : modal.title}
+            </h2>
+
+            <p className="text-slate-600 dark:text-slate-400 mb-8 font-medium leading-relaxed">
+              {modal.user ? modal.message : modal.message}
+            </p>
+
             <button
-              onClick={() => setShowModal(false)}
-              className="w-full btn-primary h-12 text-lg font-semibold"
+              onClick={() => setModal({ ...modal, show: false })}
+              className={`w-full h-14 rounded-2xl text-lg font-bold transition-all shadow-lg active:scale-95 ${modal.type === 'success' ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-500/20' :
+                modal.type === 'warning' ? 'bg-amber-600 hover:bg-amber-700 text-white shadow-amber-500/20' :
+                  'bg-red-600 hover:bg-red-700 text-white shadow-red-500/20'
+                }`}
             >
-              Aceptar
+              {modal.type === 'success' ? 'Entendido' : 'Reintentar'}
             </button>
           </div>
         </div>
       )}
 
-      {showErrorModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl p-8 max-w-sm w-full text-center border border-slate-200 dark:border-slate-800 animate-zoom-in">
-            <div className="w-20 h-20 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
-              <AlertCircle className="text-red-500 w-10 h-10" />
-            </div>
-            <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">¡Atención!</h2>
-            <p className="text-slate-600 dark:text-slate-400 mb-8 font-medium">{errorMessage}</p>
-            <button
-              onClick={() => setShowErrorModal(false)}
-              className="w-full bg-red-600 hover:bg-red-700 text-white h-12 rounded-xl text-lg font-semibold transition-all shadow-lg active:scale-95"
-            >
-              Reintentar
-            </button>
-          </div>
-        </div>
-      )}
 
       <footer className="mt-12 text-center">
         <Link
