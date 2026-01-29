@@ -73,7 +73,7 @@ export default function RegistrationPage() {
           show: true,
           type: 'warning',
           title: 'DNI no encontrado',
-          message: 'El DNI ingresado no se encuentra registrado en nuestro sistema de docentes.'
+          message: 'El DNI ingresado no se encuentra registrado en la Red de Formación Docente.'
         });
         setLoading(false);
         return;
