@@ -356,7 +356,7 @@ export default function MensajeriaPage() {
                                                         {p.nombre} {p.apellido} {isSelected && <span className="text-emerald-600 ml-2 text-xs font-bold">(Seleccionado)</span>}
                                                     </p>
                                                     <div className="flex gap-2 text-xs text-slate-500">
-                                                        {p.rol && <span className="uppercase bg-slate-100 dark:bg-slate-700 px-1.5 rounded">{p.rol}</span>}
+                                                        {p.rol && <span className="uppercase bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded text-[10px] font-bold tracking-wide border border-blue-200 dark:border-blue-800">{p.rol}</span>}
                                                         <span>{p.id}</span>
                                                     </div>
                                                 </div>
