@@ -3,9 +3,11 @@
 import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { UserSearch, Search, Loader2, User, Clock, MapPin, Building2, Download, Trash2, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { useToast } from '@/components/Toast';
 import * as XLSX from 'xlsx';
 
 export default function BuscarPersonaPage() {
+    const { showToast } = useToast();
     const [query, setQuery] = useState('');
     const [loading, setLoading] = useState(false);
     const [exporting, setExporting] = useState(false);
@@ -40,10 +42,11 @@ export default function BuscarPersonaPage() {
                 const workbook = XLSX.utils.book_new();
                 XLSX.utils.book_append_sheet(workbook, worksheet, "Participantes");
                 XLSX.writeFile(workbook, "listado_completo_participantes.xlsx");
+                showToast('Lista de participantes descargada', 'success');
             }
         } catch (err) {
             console.error('Error al exportar:', err);
-            alert('No se pudo exportar la lista de participantes.');
+            showToast('No se pudo exportar la lista de participantes', 'error');
         } finally {
             setExporting(false);
         }
@@ -53,7 +56,7 @@ export default function BuscarPersonaPage() {
         e.preventDefault();
 
         if (persona.dni.length < 7 || persona.dni.length > 8) {
-            alert('Por favor, ingresá un formato de DNI correcto.');
+            showToast('Por favor, ingresá un formato de DNI correcto.', 'error');
             return;
         }
 
@@ -72,14 +75,12 @@ export default function BuscarPersonaPage() {
             .eq('id', persona.id);
 
         if (error) {
-            alert('Error al actualizar: ' + error.message);
+            showToast('Error al actualizar docente', 'error');
         } else {
-            alert('Datos actualizados correctamente');
+            showToast('Datos actualizados correctamente', 'success');
         }
         setLoading(false);
     };
-
-
 
     const handleDeleteAsistencia = async (asistenciaId: string) => {
         if (!confirm('¿Eliminar este registro de asistencia?')) return;
@@ -87,9 +88,10 @@ export default function BuscarPersonaPage() {
         const { error } = await supabase.from('asistencias').delete().eq('id', asistenciaId);
 
         if (error) {
-            alert('Error al eliminar asistencia');
+            showToast('Error al eliminar asistencia', 'error');
         } else {
             setAsistencias(asistencias.filter(a => a.id !== asistenciaId));
+            showToast('Asistencia eliminada', 'success');
         }
     };
 

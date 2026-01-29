@@ -2,10 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { supabase, type Capacitacion, type Asistencia } from '@/lib/supabase';
-import { Download, Loader2, Users, Calendar } from 'lucide-react';
+import { Download, Loader2, Users, Calendar, FileText, Printer } from 'lucide-react';
+import { useToast } from '@/components/Toast';
 import * as XLSX from 'xlsx';
 
 export default function AsistenciaControlPage() {
+    const { showToast } = useToast();
     const [capacitaciones, setCapacitaciones] = useState<Capacitacion[]>([]);
     const [selectedCapacitacion, setSelectedCapacitacion] = useState('');
     const [asistencias, setAsistencias] = useState<any[]>([]); // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -50,6 +52,14 @@ export default function AsistenciaControlPage() {
         setLoading(false);
     }
 
+    const handlePrint = () => {
+        if (asistencias.length === 0) {
+            showToast('Selecciona una capacitación con asistentes primero', 'info');
+            return;
+        }
+        window.print();
+    };
+
     const exportToExcel = () => {
         if (asistencias.length === 0) return;
 
@@ -69,6 +79,7 @@ export default function AsistenciaControlPage() {
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, "Asistentes");
         XLSX.writeFile(workbook, `${capName.replace(/\s+/g, '_')}_asistencia.xlsx`);
+        showToast('Archivo Excel generado correctamente', 'success');
     };
 
     const exportGeneralStats = async () => {
@@ -94,12 +105,9 @@ export default function AsistenciaControlPage() {
                     const asistencias_list = c.asistencias || [];
                     const count = asistencias_list.length;
 
-                    // Contar por roles
                     const stats = asistencias_list.reduce((acc: any, curr: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
                         let rol = (curr.personas?.rol || 'Sin asignar').toLowerCase().trim();
-                        // Normalizar para incluir datos viejos que solo decían "estudiante"
                         if (rol.includes('estudiante')) rol = 'estudiante avanzado';
-
                         acc[rol] = (acc[rol] || 0) + 1;
                         return acc;
                     }, {});
@@ -124,10 +132,11 @@ export default function AsistenciaControlPage() {
                 const workbook = XLSX.utils.book_new();
                 XLSX.utils.book_append_sheet(workbook, worksheet, "Estadísticas Generales");
                 XLSX.writeFile(workbook, "estadisticas_generales_capacitaciones.xlsx");
+                showToast('Estadísticas exportadas con éxito', 'success');
             }
         } catch (err) {
             console.error('Error al exportar:', err);
-            alert('No se pudieron exportar las estadísticas.');
+            showToast('No se pudieron exportar las estadísticas', 'error');
         } finally {
             setLoading(false);
         }
@@ -137,32 +146,60 @@ export default function AsistenciaControlPage() {
         ? Math.round((asistencias.length / totalPersonas) * 100)
         : 0;
 
+    const currentCap = capacitaciones.find(c => c.id === selectedCapacitacion);
+
     return (
         <div className="space-y-6">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            {/* Print Header (Only visible in Print) */}
+            <div className="hidden print:block mb-8 border-b-2 border-slate-900 pb-6 text-center">
+                <div className="flex justify-center mb-4">
+                    <img src="/logo.png" alt="Logo" className="h-20 w-auto" />
+                </div>
+                <h1 className="text-2xl font-black uppercase tracking-tight">Acta de Asistencia Docente</h1>
+                <p className="text-sm font-bold mt-2">Red Municipal de Formación Docente</p>
+
+                <div className="mt-8 grid grid-cols-2 text-left text-sm gap-y-2 border p-4 rounded-lg bg-slate-50">
+                    <p><strong>Evento:</strong> {currentCap?.nombre}</p>
+                    <p><strong>Fecha:</strong> {currentCap ? new Date(currentCap.dia).toLocaleDateString() : '-'}</p>
+                    <p><strong>Lugar:</strong> {currentCap?.lugar || '-'}</p>
+                    <p><strong>Disertante:</strong> {currentCap?.disertante || '-'}</p>
+                    <p><strong>Total Presentes:</strong> {asistencias.length}</p>
+                </div>
+            </div>
+
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 print:hidden">
                 <div>
                     <h2 className="text-2xl font-bold">Control de Asistencia</h2>
-                    <p className="text-slate-500">Monitorea y exporta los registros en tiempo real.</p>
+                    <p className="text-slate-500 font-medium">Monitorea y exporta los registros en tiempo real.</p>
                 </div>
 
                 <div className="flex flex-wrap gap-2">
                     <button
                         onClick={exportGeneralStats}
                         disabled={loading || capacitaciones.length === 0}
-                        className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg font-medium transition-all shadow-sm disabled:opacity-50"
+                        className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg font-medium transition-all shadow-sm active:scale-95 disabled:opacity-50"
                     >
                         {loading ? <Loader2 className="animate-spin" size={18} /> : <Download size={18} />}
-                        Exportar Estadísticas Generales
+                        Estadísticas Generales
                     </button>
 
                     {selectedCapacitacion && (
-                        <button
-                            onClick={exportToExcel}
-                            className="btn-success flex items-center gap-2"
-                        >
-                            <Download size={18} />
-                            Exportar Asistencia Actual
-                        </button>
+                        <>
+                            <button
+                                onClick={handlePrint}
+                                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-all shadow-sm active:scale-95 flex items-center gap-2"
+                            >
+                                <Printer size={18} />
+                                Generar Acta (PDF)
+                            </button>
+                            <button
+                                onClick={exportToExcel}
+                                className="btn-success flex items-center gap-2"
+                            >
+                                <FileText size={18} />
+                                Excel Detallado
+                            </button>
+                        </>
                     )}
                 </div>
             </div>
