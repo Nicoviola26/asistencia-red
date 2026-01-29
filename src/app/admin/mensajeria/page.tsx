@@ -10,7 +10,8 @@ export default function MensajeriaPage() {
     const [sending, setSending] = useState(false);
 
     // Individual Mail State
-    const [dni, setDni] = useState('');
+    const [searchTerm, setSearchTerm] = useState('');
+    const [searchResults, setSearchResults] = useState<PersonaSimple[]>([]);
     const [targetPersona, setTargetPersona] = useState<any>(null); // eslint-disable-line @typescript-eslint/no-explicit-any
     // For build stability, let's define what we expect from a person
     type PersonaSimple = {
@@ -42,22 +43,53 @@ export default function MensajeriaPage() {
     }
 
     async function handlePersonaSearch() {
-        if (!dni) return;
+        if (!searchTerm) {
+            setSearchResults([]);
+            return;
+        }
         setLoading(true);
-        const { data, error } = await supabase
-            .from('personas')
-            .select('*')
-            .eq('dni', dni.trim())
-            .single();
+        setStatus(null);
+        setTargetPersona(null);
 
-        if (data) {
-            setTargetPersona(data);
-            setStatus(null);
+        // Search by DNI (exact) or Name/Surname (partial)
+        let query = supabase
+            .from('personas')
+            .select('id, nombre, apellido, correo, dni')
+            .limit(10);
+
+        // Check if search term is numeric (DNI)
+        if (/^\d+$/.test(searchTerm.trim())) {
+            query = query.eq('dni', searchTerm.trim());
         } else {
-            setTargetPersona(null);
-            setStatus({ type: 'error', text: 'No se encontró ninguna persona con ese DNI.' });
+            // Text search (ILIKE) on nombre or apellido
+            // Note: Supabase UI simple filtering doesn't support OR easily in one go without custom RPC or specific client syntax
+            // We'll use a text search approach or simple 'or' filter string
+            // 'nombre.ilike.%term%,apellido.ilike.%term%'
+            const term = `%${searchTerm.trim()}%`;
+            query = query.or(`nombre.ilike.${term},apellido.ilike.${term}`);
+        }
+
+        const { data, error } = await query;
+
+        if (data && data.length > 0) {
+            setSearchResults(data as PersonaSimple[]);
+            if (data.length === 1) {
+                // Auto-select if only one result
+                // setTargetPersona(data[0]); 
+                // Better to let user click to confirm
+            }
+        } else {
+            setSearchResults([]);
+            setStatus({ type: 'error', text: 'No se encontraron personas con ese criterio.' });
         }
         setLoading(false);
+    }
+
+    function selectPersona(persona: any) {
+        setTargetPersona(persona);
+        setSearchResults([]);
+        setSearchTerm('');
+        setStatus(null);
     }
 
 
@@ -247,16 +279,16 @@ export default function MensajeriaPage() {
 
                     <div className="space-y-4 flex-1">
                         <div>
-                            <label className="block text-sm font-medium mb-1.5 text-slate-700 dark:text-slate-300">Buscar por DNI</label>
+                            <label className="block text-sm font-medium mb-1.5 text-slate-700 dark:text-slate-300">Buscar Persona</label>
                             <div className="flex gap-2">
                                 <div className="relative flex-1">
                                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                                     <input
-                                        type="number"
+                                        type="text"
                                         className="input-field pl-10"
-                                        placeholder="Ingrese DNI..."
-                                        value={dni}
-                                        onChange={(e) => setDni(e.target.value)}
+                                        placeholder="Nombre, Apellido o DNI..."
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
                                         onKeyDown={(e) => e.key === 'Enter' && handlePersonaSearch()}
                                     />
                                 </div>
@@ -268,12 +300,43 @@ export default function MensajeriaPage() {
                                     {loading ? <Loader2 className="animate-spin" size={20} /> : 'Buscar'}
                                 </button>
                             </div>
+
+                            {/* Search Results List */}
+                            {searchResults.length > 0 && !targetPersona && (
+                                <div className="mt-2 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700 max-h-60 overflow-y-auto">
+                                    {searchResults.map((p: any) => (
+                                        <button
+                                            key={p.id}
+                                            onClick={() => selectPersona(p)}
+                                            className="w-full text-left p-3 hover:bg-slate-50 dark:hover:bg-slate-700 border-b border-slate-100 dark:border-slate-700 last:border-0 transition-colors flex justify-between items-center group"
+                                        >
+                                            <div>
+                                                <p className="font-semibold text-slate-900 dark:text-slate-200">{p.nombre} {p.apellido}</p>
+                                                <p className="text-xs text-slate-500">{p.dni}</p>
+                                            </div>
+                                            {p.correo ? (
+                                                <span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full">{p.correo}</span>
+                                            ) : (
+                                                <span className="text-xs bg-red-100 text-red-700 px-2 py-1 rounded-full">Sin correo</span>
+                                            )}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
                         </div>
 
                         {targetPersona && (
-                            <div className="p-4 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-100 dark:border-slate-800 animate-in slide-in-from-top-2">
+                            <div className="p-4 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-100 dark:border-slate-800 animate-in slide-in-from-top-2 relative group">
+                                <button
+                                    onClick={() => setTargetPersona(null)}
+                                    className="absolute top-2 right-2 p-1 text-slate-400 hover:text-red-500 transition-colors"
+                                    title="Cambiar persona"
+                                >
+                                    <AlertCircle size={16} />
+                                </button>
                                 <p className="font-bold text-slate-900 dark:text-white uppercase">{targetPersona.nombre} {targetPersona.apellido}</p>
                                 <p className="text-sm text-slate-500 dark:text-slate-400">{targetPersona.correo || '⚠️ No tiene correo registrado'}</p>
+                                <p className="text-xs text-slate-400 mt-1">DNI: {targetPersona.dni}</p>
                             </div>
                         )}
 
