@@ -20,6 +20,7 @@ export default function MensajeriaPage() {
         nombre: string;
         apellido: string;
         correo: string | null;
+        rol?: string;
     };
     const [subject, setSubject] = useState('');
     const [message, setMessage] = useState('');
@@ -52,22 +53,22 @@ export default function MensajeriaPage() {
         setStatus(null);
         // setTargetPersona(null); // No need to reset selection on new search
 
-        // Search by DNI (exact) or Name/Surname (partial)
+        // Search by DNI (exact) or Name/Surname/Role (partial)
         let query = supabase
             .from('personas')
-            .select('id, nombre, apellido, correo, dni')
+            .select('id, nombre, apellido, correo, dni, rol')
             .limit(10);
 
         // Check if search term is numeric (DNI)
         if (/^\d+$/.test(searchTerm.trim())) {
             query = query.eq('dni', searchTerm.trim());
         } else {
-            // Text search (ILIKE) on nombre or apellido
+            // Text search (ILIKE) on nombre, apellido, or rol
             // Note: Supabase UI simple filtering doesn't support OR easily in one go without custom RPC or specific client syntax
             // We'll use a text search approach or simple 'or' filter string
-            // 'nombre.ilike.%term%,apellido.ilike.%term%'
+            // 'nombre.ilike.%term%,apellido.ilike.%term%,rol.ilike.%term%'
             const term = `%${searchTerm.trim()}%`;
-            query = query.or(`nombre.ilike.${term},apellido.ilike.${term}`);
+            query = query.or(`nombre.ilike.${term},apellido.ilike.${term},rol.ilike.${term}`);
         }
 
         const { data, error } = await query;
@@ -320,7 +321,7 @@ export default function MensajeriaPage() {
                                     <input
                                         type="text"
                                         className="input-field pl-10"
-                                        placeholder="Nombre, Apellido o DNI..."
+                                        placeholder="Nombre, Apellido, DNI o Rol..."
                                         value={searchTerm}
                                         onChange={(e) => setSearchTerm(e.target.value)}
                                         onKeyDown={(e) => e.key === 'Enter' && handlePersonaSearch()}
@@ -354,7 +355,10 @@ export default function MensajeriaPage() {
                                                     <p className="font-semibold text-slate-900 dark:text-slate-200">
                                                         {p.nombre} {p.apellido} {isSelected && <span className="text-emerald-600 ml-2 text-xs font-bold">(Seleccionado)</span>}
                                                     </p>
-                                                    <p className="text-xs text-slate-500">{p.id}</p>
+                                                    <div className="flex gap-2 text-xs text-slate-500">
+                                                        {p.rol && <span className="uppercase bg-slate-100 dark:bg-slate-700 px-1.5 rounded">{p.rol}</span>}
+                                                        <span>{p.id}</span>
+                                                    </div>
                                                 </div>
                                                 {p.correo ? (
                                                     <span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full">{p.correo}</span>
@@ -377,7 +381,10 @@ export default function MensajeriaPage() {
                                         <div key={persona.id} className="flex items-center gap-2 p-2 bg-slate-50 dark:bg-slate-900/50 rounded-lg border border-slate-200 dark:border-slate-800 animate-in fade-in zoom-in duration-200">
                                             <div className="flex flex-col">
                                                 <span className="text-sm font-bold text-slate-700 dark:text-slate-200">{persona.nombre} {persona.apellido}</span>
-                                                <span className="text-[10px] text-slate-500">{persona.correo || '⚠️ Sin mail'}</span>
+                                                <div className="flex gap-1 items-center">
+                                                    {persona.rol && <span className="text-[9px] uppercase bg-slate-200 dark:bg-slate-800 px-1 rounded text-slate-600 dark:text-slate-400">{persona.rol}</span>}
+                                                    <span className="text-[10px] text-slate-500">{persona.correo || '⚠️ Sin mail'}</span>
+                                                </div>
                                             </div>
                                             <button
                                                 onClick={() => removePersona(persona.id)}
