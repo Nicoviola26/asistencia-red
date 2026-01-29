@@ -353,9 +353,18 @@ export default function BuscarPersonaPage() {
                                 <div className="space-y-1">
                                     <label className="text-[10px] font-bold uppercase text-slate-400">DNI</label>
                                     <input
+                                        type="text"
+                                        inputMode="numeric"
+                                        pattern="[0-9]{7,8}"
+                                        maxLength={8}
                                         className="input-field py-1 px-3 text-sm"
                                         value={persona.dni}
-                                        onChange={(e) => setPersona({ ...persona, dni: e.target.value })}
+                                        onChange={(e) => {
+                                            const value = e.target.value.replace(/\D/g, '');
+                                            if (value.length <= 8) {
+                                                setPersona({ ...persona, dni: value });
+                                            }
+                                        }}
                                     />
                                 </div>
                                 <div className="space-y-1">

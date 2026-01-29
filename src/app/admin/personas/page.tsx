@@ -175,8 +175,20 @@ export default function CargarPersonaPage() {
                                 <div className="space-y-2">
                                     <label className="text-sm font-semibold">DNI *</label>
                                     <input
-                                        name="dni" required className="input-field"
-                                        value={formData.dni} onChange={handleChange}
+                                        name="dni"
+                                        type="text"
+                                        inputMode="numeric"
+                                        pattern="[0-9]{7,8}"
+                                        maxLength={8}
+                                        required
+                                        className="input-field"
+                                        value={formData.dni}
+                                        onChange={(e) => {
+                                            const value = e.target.value.replace(/\D/g, '');
+                                            if (value.length <= 8) {
+                                                handleChange({ ...e, target: { ...e.target, name: 'dni', value } } as any);
+                                            }
+                                        }}
                                         placeholder="Sin puntos"
                                     />
                                 </div>

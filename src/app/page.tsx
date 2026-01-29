@@ -39,6 +39,11 @@ export default function RegistrationPage() {
     e.preventDefault();
     if (!dni || !capacitacionId) return;
 
+    if (dni.length < 7 || dni.length > 8) {
+      setMessage({ type: 'error', text: 'El DNI debe tener entre 7 y 8 números.' });
+      return;
+    }
+
     setLoading(true);
     setMessage(null);
 
@@ -128,12 +133,20 @@ export default function RegistrationPage() {
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                 <input
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]{7,8}"
+                  maxLength={8}
                   required
                   placeholder="Ej: 12345678"
-                  className="input-field pl-10"
+                  className="input-field pl-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   value={dni}
-                  onChange={(e) => setDni(e.target.value)}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/\D/g, '');
+                    if (value.length <= 8) {
+                      setDni(value);
+                    }
+                  }}
                 />
               </div>
             </div>
