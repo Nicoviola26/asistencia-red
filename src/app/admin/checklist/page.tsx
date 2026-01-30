@@ -82,7 +82,7 @@ export default function ChecklistPage() {
     const progress = Math.round((completedCount / tasks.length) * 100) || 0;
 
     return (
-        <div className="max-w-4xl mx-auto space-y-8 animate-fade-in">
+        <div className="space-y-8 animate-fade-in">
             {/* Header */}
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 print:hidden">
                 <div className="space-y-1">

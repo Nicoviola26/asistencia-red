@@ -118,7 +118,7 @@ export default function CargarCapacitacionPage() {
     };
 
     return (
-        <div className="max-w-4xl mx-auto space-y-12">
+        <div className="space-y-8 animate-fade-in">
             <div>
                 <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-8">
                     <div className="space-y-1">

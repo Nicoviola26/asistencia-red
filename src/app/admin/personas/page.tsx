@@ -166,7 +166,7 @@ export default function CargarPersonaPage() {
     };
 
     return (
-        <div className="max-w-4xl mx-auto space-y-8">
+        <div className="space-y-8 animate-fade-in">
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 print:hidden">
                 <div className="space-y-1">
                     <div className="flex items-center gap-2 text-slate-600 font-bold uppercase tracking-widest text-[10px]">
