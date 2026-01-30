@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { supabase, type Capacitacion } from '@/lib/supabase';
-import { GraduationCap, Loader2, CheckCircle2, AlertCircle, Trash2, Edit2, Eye, EyeOff, Plus } from 'lucide-react';
+import { GraduationCap, Loader2, CheckCircle2, AlertCircle, Trash2, Edit2, Eye, EyeOff, Plus, Calendar, History } from 'lucide-react';
 
 export default function CargarCapacitacionPage() {
     const [loading, setLoading] = useState(false);
@@ -34,6 +34,13 @@ export default function CargarCapacitacionPage() {
         if (data) setCapacitaciones(data);
         setFetching(false);
     }
+
+    const { proximas, pasadas } = useMemo(() => {
+        const today = new Date().toISOString().split('T')[0];
+        const p = capacitaciones.filter(c => c.dia >= today).sort((a, b) => a.dia.localeCompare(b.dia));
+        const pas = capacitaciones.filter(c => c.dia < today).sort((a, b) => b.dia.localeCompare(a.dia));
+        return { proximas: p, pasadas: pas };
+    }, [capacitaciones]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -218,71 +225,62 @@ export default function CargarCapacitacionPage() {
             </div>
 
             {/* List of existing trainings */}
-            <div className="space-y-4">
-                <h3 className="text-xl font-bold flex items-center gap-2">
-                    Capacitaciones Existentes
-                    {!fetching && (
-                        <span className="px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-800 text-xs text-slate-600 dark:text-slate-400">
-                            {capacitaciones.length}
+            <div className="space-y-12">
+                {/* UPCOMING TRAININGS */}
+                <div className="space-y-4">
+                    <h3 className="text-xl font-bold flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
+                        <Calendar size={20} />
+                        Próximas Capacitaciones
+                        <span className="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-xs font-bold">
+                            {proximas.length}
                         </span>
-                    )}
-                </h3>
+                    </h3>
 
-                {fetching ? (
-                    <div className="flex justify-center py-12">
-                        <Loader2 className="animate-spin text-slate-400" size={32} />
-                    </div>
-                ) : (
                     <div className="grid grid-cols-1 gap-4">
-                        {capacitaciones.map((cap) => (
-                            <div key={cap.id} className="card p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all hover:shadow-md">
-                                <div className="space-y-1">
-                                    <div className="flex items-center gap-2">
-                                        <h4 className="font-bold text-lg uppercase leading-none">{cap.nombre}</h4>
-                                        {!(cap as any).activa && (
-                                            <span className="px-2 py-0.5 bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 text-[10px] font-bold uppercase rounded">Deshabilitada</span>
-                                        )}
-                                    </div>
-                                    <div className="text-sm text-slate-500 flex flex-wrap gap-x-4 gap-y-1">
-                                        <span className="flex items-center gap-1 italic">
-                                            {new Date(cap.dia).toLocaleDateString()} - {cap.hora}
-                                        </span>
-                                        {cap.lugar && <span className="opacity-70">📍 {cap.lugar}</span>}
-                                        {cap.disertante && <span className="opacity-70">👤 {cap.disertante}</span>}
-                                    </div>
-                                </div>
-
-                                <div className="flex items-center gap-2">
-                                    <button
-                                        onClick={() => handleToggleActiva(cap.id, (cap as any).activa ?? true)}
-                                        className={`p-2 rounded-lg transition-colors ${(cap as any).activa ? 'text-emerald-500 hover:bg-emerald-50' : 'text-slate-400 hover:bg-slate-100'}`}
-                                        title={(cap as any).activa ? 'Ocultar para asistentes' : 'Mostrar para asistentes'}
-                                    >
-                                        {(cap as any).activa ? <Eye size={20} /> : <EyeOff size={20} />}
-                                    </button>
-                                    <button
-                                        onClick={() => startEdit(cap)}
-                                        className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
-                                        title="Editar"
-                                    >
-                                        <Edit2 size={20} />
-                                    </button>
-                                    <button
-                                        onClick={() => handleDelete(cap.id)}
-                                        className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                                        title="Eliminar"
-                                    >
-                                        <Trash2 size={20} />
-                                    </button>
-                                </div>
-                            </div>
+                        {proximas.map((cap) => (
+                            <CapacitacionCard
+                                key={cap.id}
+                                cap={cap}
+                                onToggleActiva={handleToggleActiva}
+                                onEdit={startEdit}
+                                onDelete={handleDelete}
+                            />
                         ))}
-
-                        {capacitaciones.length === 0 && (
-                            <div className="text-center py-12 text-slate-400 italic">
-                                No hay capacitaciones registradas.
+                        {proximas.length === 0 && !fetching && (
+                            <div className="text-center py-8 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-2xl text-slate-400 italic">
+                                No hay eventos programados.
                             </div>
                         )}
+                    </div>
+                </div>
+
+                {/* PAST TRAININGS */}
+                <div className="space-y-4">
+                    <h3 className="text-xl font-bold flex items-center gap-2 text-slate-500">
+                        <History size={20} />
+                        Capacitaciones Dictadas
+                        <span className="px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-xs font-bold text-slate-500">
+                            {pasadas.length}
+                        </span>
+                    </h3>
+
+                    <div className="grid grid-cols-1 gap-4 opacity-75">
+                        {pasadas.map((cap) => (
+                            <CapacitacionCard
+                                key={cap.id}
+                                cap={cap}
+                                onToggleActiva={handleToggleActiva}
+                                onEdit={startEdit}
+                                onDelete={handleDelete}
+                                isPast
+                            />
+                        ))}
+                    </div>
+                </div>
+
+                {fetching && (
+                    <div className="flex justify-center py-12">
+                        <Loader2 className="animate-spin text-slate-400" size={32} />
                     </div>
                 )}
             </div>
@@ -290,3 +288,54 @@ export default function CargarCapacitacionPage() {
     );
 }
 
+function CapacitacionCard({ cap, onToggleActiva, onEdit, onDelete, isPast }: {
+    cap: Capacitacion,
+    onToggleActiva: (id: string, s: boolean) => void,
+    onEdit: (cap: Capacitacion) => void,
+    onDelete: (id: string) => void,
+    isPast?: boolean
+}) {
+    return (
+        <div className={`card p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all hover:shadow-md ${isPast ? 'bg-slate-50/50 dark:bg-slate-900/50' : ''}`}>
+            <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                    <h4 className="font-bold text-lg uppercase leading-none">{cap.nombre}</h4>
+                    {!(cap as any).activa && (
+                        <span className="px-2 py-0.5 bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 text-[10px] font-bold uppercase rounded">Deshabilitada</span>
+                    )}
+                </div>
+                <div className="text-sm text-slate-500 flex flex-wrap gap-x-4 gap-y-1">
+                    <span className="flex items-center gap-1 italic">
+                        {new Date(cap.dia).toLocaleDateString()} - {cap.hora}
+                    </span>
+                    {cap.lugar && <span className="opacity-70">📍 {cap.lugar}</span>}
+                    {cap.disertante && <span className="opacity-70">👤 {cap.disertante}</span>}
+                </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+                <button
+                    onClick={() => onToggleActiva(cap.id, (cap as any).activa ?? true)}
+                    className={`p-2 rounded-lg transition-colors ${(cap as any).activa ? 'text-emerald-500 hover:bg-emerald-50' : 'text-slate-400 hover:bg-slate-100'}`}
+                    title={(cap as any).activa ? 'Ocultar para asistentes' : 'Mostrar para asistentes'}
+                >
+                    {(cap as any).activa ? <Eye size={20} /> : <EyeOff size={20} />}
+                </button>
+                <button
+                    onClick={() => onEdit(cap)}
+                    className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
+                    title="Editar"
+                >
+                    <Edit2 size={20} />
+                </button>
+                <button
+                    onClick={() => onDelete(cap.id)}
+                    className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                    title="Eliminar"
+                >
+                    <Trash2 size={20} />
+                </button>
+            </div>
+        </div>
+    );
+}
