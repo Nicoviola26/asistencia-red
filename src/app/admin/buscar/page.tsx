@@ -2,7 +2,11 @@
 
 import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import { UserSearch, Search, Loader2, User, Clock, MapPin, Building2, Download, Trash2, CheckCircle2, AlertTriangle } from 'lucide-react';
+import {
+    UserSearch, Search, Loader2, User, Clock, MapPin,
+    Building2, Download, Trash2, CheckCircle2, AlertTriangle,
+    Mail, Phone, GraduationCap, ChevronRight, ArrowLeft
+} from 'lucide-react';
 import { useToast } from '@/components/Toast';
 import * as XLSX from 'xlsx';
 
@@ -70,7 +74,8 @@ export default function BuscarPersonaPage() {
                 rol: persona.rol,
                 institucion: persona.institucion,
                 correo: persona.correo,
-                celular: persona.celular
+                celular: persona.celular,
+                eje: persona.eje
             })
             .eq('id', persona.id);
 
@@ -133,17 +138,17 @@ export default function BuscarPersonaPage() {
                 setPersona(null);
                 setAsistencias([]);
                 setSearchResults(prev => prev.filter(p => p.id !== deleteConfig.id));
-                alert('Persona eliminada correctamente');
+                showToast('Persona eliminada correctamente', 'success');
             } else if (deleteConfig.type === 'bulk') {
                 const { error } = await supabase.from('personas').delete().in('id', selectedIds);
                 if (error) throw error;
                 setSearchResults(prev => prev.filter(p => !selectedIds.includes(p.id)));
                 setSelectedIds([]);
                 setPersona(null);
-                alert('Personas eliminadas correctamente');
+                showToast('Personas eliminadas correctamente', 'success');
             }
         } catch (err: any) {
-            alert('Error al eliminar: ' + err.message);
+            showToast('Error al eliminar: ' + err.message, 'error');
         } finally {
             setLoading(false);
         }
@@ -215,92 +220,105 @@ export default function BuscarPersonaPage() {
     };
 
     return (
-        <div className="space-y-8">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="space-y-8 animate-fade-in">
+            {/* Header */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div>
-                    <h2 className="text-2xl font-bold">Buscar Participante</h2>
-                    <p className="text-slate-500">Consulta el historial de asistencia de una persona.</p>
+                    <div className="flex items-center gap-2 text-indigo-500 font-bold uppercase tracking-widest text-[10px] mb-1">
+                        <UserSearch size={14} />
+                        Base de Datos Docente
+                    </div>
+                    <h2 className="text-3xl font-black tracking-tight text-slate-900 dark:text-white">Explorador de Participantes</h2>
+                    <p className="text-slate-500 font-medium">Historial completo, edición y gestión de perfiles.</p>
                 </div>
                 <button
                     onClick={handleDownloadParticipants}
                     disabled={exporting}
-                    className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium transition-all disabled:opacity-50 shadow-sm"
+                    className="btn-primary bg-emerald-600 hover:bg-emerald-700 h-11 flex items-center gap-2 shadow-lg shadow-emerald-600/10"
                 >
                     {exporting ? <Loader2 className="animate-spin" size={18} /> : <Download size={18} />}
-                    Exportar Todos los Participantes
+                    Listado Completo (Excel)
                 </button>
             </div>
 
-            <div className="card p-6 max-w-xl mx-auto">
-                <form onSubmit={handleSearch} className="flex gap-2">
-                    <div className="relative flex-1">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                        <input
-                            type="text"
-                            placeholder="Buscar por DNI, Nombre, Apellido o Rol..."
-                            className="input-field pl-10"
-                            value={query}
-                            onChange={(e) => setQuery(e.target.value)}
-                        />
-                    </div>
-                    <button type="submit" disabled={loading} className="btn-primary">
-                        {loading ? <Loader2 className="animate-spin" /> : 'Buscar'}
-                    </button>
-                </form>
-                {error && <p className="text-red-500 text-sm mt-2 text-center">{error}</p>}
+            {/* Search Bar - Center and Larger */}
+            <div className={`transition-all duration-500 ${persona ? 'max-w-xl' : 'max-w-2xl mx-auto'}`}>
+                <div className="card p-2 bg-white dark:bg-slate-900 border-none shadow-2xl rounded-[2rem]">
+                    <form onSubmit={handleSearch} className="flex gap-2 p-1">
+                        <div className="relative flex-1">
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+                            <input
+                                type="text"
+                                placeholder="DNI, Nombre, Apellido o Rol..."
+                                className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-2xl py-3.5 pl-12 pr-4 text-sm font-medium focus:ring-2 focus:ring-indigo-500 transition-all outline-none"
+                                value={query}
+                                onChange={(e) => setQuery(e.target.value)}
+                            />
+                        </div>
+                        <button type="submit" disabled={loading} className="px-6 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-black uppercase text-xs tracking-widest transition-all active:scale-95 shadow-lg shadow-indigo-600/20">
+                            {loading ? <Loader2 className="animate-spin" size={20} /> : 'Buscar'}
+                        </button>
+                    </form>
+                </div>
+                {error && <p className="text-red-500 text-sm mt-3 font-bold text-center animate-shake">{error}</p>}
             </div>
 
             {/* Multiple Search Results */}
             {searchResults.length > 0 && (
-                <div className="max-w-xl mx-auto space-y-3 px-4 md:px-0">
-                    <div className="flex items-center justify-between">
+                <div className="max-w-2xl mx-auto space-y-4 animate-slide-up">
+                    <div className="flex items-center justify-between px-2">
                         <div className="flex items-center gap-3">
                             <input
                                 type="checkbox"
-                                checked={selectedIds.length === searchResults.length}
+                                checked={selectedIds.length === searchResults.length && searchResults.length > 0}
                                 onChange={toggleSelectAll}
-                                className="w-5 h-5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
+                                className="w-5 h-5 rounded-lg border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
                             />
-                            <p className="text-sm font-medium text-slate-500">
-                                {query.trim() ? 'Múltiples coincidencias encontradas:' : 'Listado completo de personas:'}
+                            <p className="text-xs font-black uppercase text-slate-400 tracking-widest">
+                                {searchResults.length} {searchResults.length === 1 ? 'Coincidencia' : 'Coincidencias'}
                             </p>
                         </div>
                         {selectedIds.length > 0 && (
                             <button
                                 onClick={handleBulkDelete}
-                                className="flex items-center gap-2 px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white rounded-md text-xs font-bold transition-all shadow-sm animate-fade-in"
+                                className="flex items-center gap-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-xl text-[10px] font-black uppercase transition-all shadow-lg shadow-red-500/20 animate-fade-in"
                             >
-                                <Trash2 size={14} /> Eliminar ({selectedIds.length})
+                                <Trash2 size={14} /> Eliminar Seleccionados ({selectedIds.length})
                             </button>
                         )}
                     </div>
-                    <div className="card divide-y divide-slate-100 dark:divide-slate-800">
+                    <div className="grid grid-cols-1 gap-3">
                         {searchResults.map((p) => (
                             <div
                                 key={p.id}
-                                className="w-full flex items-center hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors"
+                                className="group relative card p-4 flex items-center gap-4 hover:border-indigo-500/50 hover:shadow-xl transition-all duration-300 cursor-pointer bg-white dark:bg-slate-900 overflow-hidden"
                             >
-                                <div className="pl-4">
+                                <div className="absolute top-0 right-0 p-1 opacity-0 group-hover:opacity-10 transition-opacity">
+                                    <User size={80} className="rotate-12 translate-x-4 -translate-y-4" />
+                                </div>
+                                <div className="relative z-10">
                                     <input
                                         type="checkbox"
                                         checked={selectedIds.includes(p.id)}
                                         onChange={() => toggleSelect(p.id)}
-                                        className="w-5 h-5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
+                                        className="w-5 h-5 rounded-lg border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
                                     />
                                 </div>
-                                <button
+                                <div
+                                    className="flex-1 flex items-center justify-between"
                                     onClick={() => selectPersona(p)}
-                                    className="flex-1 p-4 flex items-center justify-between text-left"
                                 >
                                     <div>
-                                        <p className="font-bold uppercase leading-tight">{p.nombre} {p.apellido}</p>
-                                        <div className="flex gap-2 text-xs text-slate-500 mt-1">
-                                            {p.rol && <span className="uppercase bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded text-[10px] font-bold tracking-wide border border-blue-200 dark:border-blue-800">{p.rol}</span>}
-                                            <span className="font-mono pt-0.5">DNI: {p.dni}</span>
+                                        <p className="font-black text-slate-900 dark:text-white uppercase leading-tight group-hover:text-indigo-600 transition-colors">
+                                            {p.nombre} {p.apellido}
+                                        </p>
+                                        <div className="flex items-center gap-3 mt-1.5 font-bold">
+                                            <span className="text-[10px] uppercase bg-slate-100 dark:bg-slate-800 text-slate-500 px-2 py-0.5 rounded-md border border-slate-200 dark:border-slate-700 tracking-widest">{p.rol}</span>
+                                            <span className="text-[10px] text-indigo-500 font-mono">DNI: {p.dni}</span>
                                         </div>
                                     </div>
-                                    <User size={20} className="text-slate-300" />
-                                </button>
+                                    <ChevronRight size={20} className="text-slate-300 group-hover:text-indigo-500 group-hover:translate-x-1 transition-all" />
+                                </div>
                             </div>
                         ))}
                     </div>
@@ -308,196 +326,163 @@ export default function BuscarPersonaPage() {
             )}
 
             {persona && (
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-fade-in">
-                    {/* Persona Info */}
-                    <div className="card border-none bg-gradient-to-br from-slate-800 to-slate-900 text-white shadow-2xl overflow-hidden relative group">
-                        {/* Decorative element */}
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--primary)]/10 rounded-full -mr-16 -mt-16 blur-3xl group-hover:bg-[var(--primary)]/20 transition-all duration-500"></div>
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start animate-fade-in">
+                    {/* Compact Info Sidebar */}
+                    <div className="lg:col-span-4 space-y-6">
+                        <button
+                            onClick={() => { setPersona(null); setQuery(''); }}
+                            className="flex items-center gap-2 text-xs font-black uppercase text-slate-400 hover:text-indigo-500 transition-colors mb-4"
+                        >
+                            <ArrowLeft size={16} /> Volver a buscar
+                        </button>
 
-                        <div className="relative p-8 flex flex-col items-center text-center space-y-6">
-                            <div className="relative">
-                                <div className="w-24 h-24 bg-slate-700/50 rounded-2xl flex items-center justify-center border-2 border-slate-600 shadow-xl backdrop-blur-sm group-hover:scale-105 transition-transform duration-500">
-                                    <User size={48} className="text-[var(--primary)]" />
-                                </div>
-                                <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-emerald-500 rounded-full border-4 border-slate-800 flex items-center justify-center shadow-lg">
-                                    <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
-                                </div>
+                        {/* Profile Hero Card */}
+                        <div className="card border-none bg-gradient-to-br from-indigo-600 to-indigo-900 text-white shadow-2xl relative overflow-hidden p-8 group">
+                            <div className="absolute top-0 right-0 p-8 opacity-10 rotate-12 -mr-8 -mt-8 translate-x-4">
+                                <User size={160} />
                             </div>
 
-                            <div>
-                                <h3 className="text-2xl font-black uppercase tracking-tight text-white mb-1 shadow-sm">
-                                    {persona.nombre} {persona.apellido}
-                                </h3>
-                                <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-emerald-400 font-mono text-xs font-bold">
-                                    <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>
-                                    {persona.dni}
+                            <div className="relative z-10 flex flex-col items-center text-center space-y-6">
+                                <div className="w-24 h-24 bg-white/20 rounded-[2.5rem] flex items-center justify-center border-4 border-white/30 backdrop-blur-xl shadow-2xl relative group-hover:scale-110 transition-transform duration-500">
+                                    <User size={48} className="text-white" />
                                 </div>
-                            </div>
 
-                            <div className="w-full pt-6 space-y-4 text-left border-t border-slate-700/50">
-                                <InfoItem icon={<Building2 size={18} className="text-emerald-500" />} label="Institución" value={persona.institucion || 'No especificada'} />
-                                <InfoItem icon={<User size={18} className="text-purple-400" />} label="Rol" value={persona.rol} />
-                                <InfoItem icon={<MapPin size={18} className="text-blue-400" />} label="Eje" value={persona.eje || 'No especificado'} />
-                                <InfoItem icon={<Clock size={18} className="text-amber-400" />} label="Email" value={persona.correo || '-'} />
+                                <div>
+                                    <h3 className="text-2xl font-black uppercase tracking-tight leading-none mb-3">
+                                        {persona.nombre} <br /> {persona.apellido}
+                                    </h3>
+                                    <div className="inline-flex px-4 py-1.5 bg-white/10 backdrop-blur-md rounded-full border border-white/20 text-xs font-black tracking-widest uppercase">
+                                        DNI {persona.dni}
+                                    </div>
+                                </div>
+
+                                <div className="w-full pt-8 grid grid-cols-1 gap-4 text-left border-t border-white/10">
+                                    <InfoItem label="Institución" value={persona.institucion || 'S/D'} icon={<Building2 size={16} />} />
+                                    <InfoItem label="Cargo / Rol" value={persona.rol} icon={<GraduationCap size={16} />} />
+                                    <InfoItem label="Eje de Formación" value={persona.eje || 'General'} icon={<MapPin size={16} />} />
+                                    <InfoItem label="WhatsApp" value={persona.celular || 'S/D'} icon={<Phone size={16} />} />
+                                    <InfoItem label="Correo" value={persona.correo || 'S/D'} icon={<Mail size={16} />} />
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    {/* Attendance History */}
-                    <div className="lg:col-span-2 space-y-6">
-                        {/* Edit Persona Section */}
-                        <div className="card p-6 bg-white dark:bg-slate-900 border-t-4 border-[var(--primary)]">
-                            <div className="flex items-center justify-between mb-4">
-                                <h3 className="text-lg font-bold">Editar Datos de la Persona</h3>
+                    {/* Main Actions Area */}
+                    <div className="lg:col-span-8 space-y-8">
+                        {/* Edit Section */}
+                        <div className="card p-8 bg-white dark:bg-slate-900 border-none shadow-xl border-t-8 border-indigo-500">
+                            <div className="flex items-center justify-between mb-8">
+                                <div className="space-y-1">
+                                    <h3 className="text-xl font-black uppercase tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
+                                        <CheckCircle2 className="text-indigo-500" size={24} />
+                                        Configuración del Perfil
+                                    </h3>
+                                    <p className="text-xs font-medium text-slate-500 uppercase tracking-widest">Modifica los datos personales o elimina el registro.</p>
+                                </div>
                                 <button
                                     onClick={() => handleDeletePersona(persona.id)}
-                                    className="flex items-center gap-1 text-xs font-bold text-red-500 hover:text-red-700 uppercase transition-colors"
+                                    className="p-3 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-2xl transition-all group"
+                                    title="Eliminar permanentemente"
                                 >
-                                    <Trash2 size={14} /> Eliminar Persona
+                                    <Trash2 size={24} className="group-hover:scale-110" />
                                 </button>
                             </div>
-                            <form onSubmit={handleUpdatePersona} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div className="space-y-1">
-                                    <label className="text-[10px] font-bold uppercase text-slate-400">Nombre</label>
-                                    <input
-                                        className="input-field py-1 px-3 text-sm"
-                                        value={persona.nombre}
-                                        onChange={(e) => setPersona({ ...persona, nombre: e.target.value })}
-                                    />
+
+                            <form onSubmit={handleUpdatePersona} className="space-y-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+                                    <CustomInput label="Nombre" value={persona.nombre} onChange={(v) => setPersona({ ...persona, nombre: v })} />
+                                    <CustomInput label="Apellido" value={persona.apellido} onChange={(v) => setPersona({ ...persona, apellido: v })} />
+                                    <CustomInput label="DNI" value={persona.dni} onChange={(v) => setPersona({ ...persona, dni: v.replace(/\D/g, '').slice(0, 8) })} isMono />
+
+                                    <div className="flex flex-col gap-2">
+                                        <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Rol en el Sistema</label>
+                                        <select
+                                            className="w-full bg-slate-50 dark:bg-slate-800 border-2 border-transparent focus:border-indigo-500 rounded-xl px-4 py-2.5 text-sm font-bold transition-all outline-none"
+                                            value={persona.rol}
+                                            onChange={(e) => setPersona({ ...persona, rol: e.target.value })}
+                                        >
+                                            <option value="docente">Docente</option>
+                                            <option value="directivo">Directivo</option>
+                                            <option value="estudiante avanzado">Estudiante Avanzado</option>
+                                        </select>
+                                    </div>
+
+                                    <div className="flex flex-col gap-2">
+                                        <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Asignación de Eje</label>
+                                        <select
+                                            className="w-full bg-slate-50 dark:bg-slate-800 border-2 border-transparent focus:border-indigo-500 rounded-xl px-4 py-2.5 text-sm font-bold transition-all outline-none"
+                                            value={persona.eje || ''}
+                                            onChange={(e) => setPersona({ ...persona, eje: e.target.value })}
+                                        >
+                                            <option value="">Sin asignar</option>
+                                            <option value="Educación Ambiental">Educación Ambiental</option>
+                                            <option value="Educación Digital Integral">Educación Digital Integral</option>
+                                            <option value="Infancias Diversas">Infancias Diversas</option>
+                                            <option value="Alfabetización Inicial">Alfabetización Inicial</option>
+                                            <option value="Lenguajes Artísticos Integrales">Lenguajes Artísticos Integrales</option>
+                                        </select>
+                                    </div>
+
+                                    <CustomInput label="Email de contacto" value={persona.correo || ''} onChange={(v) => setPersona({ ...persona, correo: v })} type="email" />
+                                    <CustomInput label="Móvil (WhatsApp)" value={persona.celular || ''} onChange={(v) => setPersona({ ...persona, celular: v })} />
+                                    <div className="md:col-span-2">
+                                        <CustomInput label="Institución Educativa" value={persona.institucion || ''} onChange={(v) => setPersona({ ...persona, institucion: v })} />
+                                    </div>
                                 </div>
-                                <div className="space-y-1">
-                                    <label className="text-[10px] font-bold uppercase text-slate-400">Apellido</label>
-                                    <input
-                                        className="input-field py-1 px-3 text-sm"
-                                        value={persona.apellido}
-                                        onChange={(e) => setPersona({ ...persona, apellido: e.target.value })}
-                                    />
-                                </div>
-                                <div className="space-y-1">
-                                    <label className="text-[10px] font-bold uppercase text-slate-400">DNI</label>
-                                    <input
-                                        type="text"
-                                        inputMode="numeric"
-                                        maxLength={8}
-                                        className="input-field py-1 px-3 text-sm"
-                                        value={persona.dni}
-                                        onChange={(e) => {
-                                            const value = e.target.value.replace(/\D/g, '');
-                                            if (value.length <= 8) {
-                                                setPersona({ ...persona, dni: value });
-                                            }
-                                        }}
-                                    />
-                                </div>
-                                <div className="space-y-1">
-                                    <label className="text-[10px] font-bold uppercase text-slate-400">Rol</label>
-                                    <select
-                                        className="input-field py-1 px-3 text-sm"
-                                        value={persona.rol}
-                                        onChange={(e) => setPersona({ ...persona, rol: e.target.value })}
-                                    >
-                                        <option value="docente">Docente</option>
-                                        <option value="directivo">Directivo</option>
-                                        <option value="estudiante avanzado">Estudiante Avanzado</option>
-                                    </select>
-                                </div>
-                                <div className="space-y-1">
-                                    <label className="text-[10px] font-bold uppercase text-slate-400">Eje</label>
-                                    <select
-                                        className="input-field py-1 px-3 text-sm"
-                                        value={persona.eje || ''}
-                                        onChange={(e) => setPersona({ ...persona, eje: e.target.value })}
-                                    >
-                                        <option value="">Sin asignar</option>
-                                        <option value="Educación Ambiental">Educación Ambiental</option>
-                                        <option value="Educación Digital Integral">Educación Digital Integral</option>
-                                        <option value="Infancias Diversas">Infancias Diversas</option>
-                                        <option value="Alfabetización Inicial">Alfabetización Inicial</option>
-                                        <option value="Lenguajes Artísticos Integrales">Lenguajes Artísticos Integrales</option>
-                                    </select>
-                                </div>
-                                <div className="space-y-1">
-                                    <label className="text-[10px] font-bold uppercase text-slate-400">Email</label>
-                                    <input
-                                        type="email"
-                                        className="input-field py-1 px-3 text-sm"
-                                        value={persona.correo || ''}
-                                        onChange={(e) => setPersona({ ...persona, correo: e.target.value })}
-                                    />
-                                </div>
-                                <div className="space-y-1">
-                                    <label className="text-[10px] font-bold uppercase text-slate-400">Número de contacto (WhatsApp)</label>
-                                    <input
-                                        className="input-field py-1 px-3 text-sm"
-                                        value={persona.celular || ''}
-                                        onChange={(e) => setPersona({ ...persona, celular: e.target.value })}
-                                        placeholder="Ej: 3624123456"
-                                    />
-                                </div>
-                                <div className="md:col-span-2 space-y-1">
-                                    <label className="text-[10px] font-bold uppercase text-slate-400">Institución</label>
-                                    <input
-                                        className="input-field py-1 px-3 text-sm"
-                                        value={persona.institucion || ''}
-                                        onChange={(e) => setPersona({ ...persona, institucion: e.target.value })}
-                                    />
-                                </div>
-                                <div className="md:col-span-2 pt-2">
-                                    <button
-                                        type="submit"
-                                        disabled={loading}
-                                        className="w-full btn-primary h-10 text-sm flex items-center justify-center gap-2"
-                                    >
-                                        {loading ? <Loader2 className="animate-spin" size={16} /> : <CheckCircle2 size={16} />}
-                                        Guardar Cambios
-                                    </button>
-                                </div>
+                                <button
+                                    type="submit"
+                                    disabled={loading}
+                                    className="w-full h-14 bg-indigo-600 hover:bg-indigo-700 text-white rounded-[1.2rem] font-black uppercase tracking-widest text-sm shadow-xl shadow-indigo-600/20 transition-all active:scale-[0.98] flex items-center justify-center gap-3"
+                                >
+                                    {loading ? <Loader2 className="animate-spin" /> : <CheckCircle2 size={24} />}
+                                    Actualizar Perfil de Asistente
+                                </button>
                             </form>
                         </div>
 
-                        {/* History */}
-                        <div className="space-y-4">
-                            <h3 className="text-lg font-bold flex items-center gap-2">
-                                Historial de Asistencias
-                                <span className="px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-800 text-xs text-slate-600 dark:text-slate-400">
-                                    {asistencias.length}
-                                </span>
+                        {/* History Visualization (Timeline Style) */}
+                        <div className="space-y-6">
+                            <h3 className="text-xl font-black uppercase tracking-tight flex items-center gap-3 text-slate-800 dark:text-white">
+                                <Clock size={24} className="text-slate-400" />
+                                Cronograma de Asistencia
+                                <span className="bg-slate-100 dark:bg-slate-800 text-slate-500 px-3 py-1 rounded-full text-xs font-black">{asistencias.length}</span>
                             </h3>
 
                             {asistencias.length === 0 ? (
-                                <div className="card p-12 flex flex-col items-center justify-center text-slate-400">
-                                    <Clock size={48} className="opacity-20 mb-4" />
-                                    <p>No registra asistencias hasta el momento.</p>
+                                <div className="card p-12 border-dashed border-2 flex flex-col items-center text-slate-400">
+                                    <AlertTriangle size={48} className="opacity-10 mb-4" />
+                                    <p className="font-bold">No registra asistencias previas en la red.</p>
                                 </div>
                             ) : (
-                                <div className="space-y-3">
+                                <div className="relative pl-6 space-y-6 before:content-[''] before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-100 dark:before:bg-slate-800">
                                     {asistencias.map((asistencia) => (
-                                        <div key={asistencia.id} className="card p-4 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors">
-                                            <div>
-                                                <h4 className="font-bold text-slate-800 dark:text-white uppercase tracking-tight">
-                                                    {asistencia.capacitaciones.nombre}
-                                                </h4>
-                                                <div className="flex items-center gap-4 mt-1 text-sm text-slate-500">
-                                                    <span className="flex items-center gap-1">
-                                                        <MapPin size={14} /> {asistencia.capacitaciones.lugar || 'S/D'}
-                                                    </span>
-                                                    <span className="flex items-center gap-1">
-                                                        <Clock size={14} /> {new Date(asistencia.capacitaciones.dia).toLocaleDateString()}
-                                                    </span>
+                                        <div key={asistencia.id} className="relative group animate-slide-right">
+                                            <div className="absolute -left-[1.85rem] top-1.5 w-3 h-3 bg-white dark:bg-slate-900 border-2 border-indigo-500 rounded-full z-10 group-hover:scale-150 transition-transform"></div>
+                                            <div className="card p-5 group-hover:shadow-lg transition-all border-none bg-white dark:bg-slate-900 shadow-sm flex items-center justify-between gap-4">
+                                                <div className="space-y-1">
+                                                    <div className="text-[10px] font-black uppercase text-indigo-500 tracking-wider">
+                                                        {new Date(asistencia.capacitaciones.dia).toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+                                                    </div>
+                                                    <h4 className="font-black text-slate-900 dark:text-white uppercase leading-tight tracking-tight">
+                                                        {asistencia.capacitaciones.nombre}
+                                                    </h4>
+                                                    <div className="flex items-center gap-3 text-xs text-slate-500 font-medium">
+                                                        <span className="flex items-center gap-1">📍 {asistencia.capacitaciones.lugar || 'S/D'}</span>
+                                                        <span className="flex items-center gap-1">👤 {asistencia.capacitaciones.disertante || 'S/D'}</span>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div className="flex items-center gap-4">
-                                                <div className="text-right">
-                                                    <p className="text-xs font-medium text-slate-400 uppercase">Registrado</p>
-                                                    <p className="font-semibold text-[var(--primary)]">{new Date(asistencia.fecha_registro).toLocaleTimeString()}</p>
+                                                <div className="flex items-center gap-4">
+                                                    <div className="text-right">
+                                                        <p className="text-[9px] font-black uppercase text-slate-400">Entrada</p>
+                                                        <p className="font-black text-indigo-600 dark:text-indigo-400">{new Date(asistencia.fecha_registro).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} hs</p>
+                                                    </div>
+                                                    <button
+                                                        onClick={() => handleDeleteAsistencia(asistencia.id)}
+                                                        className="p-2 text-slate-300 hover:text-red-500 transition-colors"
+                                                    >
+                                                        <Trash2 size={20} />
+                                                    </button>
                                                 </div>
-                                                <button
-                                                    onClick={() => handleDeleteAsistencia(asistencia.id)}
-                                                    className="p-2 text-slate-300 hover:text-red-500 transition-colors"
-                                                    title="Eliminar asistencia"
-                                                >
-                                                    <Trash2 size={18} />
-                                                </button>
                                             </div>
                                         </div>
                                     ))}
@@ -508,39 +493,30 @@ export default function BuscarPersonaPage() {
                 </div>
             )}
 
-            {/* Modal de Confirmación de Eliminación */}
+            {/* Modal de Confirmación */}
             {isDeleteModalOpen && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/80">
-                    <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-200 dark:border-slate-800">
-                        <div className="p-6">
-                            <div className="flex items-center gap-4 mb-6">
-                                <div className="p-3 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-full">
-                                    <AlertTriangle size={32} />
-                                </div>
-                                <div>
-                                    <h3 className="text-xl font-bold text-slate-900 dark:text-white">Confirmar Eliminación</h3>
-                                    <p className="text-sm text-slate-500">Esta acción no se puede deshacer.</p>
-                                </div>
-                            </div>
-
-                            <p className="text-slate-600 dark:text-slate-300 leading-relaxed mb-8">
-                                Estás por eliminar definitivamente a <span className="font-bold text-red-600 dark:text-red-400">{deleteConfig.count === 1 ? 'esta persona' : `${deleteConfig.count} personas`}</span>, ¿estás seguro?
-                            </p>
-
-                            <div className="flex gap-3">
-                                <button
-                                    onClick={() => setIsDeleteModalOpen(false)}
-                                    className="flex-1 px-4 py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-xl font-bold transition-colors"
-                                >
-                                    Cancelar
-                                </button>
-                                <button
-                                    onClick={confirmDelete}
-                                    className="flex-1 px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold transition-all shadow-lg active:scale-95"
-                                >
-                                    Eliminar
-                                </button>
-                            </div>
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-fade-in">
+                    <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-2xl max-w-sm w-full p-8 border border-slate-100 dark:border-slate-800 text-center animate-zoom-in">
+                        <div className="w-20 h-20 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-3xl flex items-center justify-center mx-auto mb-6">
+                            <AlertTriangle size={40} />
+                        </div>
+                        <h3 className="text-2xl font-black text-slate-900 dark:text-white mb-2 uppercase tracking-tight">¿Estás Seguro?</h3>
+                        <p className="text-slate-500 font-medium mb-8 leading-relaxed">
+                            Se eliminará permanentemente a <span className="font-black text-red-500">{deleteConfig.count === 1 ? 'este usuario' : `${deleteConfig.count} usuarios`}</span> y todos sus registros. Esta acción no tiene vuelta atrás.
+                        </p>
+                        <div className="flex flex-col gap-3">
+                            <button
+                                onClick={confirmDelete}
+                                className="w-full py-4 bg-red-600 hover:bg-red-700 text-white rounded-2xl font-black uppercase tracking-widest text-xs transition-all shadow-xl shadow-red-600/20 active:scale-95"
+                            >
+                                Sí, eliminar ahora
+                            </button>
+                            <button
+                                onClick={() => setIsDeleteModalOpen(false)}
+                                className="w-full py-4 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-2xl font-black uppercase tracking-widest text-xs transition-colors"
+                            >
+                                Cancelar
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -551,12 +527,26 @@ export default function BuscarPersonaPage() {
 
 function InfoItem({ icon, label, value }: { icon: React.ReactNode, label: string, value: string }) {
     return (
-        <div className="flex items-start gap-3">
-            <div className="mt-0.5">{icon}</div>
+        <div className="flex items-start gap-3 bg-white/5 p-3 rounded-2xl border border-white/10">
+            <div className="text-white/40">{icon}</div>
             <div>
-                <p className="text-[10px] text-slate-400 uppercase font-bold tracking-wider mb-0.5">{label}</p>
-                <p className="text-sm font-semibold leading-tight">{value}</p>
+                <p className="text-[9px] text-white/40 uppercase font-black tracking-widest mb-0.5">{label}</p>
+                <p className="text-xs font-bold leading-tight">{value}</p>
             </div>
+        </div>
+    );
+}
+
+function CustomInput({ label, value, onChange, type = "text", isMono = false }: { label: string, value: string, onChange: (v: string) => void, type?: string, isMono?: boolean }) {
+    return (
+        <div className="flex flex-col gap-2">
+            <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">{label}</label>
+            <input
+                type={type}
+                className={`w-full bg-slate-50 dark:bg-slate-800 border-2 border-transparent focus:border-indigo-500 rounded-xl px-4 py-2.5 text-sm font-bold transition-all outline-none ${isMono ? 'font-mono' : ''}`}
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+            />
         </div>
     );
 }
