@@ -191,31 +191,31 @@ export default function AsistenciaControlPage() {
                     )}
                 </div>
 
-                <div className="flex flex-wrap sm:flex-nowrap items-center gap-2">
+                <div className="flex flex-wrap sm:flex-nowrap items-center gap-3">
                     <button
                         onClick={exportGeneralStats}
                         disabled={loading || capacitaciones.length === 0}
-                        className="btn-primary bg-slate-900 hover:bg-slate-800 h-10 px-4 flex items-center justify-center gap-2 group shadow-xl shadow-slate-900/10 border-none transition-all active:scale-95 whitespace-nowrap"
+                        className="btn-primary bg-slate-800 hover:bg-slate-900 h-10 px-5 flex items-center justify-center gap-2 group shadow-lg shadow-slate-900/20 border-none transition-all active:scale-[0.97] whitespace-nowrap"
                     >
-                        {loading ? <Loader2 className="animate-spin" size={16} /> : <Download size={16} className="group-hover:-translate-y-0.5 transition-transform" />}
-                        <span className="text-[10px] font-black uppercase tracking-wider">Estadísticas Globales</span>
+                        {loading ? <Loader2 className="animate-spin" size={14} /> : <Download size={14} className="group-hover:-translate-y-0.5 transition-transform" />}
+                        <span className="text-[10px] font-black uppercase tracking-widest">Estadísticas</span>
                     </button>
 
                     {selectedCapacitacion && (
                         <>
                             <button
                                 onClick={handlePrint}
-                                className="btn-primary bg-white border-2 border-slate-100 text-slate-600 hover:bg-slate-50 hover:border-slate-200 h-10 px-4 flex items-center justify-center gap-2 shadow-sm transition-all active:scale-95 whitespace-nowrap"
+                                className="btn-primary bg-indigo-600 hover:bg-indigo-700 text-white h-10 px-5 flex items-center justify-center gap-2 group shadow-lg shadow-indigo-600/20 border-none transition-all active:scale-[0.97] whitespace-nowrap"
                             >
-                                <Printer size={16} className="text-slate-400" />
-                                <span className="text-[10px] font-black uppercase tracking-wider">Generar Acta</span>
+                                <Printer size={14} className="group-hover:scale-110 transition-transform" />
+                                <span className="text-[10px] font-black uppercase tracking-widest">Imprimir Acta</span>
                             </button>
                             <button
                                 onClick={exportToExcel}
-                                className="btn-primary bg-emerald-600 hover:bg-emerald-700 h-10 px-4 flex items-center justify-center gap-2 shadow-xl shadow-emerald-600/20 border-none transition-all active:scale-95 whitespace-nowrap"
+                                className="btn-primary bg-emerald-600 hover:bg-emerald-700 h-10 px-5 flex items-center justify-center gap-2 group shadow-lg shadow-emerald-600/20 border-none transition-all active:scale-[0.97] whitespace-nowrap"
                             >
-                                <FileText size={16} />
-                                <span className="text-[10px] font-black uppercase tracking-wider">Excel Detallado</span>
+                                <FileText size={14} className="group-hover:rotate-6 transition-transform" />
+                                <span className="text-[10px] font-black uppercase tracking-widest">Exportar Excel</span>
                             </button>
                         </>
                     )}
