@@ -241,8 +241,8 @@ export default function BuscarPersonaPage() {
                 </button>
             </div>
 
-            {/* Search Bar - Center and Larger */}
-            <div className={`transition-all duration-500 ${persona ? 'max-w-xl' : 'max-w-2xl mx-auto'}`}>
+            {/* Search Bar - Always Centered */}
+            <div className="max-w-2xl mx-auto transition-all duration-500">
                 <div className="card p-2 bg-white dark:bg-slate-900 border-none shadow-2xl rounded-[2rem]">
                     <form onSubmit={handleSearch} className="flex gap-2 p-1">
                         <div className="relative flex-1">
@@ -326,168 +326,170 @@ export default function BuscarPersonaPage() {
             )}
 
             {persona && (
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start animate-fade-in">
-                    {/* Compact Info Sidebar */}
-                    <div className="lg:col-span-4 space-y-6">
-                        <button
-                            onClick={() => { setPersona(null); setQuery(''); }}
-                            className="flex items-center gap-2 text-xs font-black uppercase text-slate-400 hover:text-indigo-500 transition-colors mb-4"
-                        >
-                            <ArrowLeft size={16} /> Volver a buscar
-                        </button>
+                <div className="space-y-6 animate-fade-in">
+                    <button
+                        onClick={() => { setPersona(null); setQuery(''); }}
+                        className="flex items-center gap-2 text-xs font-black uppercase text-slate-400 hover:text-indigo-500 transition-colors ml-1"
+                    >
+                        <ArrowLeft size={16} /> Volver a buscar
+                    </button>
 
-                        {/* Profile Hero Card */}
-                        <div className="card border-none bg-gradient-to-br from-indigo-600 to-indigo-900 text-white shadow-2xl relative overflow-hidden p-8 group">
-                            <div className="absolute top-0 right-0 p-8 opacity-10 rotate-12 -mr-8 -mt-8 translate-x-4">
-                                <User size={160} />
-                            </div>
-
-                            <div className="relative z-10 flex flex-col items-center text-center space-y-6">
-                                <div className="w-24 h-24 bg-white/20 rounded-[2.5rem] flex items-center justify-center border-4 border-white/30 backdrop-blur-xl shadow-2xl relative group-hover:scale-110 transition-transform duration-500">
-                                    <User size={48} className="text-white" />
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                        {/* Compact Info Sidebar */}
+                        <div className="lg:col-span-4 lg:sticky lg:top-8">
+                            {/* Profile Hero Card */}
+                            <div className="card border-none bg-gradient-to-br from-indigo-600 to-indigo-900 text-white shadow-2xl relative overflow-hidden p-8 group">
+                                <div className="absolute top-0 right-0 p-8 opacity-10 rotate-12 -mr-8 -mt-8 translate-x-4">
+                                    <User size={160} />
                                 </div>
 
-                                <div>
-                                    <h3 className="text-2xl font-black uppercase tracking-tight leading-none mb-3">
-                                        {persona.nombre} <br /> {persona.apellido}
-                                    </h3>
-                                    <div className="inline-flex px-4 py-1.5 bg-white/10 backdrop-blur-md rounded-full border border-white/20 text-xs font-black tracking-widest uppercase">
-                                        DNI {persona.dni}
+                                <div className="relative z-10 flex flex-col items-center text-center space-y-6">
+                                    <div className="w-24 h-24 bg-white/20 rounded-[2.5rem] flex items-center justify-center border-4 border-white/30 backdrop-blur-xl shadow-2xl relative group-hover:scale-110 transition-transform duration-500">
+                                        <User size={48} className="text-white" />
                                     </div>
-                                </div>
 
-                                <div className="w-full pt-8 grid grid-cols-1 gap-4 text-left border-t border-white/10">
-                                    <InfoItem label="Institución" value={persona.institucion || 'S/D'} icon={<Building2 size={16} />} />
-                                    <InfoItem label="Cargo / Rol" value={persona.rol} icon={<GraduationCap size={16} />} />
-                                    <InfoItem label="Eje de Formación" value={persona.eje || 'General'} icon={<MapPin size={16} />} />
-                                    <InfoItem label="WhatsApp" value={persona.celular || 'S/D'} icon={<Phone size={16} />} />
-                                    <InfoItem label="Correo" value={persona.correo || 'S/D'} icon={<Mail size={16} />} />
+                                    <div>
+                                        <h3 className="text-2xl font-black uppercase tracking-tight leading-none mb-3">
+                                            {persona.nombre} <br /> {persona.apellido}
+                                        </h3>
+                                        <div className="inline-flex px-4 py-1.5 bg-white/10 backdrop-blur-md rounded-full border border-white/20 text-xs font-black tracking-widest uppercase">
+                                            DNI {persona.dni}
+                                        </div>
+                                    </div>
+
+                                    <div className="w-full pt-8 grid grid-cols-1 gap-4 text-left border-t border-white/10">
+                                        <InfoItem label="Institución" value={persona.institucion || 'S/D'} icon={<Building2 size={16} />} />
+                                        <InfoItem label="Cargo / Rol" value={persona.rol} icon={<GraduationCap size={16} />} />
+                                        <InfoItem label="Eje de Formación" value={persona.eje || 'General'} icon={<MapPin size={16} />} />
+                                        <InfoItem label="WhatsApp" value={persona.celular || 'S/D'} icon={<Phone size={16} />} />
+                                        <InfoItem label="Correo" value={persona.correo || 'S/D'} icon={<Mail size={16} />} />
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                    {/* Main Actions Area */}
-                    <div className="lg:col-span-8 space-y-8">
-                        {/* Edit Section */}
-                        <div className="card p-8 bg-white dark:bg-slate-900 border-none shadow-xl border-t-8 border-indigo-500">
-                            <div className="flex items-center justify-between mb-8">
-                                <div className="space-y-1">
-                                    <h3 className="text-xl font-black uppercase tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
-                                        <CheckCircle2 className="text-indigo-500" size={24} />
-                                        Configuración del Perfil
-                                    </h3>
-                                    <p className="text-xs font-medium text-slate-500 uppercase tracking-widest">Modifica los datos personales o elimina el registro.</p>
+                        {/* Main Actions Area */}
+                        <div className="lg:col-span-8 space-y-8">
+                            {/* Edit Section */}
+                            <div className="card p-8 bg-white dark:bg-slate-900 border-none shadow-xl border-t-8 border-indigo-500">
+                                <div className="flex items-center justify-between mb-8">
+                                    <div className="space-y-1">
+                                        <h3 className="text-xl font-black uppercase tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
+                                            <CheckCircle2 className="text-indigo-500" size={24} />
+                                            Configuración del Perfil
+                                        </h3>
+                                        <p className="text-xs font-medium text-slate-500 uppercase tracking-widest">Modifica los datos personales o elimina el registro.</p>
+                                    </div>
+                                    <button
+                                        onClick={() => handleDeletePersona(persona.id)}
+                                        className="p-3 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-2xl transition-all group"
+                                        title="Eliminar permanentemente"
+                                    >
+                                        <Trash2 size={24} className="group-hover:scale-110" />
+                                    </button>
                                 </div>
-                                <button
-                                    onClick={() => handleDeletePersona(persona.id)}
-                                    className="p-3 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-2xl transition-all group"
-                                    title="Eliminar permanentemente"
-                                >
-                                    <Trash2 size={24} className="group-hover:scale-110" />
-                                </button>
+
+                                <form onSubmit={handleUpdatePersona} className="space-y-6">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+                                        <CustomInput label="Nombre" value={persona.nombre} onChange={(v) => setPersona({ ...persona, nombre: v })} />
+                                        <CustomInput label="Apellido" value={persona.apellido} onChange={(v) => setPersona({ ...persona, apellido: v })} />
+                                        <CustomInput label="DNI" value={persona.dni} onChange={(v) => setPersona({ ...persona, dni: v.replace(/\D/g, '').slice(0, 8) })} isMono />
+
+                                        <div className="flex flex-col gap-2">
+                                            <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Rol en el Sistema</label>
+                                            <select
+                                                className="w-full bg-slate-50 dark:bg-slate-800 border-2 border-transparent focus:border-indigo-500 rounded-xl px-4 py-2.5 text-sm font-bold transition-all outline-none"
+                                                value={persona.rol}
+                                                onChange={(e) => setPersona({ ...persona, rol: e.target.value })}
+                                            >
+                                                <option value="docente">Docente</option>
+                                                <option value="directivo">Directivo</option>
+                                                <option value="estudiante avanzado">Estudiante Avanzado</option>
+                                            </select>
+                                        </div>
+
+                                        <div className="flex flex-col gap-2">
+                                            <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Asignación de Eje</label>
+                                            <select
+                                                className="w-full bg-slate-50 dark:bg-slate-800 border-2 border-transparent focus:border-indigo-500 rounded-xl px-4 py-2.5 text-sm font-bold transition-all outline-none"
+                                                value={persona.eje || ''}
+                                                onChange={(e) => setPersona({ ...persona, eje: e.target.value })}
+                                            >
+                                                <option value="">Sin asignar</option>
+                                                <option value="Educación Ambiental">Educación Ambiental</option>
+                                                <option value="Educación Digital Integral">Educación Digital Integral</option>
+                                                <option value="Infancias Diversas">Infancias Diversas</option>
+                                                <option value="Alfabetización Inicial">Alfabetización Inicial</option>
+                                                <option value="Lenguajes Artísticos Integrales">Lenguajes Artísticos Integrales</option>
+                                            </select>
+                                        </div>
+
+                                        <CustomInput label="Email de contacto" value={persona.correo || ''} onChange={(v) => setPersona({ ...persona, correo: v })} type="email" />
+                                        <CustomInput label="Móvil (WhatsApp)" value={persona.celular || ''} onChange={(v) => setPersona({ ...persona, celular: v })} />
+                                        <div className="md:col-span-2">
+                                            <CustomInput label="Institución Educativa" value={persona.institucion || ''} onChange={(v) => setPersona({ ...persona, institucion: v })} />
+                                        </div>
+                                    </div>
+                                    <button
+                                        type="submit"
+                                        disabled={loading}
+                                        className="w-full h-14 bg-indigo-600 hover:bg-indigo-700 text-white rounded-[1.2rem] font-black uppercase tracking-widest text-sm shadow-xl shadow-indigo-600/20 transition-all active:scale-[0.98] flex items-center justify-center gap-3"
+                                    >
+                                        {loading ? <Loader2 className="animate-spin" /> : <CheckCircle2 size={24} />}
+                                        Actualizar Perfil de Asistente
+                                    </button>
+                                </form>
                             </div>
 
-                            <form onSubmit={handleUpdatePersona} className="space-y-6">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
-                                    <CustomInput label="Nombre" value={persona.nombre} onChange={(v) => setPersona({ ...persona, nombre: v })} />
-                                    <CustomInput label="Apellido" value={persona.apellido} onChange={(v) => setPersona({ ...persona, apellido: v })} />
-                                    <CustomInput label="DNI" value={persona.dni} onChange={(v) => setPersona({ ...persona, dni: v.replace(/\D/g, '').slice(0, 8) })} isMono />
+                            {/* History Visualization (Timeline Style) */}
+                            <div className="space-y-6">
+                                <h3 className="text-xl font-black uppercase tracking-tight flex items-center gap-3 text-slate-800 dark:text-white">
+                                    <Clock size={24} className="text-slate-400" />
+                                    Cronograma de Asistencia
+                                    <span className="bg-slate-100 dark:bg-slate-800 text-slate-500 px-3 py-1 rounded-full text-xs font-black">{asistencias.length}</span>
+                                </h3>
 
-                                    <div className="flex flex-col gap-2">
-                                        <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Rol en el Sistema</label>
-                                        <select
-                                            className="w-full bg-slate-50 dark:bg-slate-800 border-2 border-transparent focus:border-indigo-500 rounded-xl px-4 py-2.5 text-sm font-bold transition-all outline-none"
-                                            value={persona.rol}
-                                            onChange={(e) => setPersona({ ...persona, rol: e.target.value })}
-                                        >
-                                            <option value="docente">Docente</option>
-                                            <option value="directivo">Directivo</option>
-                                            <option value="estudiante avanzado">Estudiante Avanzado</option>
-                                        </select>
+                                {asistencias.length === 0 ? (
+                                    <div className="card p-12 border-dashed border-2 flex flex-col items-center text-slate-400">
+                                        <AlertTriangle size={48} className="opacity-10 mb-4" />
+                                        <p className="font-bold">No registra asistencias previas en la red.</p>
                                     </div>
-
-                                    <div className="flex flex-col gap-2">
-                                        <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Asignación de Eje</label>
-                                        <select
-                                            className="w-full bg-slate-50 dark:bg-slate-800 border-2 border-transparent focus:border-indigo-500 rounded-xl px-4 py-2.5 text-sm font-bold transition-all outline-none"
-                                            value={persona.eje || ''}
-                                            onChange={(e) => setPersona({ ...persona, eje: e.target.value })}
-                                        >
-                                            <option value="">Sin asignar</option>
-                                            <option value="Educación Ambiental">Educación Ambiental</option>
-                                            <option value="Educación Digital Integral">Educación Digital Integral</option>
-                                            <option value="Infancias Diversas">Infancias Diversas</option>
-                                            <option value="Alfabetización Inicial">Alfabetización Inicial</option>
-                                            <option value="Lenguajes Artísticos Integrales">Lenguajes Artísticos Integrales</option>
-                                        </select>
-                                    </div>
-
-                                    <CustomInput label="Email de contacto" value={persona.correo || ''} onChange={(v) => setPersona({ ...persona, correo: v })} type="email" />
-                                    <CustomInput label="Móvil (WhatsApp)" value={persona.celular || ''} onChange={(v) => setPersona({ ...persona, celular: v })} />
-                                    <div className="md:col-span-2">
-                                        <CustomInput label="Institución Educativa" value={persona.institucion || ''} onChange={(v) => setPersona({ ...persona, institucion: v })} />
-                                    </div>
-                                </div>
-                                <button
-                                    type="submit"
-                                    disabled={loading}
-                                    className="w-full h-14 bg-indigo-600 hover:bg-indigo-700 text-white rounded-[1.2rem] font-black uppercase tracking-widest text-sm shadow-xl shadow-indigo-600/20 transition-all active:scale-[0.98] flex items-center justify-center gap-3"
-                                >
-                                    {loading ? <Loader2 className="animate-spin" /> : <CheckCircle2 size={24} />}
-                                    Actualizar Perfil de Asistente
-                                </button>
-                            </form>
-                        </div>
-
-                        {/* History Visualization (Timeline Style) */}
-                        <div className="space-y-6">
-                            <h3 className="text-xl font-black uppercase tracking-tight flex items-center gap-3 text-slate-800 dark:text-white">
-                                <Clock size={24} className="text-slate-400" />
-                                Cronograma de Asistencia
-                                <span className="bg-slate-100 dark:bg-slate-800 text-slate-500 px-3 py-1 rounded-full text-xs font-black">{asistencias.length}</span>
-                            </h3>
-
-                            {asistencias.length === 0 ? (
-                                <div className="card p-12 border-dashed border-2 flex flex-col items-center text-slate-400">
-                                    <AlertTriangle size={48} className="opacity-10 mb-4" />
-                                    <p className="font-bold">No registra asistencias previas en la red.</p>
-                                </div>
-                            ) : (
-                                <div className="relative pl-6 space-y-6 before:content-[''] before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-100 dark:before:bg-slate-800">
-                                    {asistencias.map((asistencia) => (
-                                        <div key={asistencia.id} className="relative group animate-slide-right">
-                                            <div className="absolute -left-[1.85rem] top-1.5 w-3 h-3 bg-white dark:bg-slate-900 border-2 border-indigo-500 rounded-full z-10 group-hover:scale-150 transition-transform"></div>
-                                            <div className="card p-5 group-hover:shadow-lg transition-all border-none bg-white dark:bg-slate-900 shadow-sm flex items-center justify-between gap-4">
-                                                <div className="space-y-1">
-                                                    <div className="text-[10px] font-black uppercase text-indigo-500 tracking-wider">
-                                                        {new Date(asistencia.capacitaciones.dia).toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+                                ) : (
+                                    <div className="relative pl-6 space-y-6 before:content-[''] before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-100 dark:before:bg-slate-800">
+                                        {asistencias.map((asistencia) => (
+                                            <div key={asistencia.id} className="relative group animate-slide-right">
+                                                <div className="absolute -left-[1.85rem] top-1.5 w-3 h-3 bg-white dark:bg-slate-900 border-2 border-indigo-500 rounded-full z-10 group-hover:scale-150 transition-transform"></div>
+                                                <div className="card p-5 group-hover:shadow-lg transition-all border-none bg-white dark:bg-slate-900 shadow-sm flex items-center justify-between gap-4">
+                                                    <div className="space-y-1">
+                                                        <div className="text-[10px] font-black uppercase text-indigo-500 tracking-wider">
+                                                            {new Date(asistencia.capacitaciones.dia).toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+                                                        </div>
+                                                        <h4 className="font-black text-slate-900 dark:text-white uppercase leading-tight tracking-tight">
+                                                            {asistencia.capacitaciones.nombre}
+                                                        </h4>
+                                                        <div className="flex items-center gap-3 text-xs text-slate-500 font-medium">
+                                                            <span className="flex items-center gap-1">📍 {asistencia.capacitaciones.lugar || 'S/D'}</span>
+                                                            <span className="flex items-center gap-1">👤 {asistencia.capacitaciones.disertante || 'S/D'}</span>
+                                                        </div>
                                                     </div>
-                                                    <h4 className="font-black text-slate-900 dark:text-white uppercase leading-tight tracking-tight">
-                                                        {asistencia.capacitaciones.nombre}
-                                                    </h4>
-                                                    <div className="flex items-center gap-3 text-xs text-slate-500 font-medium">
-                                                        <span className="flex items-center gap-1">📍 {asistencia.capacitaciones.lugar || 'S/D'}</span>
-                                                        <span className="flex items-center gap-1">👤 {asistencia.capacitaciones.disertante || 'S/D'}</span>
+                                                    <div className="flex items-center gap-4">
+                                                        <div className="text-right">
+                                                            <p className="text-[9px] font-black uppercase text-slate-400">Entrada</p>
+                                                            <p className="font-black text-indigo-600 dark:text-indigo-400">{new Date(asistencia.fecha_registro).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} hs</p>
+                                                        </div>
+                                                        <button
+                                                            onClick={() => handleDeleteAsistencia(asistencia.id)}
+                                                            className="p-2 text-slate-300 hover:text-red-500 transition-colors"
+                                                        >
+                                                            <Trash2 size={20} />
+                                                        </button>
                                                     </div>
-                                                </div>
-                                                <div className="flex items-center gap-4">
-                                                    <div className="text-right">
-                                                        <p className="text-[9px] font-black uppercase text-slate-400">Entrada</p>
-                                                        <p className="font-black text-indigo-600 dark:text-indigo-400">{new Date(asistencia.fecha_registro).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} hs</p>
-                                                    </div>
-                                                    <button
-                                                        onClick={() => handleDeleteAsistencia(asistencia.id)}
-                                                        className="p-2 text-slate-300 hover:text-red-500 transition-colors"
-                                                    >
-                                                        <Trash2 size={20} />
-                                                    </button>
                                                 </div>
                                             </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>
