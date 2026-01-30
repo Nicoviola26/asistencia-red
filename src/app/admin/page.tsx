@@ -14,7 +14,8 @@ import {
     ArrowUpRight,
     TrendingUp,
     X,
-    Loader2
+    Loader2,
+    MapPin
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -23,27 +24,41 @@ export default function AdminDashboard() {
         totalPersonas: 0,
         totalAsistencias: 0,
         totalCapacitaciones: 0,
-        lastMonthGrowth: 12
+        porRol: {
+            docente: 0,
+            directivo: 0,
+            estudiante: 0
+        }
     });
     const [loading, setLoading] = useState(true);
     const [nextCapacitacion, setNextCapacitacion] = useState<any>(null);
     const [loadingNext, setLoadingNext] = useState(true);
     const [showActivity, setShowActivity] = useState(true);
+    const [roleCycleIndex, setRoleCycleIndex] = useState(0);
 
     useEffect(() => {
         async function fetchStats() {
             setLoading(true);
-            const [personas, asistencias, capacitaciones] = await Promise.all([
+            const [personas, asistencias, capacitaciones, rolesData] = await Promise.all([
                 supabase.from('personas').select('*', { count: 'exact', head: true }),
                 supabase.from('asistencias').select('*', { count: 'exact', head: true }),
-                supabase.from('capacitaciones').select('*', { count: 'exact', head: true })
+                supabase.from('capacitaciones').select('*', { count: 'exact', head: true }),
+                supabase.from('personas').select('rol')
             ]);
+
+            const perRol = (rolesData.data || []).reduce((acc: any, curr: any) => {
+                const r = (curr.rol || '').toLowerCase();
+                if (r.includes('docente')) acc.docente++;
+                else if (r.includes('direc')) acc.directivo++;
+                else if (r.includes('estud')) acc.estudiante++;
+                return acc;
+            }, { docente: 0, directivo: 0, estudiante: 0 });
 
             setStats({
                 totalPersonas: personas.count || 0,
                 totalAsistencias: asistencias.count || 0,
                 totalCapacitaciones: capacitaciones.count || 0,
-                lastMonthGrowth: 8
+                porRol: perRol
             });
             setLoading(false);
         }
@@ -74,8 +89,25 @@ export default function AdminDashboard() {
         fetchNext();
     }, []);
 
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setRoleCycleIndex((prev) => (prev + 1) % 4);
+        }, 12000); // 12 segundos
+        return () => clearInterval(interval);
+    }, []);
+
+    const roleSlides = [
+        { label: 'Participantes Totales', value: stats.totalPersonas, sub: 'En la red', color: 'text-emerald-400' },
+        { label: 'Docentes', value: stats.porRol.docente, sub: 'Activos', color: 'text-blue-400' },
+        { label: 'Directivos', value: stats.porRol.directivo, sub: 'Registrados', color: 'text-purple-400' },
+        { label: 'Estudiantes Avanzados', value: stats.porRol.estudiante, sub: 'Inscriptos', color: 'text-amber-400' },
+    ];
+
+    const currentSlide = roleSlides[roleCycleIndex];
+
     return (
         <div className="space-y-8 animate-fade-in">
+            {/* Dashboard Headers */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
                 <div>
                     <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">Panel de Control</h2>
@@ -86,6 +118,41 @@ export default function AdminDashboard() {
                     Sistema en Línea
                 </div>
             </div>
+
+            {/* Next Training Featured Banner */}
+            {!loadingNext && nextCapacitacion && (
+                <div className="relative overflow-hidden card border-none bg-gradient-to-r from-emerald-600 to-emerald-800 text-white p-1 animate-zoom-in">
+                    <div className="absolute top-0 right-0 p-8 opacity-10 rotate-12 -mr-8 -mt-8">
+                        <CalendarCheck size={160} />
+                    </div>
+                    <div className="relative bg-slate-900/20 backdrop-blur-sm rounded-[1.1rem] p-6 flex flex-col md:flex-row items-center justify-between gap-6">
+                        <div className="flex items-center gap-5">
+                            <div className="w-16 h-16 bg-white/10 rounded-2xl flex flex-col items-center justify-center border border-white/20 shrink-0">
+                                <span className="text-[10px] font-black uppercase opacity-60">
+                                    {new Date(nextCapacitacion.dia).toLocaleDateString(undefined, { month: 'short' })}
+                                </span>
+                                <span className="text-2xl font-black leading-none">
+                                    {new Date(nextCapacitacion.dia).getDate()}
+                                </span>
+                            </div>
+                            <div>
+                                <div className="flex items-center gap-2 mb-1">
+                                    <span className="px-2 py-0.5 bg-emerald-500 text-[9px] font-black uppercase rounded-full">Próximo Evento</span>
+                                    <span className="text-xs font-bold opacity-70 flex items-center gap-1"><MapPin size={12} /> {nextCapacitacion.lugar || 'S/D'}</span>
+                                </div>
+                                <h3 className="text-2xl font-black uppercase tracking-tight leading-tight">{nextCapacitacion.nombre}</h3>
+                                <p className="text-sm font-medium opacity-80 mt-1">Con el disertante <span className="font-bold">{nextCapacitacion.disertante || 'Por confirmar'}</span> a las {nextCapacitacion.hora} hs</p>
+                            </div>
+                        </div>
+                        <Link
+                            href="/admin/asistencia"
+                            className="px-6 py-3 bg-white text-emerald-800 rounded-xl font-black uppercase text-sm hover:scale-105 active:scale-95 transition-all shadow-xl shadow-emerald-900/20"
+                        >
+                            Ver Preparativos
+                        </Link>
+                    </div>
+                </div>
+            )}
 
             {/* Metrics Row */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -107,7 +174,7 @@ export default function AdminDashboard() {
                     title="Capacitaciones"
                     value={stats.totalCapacitaciones}
                     icon={<GraduationCap className="text-purple-500" />}
-                    trend="5 activas hoy"
+                    trend={`${nextCapacitacion ? 'Siguiente programada' : 'Sin pendientes'}`}
                     loading={loading}
                 />
             </div>
@@ -149,7 +216,7 @@ export default function AdminDashboard() {
                     {showActivity && (
                         <div className="space-y-4 animate-fade-in">
                             <div className="flex items-center justify-between px-1">
-                                <h3 className="text-xl font-bold">Actividad</h3>
+                                <h3 className="text-xl font-bold">Estadísticas de Red</h3>
                                 <button
                                     onClick={() => setShowActivity(false)}
                                     className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
@@ -158,58 +225,26 @@ export default function AdminDashboard() {
                                     <X size={16} />
                                 </button>
                             </div>
-                            <div className="card p-6 bg-gradient-to-br from-slate-900 to-slate-800 text-white border-0 shadow-2xl relative overflow-hidden group">
+                            <div className="card p-6 bg-gradient-to-br from-slate-900 to-slate-800 text-white border-0 shadow-2xl relative overflow-hidden group min-h-[220px] flex flex-col justify-center">
                                 <Users className="absolute -right-4 -bottom-4 text-white/5 w-40 h-40 group-hover:scale-110 transition-transform duration-700" />
-                                <div className="relative z-10">
-                                    <h4 className="font-bold text-slate-300 uppercase tracking-widest text-[10px] mb-4">Participantes Totales</h4>
+                                <div key={roleCycleIndex} className="relative z-10 animate-fade-in">
+                                    <h4 className="font-bold text-slate-300 uppercase tracking-widest text-[10px] mb-4 flex items-center gap-2">
+                                        <div className="flex gap-1">
+                                            {[0, 1, 2, 3].map(i => (
+                                                <div key={i} className={`w-1.5 h-1.5 rounded-full transition-all ${i === roleCycleIndex ? 'bg-emerald-500 w-4' : 'bg-slate-700'}`} />
+                                            ))}
+                                        </div>
+                                        {currentSlide.label}
+                                    </h4>
                                     <div className="flex items-baseline gap-2 mb-2">
-                                        <p className="text-5xl font-black">{stats.totalPersonas}</p>
-                                        <p className="text-emerald-400 text-xs font-bold uppercase tracking-tight">Docentes</p>
+                                        <p className="text-6xl font-black tabular-nums">{currentSlide.value}</p>
+                                        <p className={`${currentSlide.color} text-xs font-black uppercase tracking-tight`}>{currentSlide.sub}</p>
                                     </div>
-                                    <p className="text-sm text-slate-400 mb-6 leading-relaxed">Cantidad total de personas registradas en la Red de Formación.</p>
-                                    <Link href="/admin/personas" className="inline-flex items-center gap-2 text-sm font-bold text-emerald-400 hover:text-emerald-300 transition-colors">
-                                        Gestionar Inscriptos <ArrowUpRight size={16} />
-                                    </Link>
+                                    <p className="text-sm text-slate-400 leading-relaxed mb-4">Actualizado en tiempo real desde la plataforma.</p>
                                 </div>
                             </div>
                         </div>
                     )}
-
-                    <div className="space-y-4">
-                        <h3 className="text-xl font-bold px-1">Próximo Evento</h3>
-                        <div className="card p-6 border-dashed border-2 flex flex-col items-center text-center justify-center space-y-3 min-h-[200px]">
-                            {loadingNext ? (
-                                <Loader2 className="animate-spin text-slate-300" size={32} />
-                            ) : nextCapacitacion ? (
-                                <>
-                                    <div className="p-3 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 rounded-full">
-                                        <CalendarCheck size={28} />
-                                    </div>
-                                    <div className="space-y-1">
-                                        <h4 className="font-bold text-slate-900 dark:text-white uppercase leading-tight">{nextCapacitacion.nombre}</h4>
-                                        <p className="text-xs font-bold text-[var(--primary)] uppercase tracking-wide">
-                                            {new Date(nextCapacitacion.dia).toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' })}
-                                        </p>
-                                        <p className="text-xs text-slate-500 font-mono">{nextCapacitacion.hora} hs — {nextCapacitacion.lugar || 'S/D'}</p>
-                                    </div>
-                                    <Link
-                                        href="/admin/capacitaciones"
-                                        className="mt-2 text-[10px] font-black uppercase text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 underline decoration-2 underline-offset-4"
-                                    >
-                                        Gestionar Eventos
-                                    </Link>
-                                </>
-                            ) : (
-                                <>
-                                    <div className="p-3 bg-slate-100 dark:bg-slate-800 rounded-full mb-2">
-                                        <CalendarCheck size={24} className="text-slate-400" />
-                                    </div>
-                                    <h4 className="font-bold text-sm text-slate-400">Sin capacitaciones</h4>
-                                    <p className="text-xs text-slate-500 max-w-[150px]">No hay eventos programados para los próximos días.</p>
-                                </>
-                            )}
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
