@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { ClipboardList, CheckCircle2, ChevronRight, HelpCircle, FastForward, Play, CheckCircle, Plus, Trash2 } from 'lucide-react';
+import { ClipboardList, CheckCircle2, ChevronRight, HelpCircle, FastForward, Play, CheckCircle, Plus, Trash2, X, AlertTriangle } from 'lucide-react';
 
 interface Task {
     id: string;
@@ -26,6 +26,7 @@ export default function ChecklistPage() {
     const [newTask, setNewTask] = useState('');
     const [newCategory, setNewCategory] = useState<Task['category']>('previo');
     const [mounted, setMounted] = useState(false);
+    const [showResetModal, setShowResetModal] = useState(false);
 
     useEffect(() => {
         const saved = localStorage.getItem('asistencia_checklist_v2');
@@ -65,9 +66,8 @@ export default function ChecklistPage() {
     };
 
     const resetTasks = () => {
-        if (confirm('¿Deseas restablecer la lista a los valores por defecto?')) {
-            setTasks(DEFAULT_TASKS);
-        }
+        setTasks(DEFAULT_TASKS);
+        setShowResetModal(false);
     };
 
     if (!mounted) return null;
@@ -94,7 +94,7 @@ export default function ChecklistPage() {
                     <p className="text-slate-500 font-medium">Cronograma de tareas para que la Capacitación sea un ÉXITO</p>
                 </div>
                 <button
-                    onClick={resetTasks}
+                    onClick={() => setShowResetModal(true)}
                     className="btn-primary bg-slate-100 hover:bg-slate-200 text-slate-500 h-10 px-5 flex items-center justify-center gap-2 border-none shadow-sm transition-all active:scale-95"
                 >
                     <span className="text-[10px] font-black uppercase tracking-widest">Restablecer Lista</span>
@@ -190,6 +190,43 @@ export default function ChecklistPage() {
                     Esta lista es temporal y sirve como ayuda memoria para la organización de cada evento. Podés restablecerla cuando comience un nuevo ciclo de capacitación.
                 </p>
             </div>
+
+            {/* Custom Reset Modal */}
+            {showResetModal && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                    <div
+                        className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm animate-fade-in"
+                        onClick={() => setShowResetModal(false)}
+                    />
+                    <div className="bg-white dark:bg-slate-900 rounded-3xl p-8 max-w-sm w-full shadow-2xl relative z-10 animate-fade-in-pure border border-slate-200 dark:border-slate-800">
+                        <div className="flex flex-col items-center text-center space-y-4">
+                            <div className="w-16 h-16 bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-full flex items-center justify-center shadow-inner">
+                                <AlertTriangle size={32} />
+                            </div>
+                            <div className="space-y-2">
+                                <h3 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tight">¿Restablecer Lista?</h3>
+                                <p className="text-sm text-slate-500 dark:text-slate-400 font-medium leading-relaxed">
+                                    Esta acción volverá la lista a su estado original. Perderás todas las tareas personalizadas y el progreso actual.
+                                </p>
+                            </div>
+                            <div className="flex flex-col w-full gap-2 pt-2">
+                                <button
+                                    onClick={resetTasks}
+                                    className="btn-primary bg-amber-600 hover:bg-amber-700 text-white h-12 border-none shadow-lg shadow-amber-600/20 active:scale-95 transition-all w-full"
+                                >
+                                    <span className="text-xs font-black uppercase tracking-widest">Sí, Restablecer Todo</span>
+                                </button>
+                                <button
+                                    onClick={() => setShowResetModal(false)}
+                                    className="btn-primary bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 h-12 border-none hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 transition-all w-full"
+                                >
+                                    <span className="text-xs font-black uppercase tracking-widest">No, Mantener Lista</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
