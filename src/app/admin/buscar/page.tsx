@@ -220,23 +220,22 @@ export default function BuscarPersonaPage() {
         <div className="text-[var(--foreground)]">
             {/* Main Content with Animation */}
             <div className="space-y-8 animate-fade-in">
-                {/* Header */}
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                    <div>
-                        <div className="flex items-center gap-2 text-emerald-600 font-bold uppercase tracking-widest text-[10px] mb-1">
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 print:hidden">
+                    <div className="space-y-1">
+                        <div className="flex items-center gap-2 text-emerald-600 font-bold uppercase tracking-widest text-[10px]">
                             <UserSearch size={14} />
                             Base de Datos Docente
                         </div>
-                        <h2 className="text-3xl font-black tracking-tight text-slate-900 dark:text-white">Explorador de Participantes</h2>
+                        <h2 className="text-3xl font-black tracking-tight text-slate-900 dark:text-white leading-none">Explorador de Participantes</h2>
                         <p className="text-slate-500 font-medium">Historial completo, edición y gestión de perfiles.</p>
                     </div>
                     <button
                         onClick={handleDownloadParticipants}
                         disabled={exporting}
-                        className="btn-primary bg-emerald-600 hover:bg-emerald-700 h-11 flex items-center gap-2 shadow-lg shadow-emerald-600/10 border-none"
+                        className="btn-primary bg-emerald-600 hover:bg-emerald-700 h-10 px-5 flex items-center justify-center gap-2 group shadow-lg shadow-emerald-600/20 border-none transition-all active:scale-[0.97] whitespace-nowrap"
                     >
-                        {exporting ? <Loader2 className="animate-spin" size={18} /> : <Download size={18} />}
-                        Listado Completo (Excel)
+                        {exporting ? <Loader2 className="animate-spin" size={14} /> : <Download size={14} className="group-hover:-translate-y-0.5 transition-transform" />}
+                        <span className="text-[10px] font-black uppercase tracking-widest">Descargar Listado</span>
                     </button>
                 </div>
 

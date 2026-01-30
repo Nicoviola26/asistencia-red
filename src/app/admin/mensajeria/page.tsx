@@ -326,9 +326,15 @@ export default function MensajeriaPage() {
 
     return (
         <div className="space-y-8 animate-fade-in">
-            <div>
-                <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">Mensajería y Notificaciones</h2>
-                <p className="text-slate-500 dark:text-slate-400">Envía comunicados individuales o masivos por correo electrónico.</p>
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 print:hidden">
+                <div className="space-y-1">
+                    <div className="flex items-center gap-2 text-blue-600 font-bold uppercase tracking-widest text-[10px]">
+                        <Mail size={14} />
+                        Centro de Comunicaciones
+                    </div>
+                    <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight leading-none">Mensajería y Notificaciones</h2>
+                    <p className="text-slate-500 font-medium">Envía comunicados individuales o masivos por correo electrónico.</p>
+                </div>
             </div>
 
             {status && (
@@ -339,7 +345,8 @@ export default function MensajeriaPage() {
                     {status.type === 'success' ? <CheckCircle2 className="shrink-0" /> : <AlertCircle className="shrink-0" />}
                     <p className="font-medium text-sm">{status.text}</p>
                 </div>
-            )}
+            )
+            }
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Individual Email Card */}
@@ -648,6 +655,6 @@ export default function MensajeriaPage() {
                     </div>
                 </div>
             </div>
-        </div>
+        </div >
     );
 }

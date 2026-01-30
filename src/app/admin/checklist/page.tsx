@@ -84,21 +84,20 @@ export default function ChecklistPage() {
     return (
         <div className="max-w-4xl mx-auto space-y-8 animate-fade-in">
             {/* Header */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
-                    <div className="p-3 bg-[var(--primary)] text-white rounded-xl shadow-lg shadow-emerald-500/20">
-                        <ClipboardList size={24} />
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 print:hidden">
+                <div className="space-y-1">
+                    <div className="flex items-center gap-2 text-emerald-600 font-bold uppercase tracking-widest text-[10px]">
+                        <ClipboardList size={14} />
+                        Planificación Logística
                     </div>
-                    <div>
-                        <h2 className="text-2xl font-bold">Cosas a Tener en Cuenta</h2>
-                        <p className="text-[var(--muted)]">Cronograma de tareas para que la Capacitación sea un ÉXITO</p>
-                    </div>
+                    <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight leading-none">Cosas a Tener en Cuenta</h2>
+                    <p className="text-slate-500 font-medium">Cronograma de tareas para que la Capacitación sea un ÉXITO</p>
                 </div>
                 <button
                     onClick={resetTasks}
-                    className="text-xs font-bold text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 uppercase tracking-wider transition-colors"
+                    className="btn-primary bg-slate-100 hover:bg-slate-200 text-slate-500 h-10 px-5 flex items-center justify-center gap-2 border-none shadow-sm transition-all active:scale-95"
                 >
-                    Restablecer lista
+                    <span className="text-[10px] font-black uppercase tracking-widest">Restablecer Lista</span>
                 </button>
             </div>
 

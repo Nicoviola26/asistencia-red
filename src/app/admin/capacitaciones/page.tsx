@@ -120,25 +120,27 @@ export default function CargarCapacitacionPage() {
     return (
         <div className="max-w-4xl mx-auto space-y-12">
             <div>
-                <div className="flex items-center justify-between mb-8">
-                    <div className="flex items-center gap-3">
-                        <div className="p-3 bg-purple-600 text-white rounded-xl">
-                            <Plus size={24} />
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-8">
+                    <div className="space-y-1">
+                        <div className="flex items-center gap-2 text-purple-600 font-bold uppercase tracking-widest text-[10px]">
+                            <Calendar size={14} />
+                            Gestión de Calendario
                         </div>
-                        <div>
-                            <h2 className="text-2xl font-bold">{isEditing ? 'Editar Capacitación' : 'Nueva Capacitación'}</h2>
-                            <p className="text-slate-500">Completa los datos del evento.</p>
-                        </div>
+                        <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight leading-none">
+                            {isEditing ? 'Editar Capacitación' : 'Nueva Capacitación'}
+                        </h2>
+                        <p className="text-slate-500 font-medium">Completa los datos del evento para habilitar el registro.</p>
                     </div>
+
                     {isEditing && (
                         <button
                             onClick={() => {
                                 setIsEditing(null);
                                 setFormData({ nombre: '', dia: '', hora: '', lugar: '', disertante: '', activa: true });
                             }}
-                            className="text-sm font-medium text-slate-500 hover:text-slate-700 underline"
+                            className="btn-primary bg-slate-100 hover:bg-slate-200 text-slate-600 h-10 px-5 flex items-center justify-center gap-2 border-none shadow-sm transition-all active:scale-95"
                         >
-                            Cancelar Edición
+                            <span className="text-[10px] font-black uppercase tracking-widest">Cancelar Edición</span>
                         </button>
                     )}
                 </div>

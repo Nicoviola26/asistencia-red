@@ -167,15 +167,14 @@ export default function CargarPersonaPage() {
 
     return (
         <div className="max-w-4xl mx-auto space-y-8">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
-                    <div className="p-3 bg-slate-800 text-white rounded-xl">
-                        <UserPlus size={24} />
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 print:hidden">
+                <div className="space-y-1">
+                    <div className="flex items-center gap-2 text-slate-600 font-bold uppercase tracking-widest text-[10px]">
+                        <UserPlus size={14} />
+                        Gestión de Personal
                     </div>
-                    <div>
-                        <h2 className="text-2xl font-bold">Gestión de Personas</h2>
-                        <p className="text-slate-500">Registrá participantes o importá una lista completa.</p>
-                    </div>
+                    <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight leading-none">Gestión de Personas</h2>
+                    <p className="text-slate-500 font-medium">Registrá participantes o importá una lista completa.</p>
                 </div>
 
                 <div className="flex gap-2">
@@ -189,10 +188,10 @@ export default function CargarPersonaPage() {
                     <button
                         onClick={() => fileInputRef.current?.click()}
                         disabled={importing}
-                        className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium transition-all disabled:opacity-50"
+                        className="btn-primary bg-emerald-600 hover:bg-emerald-700 h-10 px-5 flex items-center justify-center gap-2 group shadow-lg shadow-emerald-600/20 border-none transition-all active:scale-[0.97] whitespace-nowrap"
                     >
-                        {importing ? <Loader2 className="animate-spin" size={18} /> : <FileSpreadsheet size={18} />}
-                        Importar Excel / CSV
+                        {importing ? <Loader2 className="animate-spin" size={14} /> : <FileSpreadsheet size={14} className="group-hover:rotate-6 transition-transform" />}
+                        <span className="text-[10px] font-black uppercase tracking-widest">Importar Excel / CSV</span>
                     </button>
                 </div>
             </div>
