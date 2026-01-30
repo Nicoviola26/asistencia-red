@@ -155,7 +155,7 @@ export default function AdminDashboard() {
                             </div>
                         </div>
                         <Link
-                            href="/admin/asistencia"
+                            href="/admin/checklist"
                             className="px-6 py-3 bg-white text-emerald-700 rounded-xl font-black uppercase text-sm hover:scale-105 active:scale-95 transition-all shadow-xl shadow-emerald-900/10"
                         >
                             Ver Preparativos
