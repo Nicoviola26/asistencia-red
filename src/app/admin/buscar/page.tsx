@@ -220,11 +220,11 @@ export default function BuscarPersonaPage() {
     };
 
     return (
-        <div className="space-y-8 animate-fade-in">
+        <div className="space-y-8 animate-fade-in text-[var(--foreground)]">
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div>
-                    <div className="flex items-center gap-2 text-indigo-500 font-bold uppercase tracking-widest text-[10px] mb-1">
+                    <div className="flex items-center gap-2 text-emerald-600 font-bold uppercase tracking-widest text-[10px] mb-1">
                         <UserSearch size={14} />
                         Base de Datos Docente
                     </div>
@@ -234,7 +234,7 @@ export default function BuscarPersonaPage() {
                 <button
                     onClick={handleDownloadParticipants}
                     disabled={exporting}
-                    className="btn-primary bg-emerald-600 hover:bg-emerald-700 h-11 flex items-center gap-2 shadow-lg shadow-emerald-600/10"
+                    className="btn-primary bg-emerald-600 hover:bg-emerald-700 h-11 flex items-center gap-2 shadow-lg shadow-emerald-600/10 border-none"
                 >
                     {exporting ? <Loader2 className="animate-spin" size={18} /> : <Download size={18} />}
                     Listado Completo (Excel)
@@ -250,12 +250,12 @@ export default function BuscarPersonaPage() {
                             <input
                                 type="text"
                                 placeholder="DNI, Nombre, Apellido o Rol..."
-                                className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-2xl py-3.5 pl-12 pr-4 text-sm font-medium focus:ring-2 focus:ring-indigo-500 transition-all outline-none"
+                                className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-2xl py-3.5 pl-12 pr-4 text-sm font-medium focus:ring-2 focus:ring-emerald-500 transition-all outline-none"
                                 value={query}
                                 onChange={(e) => setQuery(e.target.value)}
                             />
                         </div>
-                        <button type="submit" disabled={loading} className="px-6 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-black uppercase text-xs tracking-widest transition-all active:scale-95 shadow-lg shadow-indigo-600/20">
+                        <button type="submit" disabled={loading} className="px-6 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-black uppercase text-xs tracking-widest transition-all active:scale-95 shadow-lg shadow-emerald-600/20">
                             {loading ? <Loader2 className="animate-spin" size={20} /> : 'Buscar'}
                         </button>
                     </form>
@@ -272,7 +272,7 @@ export default function BuscarPersonaPage() {
                                 type="checkbox"
                                 checked={selectedIds.length === searchResults.length && searchResults.length > 0}
                                 onChange={toggleSelectAll}
-                                className="w-5 h-5 rounded-lg border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                                className="w-5 h-5 rounded-lg border-slate-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
                             />
                             <p className="text-xs font-black uppercase text-slate-400 tracking-widest">
                                 {searchResults.length} {searchResults.length === 1 ? 'Coincidencia' : 'Coincidencias'}
@@ -291,7 +291,7 @@ export default function BuscarPersonaPage() {
                         {searchResults.map((p) => (
                             <div
                                 key={p.id}
-                                className="group relative card p-4 flex items-center gap-4 hover:border-indigo-500/50 hover:shadow-xl transition-all duration-300 cursor-pointer bg-white dark:bg-slate-900 overflow-hidden"
+                                className="group relative card p-4 flex items-center gap-4 hover:border-emerald-500/50 hover:shadow-xl transition-all duration-300 cursor-pointer bg-white dark:bg-slate-900 overflow-hidden"
                             >
                                 <div className="absolute top-0 right-0 p-1 opacity-0 group-hover:opacity-10 transition-opacity">
                                     <User size={80} className="rotate-12 translate-x-4 -translate-y-4" />
@@ -301,7 +301,7 @@ export default function BuscarPersonaPage() {
                                         type="checkbox"
                                         checked={selectedIds.includes(p.id)}
                                         onChange={() => toggleSelect(p.id)}
-                                        className="w-5 h-5 rounded-lg border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                                        className="w-5 h-5 rounded-lg border-slate-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
                                     />
                                 </div>
                                 <div
@@ -309,15 +309,15 @@ export default function BuscarPersonaPage() {
                                     onClick={() => selectPersona(p)}
                                 >
                                     <div>
-                                        <p className="font-black text-slate-900 dark:text-white uppercase leading-tight group-hover:text-indigo-600 transition-colors">
+                                        <p className="font-black text-slate-900 dark:text-white uppercase leading-tight group-hover:text-emerald-600 transition-colors">
                                             {p.nombre} {p.apellido}
                                         </p>
                                         <div className="flex items-center gap-3 mt-1.5 font-bold">
                                             <span className="text-[10px] uppercase bg-slate-100 dark:bg-slate-800 text-slate-500 px-2 py-0.5 rounded-md border border-slate-200 dark:border-slate-700 tracking-widest">{p.rol}</span>
-                                            <span className="text-[10px] text-indigo-500 font-mono">DNI: {p.dni}</span>
+                                            <span className="text-[10px] text-emerald-500 font-mono">DNI: {p.dni}</span>
                                         </div>
                                     </div>
-                                    <ChevronRight size={20} className="text-slate-300 group-hover:text-indigo-500 group-hover:translate-x-1 transition-all" />
+                                    <ChevronRight size={20} className="text-slate-300 group-hover:text-emerald-500 group-hover:translate-x-1 transition-all" />
                                 </div>
                             </div>
                         ))}
@@ -329,16 +329,16 @@ export default function BuscarPersonaPage() {
                 <div className="space-y-6 animate-fade-in">
                     <button
                         onClick={() => { setPersona(null); setQuery(''); }}
-                        className="flex items-center gap-2 text-xs font-black uppercase text-slate-400 hover:text-indigo-500 transition-colors ml-1"
+                        className="flex items-center gap-2 text-xs font-black uppercase text-slate-400 hover:text-emerald-500 transition-colors ml-1"
                     >
                         <ArrowLeft size={16} /> Volver a buscar
                     </button>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-                        {/* Compact Info Sidebar */}
-                        <div className="lg:col-span-4 lg:sticky lg:top-8">
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+                        {/* Compact Info Sidebar - Emerald Theme */}
+                        <div className="lg:col-span-4 flex flex-col">
                             {/* Profile Hero Card */}
-                            <div className="card border-none bg-gradient-to-br from-indigo-600 to-indigo-900 text-white shadow-2xl relative overflow-hidden p-8 group">
+                            <div className="card h-full border-none bg-gradient-to-br from-emerald-600 to-emerald-800 text-white shadow-2xl relative overflow-hidden p-8 group flex flex-col justify-between">
                                 <div className="absolute top-0 right-0 p-8 opacity-10 rotate-12 -mr-8 -mt-8 translate-x-4">
                                     <User size={160} />
                                 </div>
@@ -357,7 +357,7 @@ export default function BuscarPersonaPage() {
                                         </div>
                                     </div>
 
-                                    <div className="w-full pt-8 grid grid-cols-1 gap-4 text-left border-t border-white/10">
+                                    <div className="w-full pt-8 grid grid-cols-1 gap-3 text-left border-t border-white/10">
                                         <InfoItem label="Institución" value={persona.institucion || 'S/D'} icon={<Building2 size={16} />} />
                                         <InfoItem label="Cargo / Rol" value={persona.rol} icon={<GraduationCap size={16} />} />
                                         <InfoItem label="Eje de Formación" value={persona.eje || 'General'} icon={<MapPin size={16} />} />
@@ -368,14 +368,14 @@ export default function BuscarPersonaPage() {
                             </div>
                         </div>
 
-                        {/* Main Actions Area */}
-                        <div className="lg:col-span-8 space-y-8">
+                        {/* Main Actions Area - Emerald Theme */}
+                        <div className="lg:col-span-8 flex flex-col">
                             {/* Edit Section */}
-                            <div className="card p-8 bg-white dark:bg-slate-900 border-none shadow-xl border-t-8 border-indigo-500">
+                            <div className="card h-full p-8 bg-white dark:bg-slate-900 border-none shadow-xl border-t-8 border-emerald-500 flex flex-col">
                                 <div className="flex items-center justify-between mb-8">
                                     <div className="space-y-1">
                                         <h3 className="text-xl font-black uppercase tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
-                                            <CheckCircle2 className="text-indigo-500" size={24} />
+                                            <CheckCircle2 className="text-emerald-500" size={24} />
                                             Configuración del Perfil
                                         </h3>
                                         <p className="text-xs font-medium text-slate-500 uppercase tracking-widest">Modifica los datos personales o elimina el registro.</p>
@@ -389,8 +389,8 @@ export default function BuscarPersonaPage() {
                                     </button>
                                 </div>
 
-                                <form onSubmit={handleUpdatePersona} className="space-y-6">
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+                                <form onSubmit={handleUpdatePersona} className="flex-1 flex flex-col justify-between space-y-6">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
                                         <CustomInput label="Nombre" value={persona.nombre} onChange={(v) => setPersona({ ...persona, nombre: v })} />
                                         <CustomInput label="Apellido" value={persona.apellido} onChange={(v) => setPersona({ ...persona, apellido: v })} />
                                         <CustomInput label="DNI" value={persona.dni} onChange={(v) => setPersona({ ...persona, dni: v.replace(/\D/g, '').slice(0, 8) })} isMono />
@@ -398,7 +398,7 @@ export default function BuscarPersonaPage() {
                                         <div className="flex flex-col gap-2">
                                             <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Rol en el Sistema</label>
                                             <select
-                                                className="w-full bg-slate-50 dark:bg-slate-800 border-2 border-transparent focus:border-indigo-500 rounded-xl px-4 py-2.5 text-sm font-bold transition-all outline-none"
+                                                className="w-full bg-slate-50 dark:bg-slate-800 border-2 border-transparent focus:border-emerald-500 rounded-xl px-4 py-2 text-sm font-bold transition-all outline-none"
                                                 value={persona.rol}
                                                 onChange={(e) => setPersona({ ...persona, rol: e.target.value })}
                                             >
@@ -411,7 +411,7 @@ export default function BuscarPersonaPage() {
                                         <div className="flex flex-col gap-2">
                                             <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Asignación de Eje</label>
                                             <select
-                                                className="w-full bg-slate-50 dark:bg-slate-800 border-2 border-transparent focus:border-indigo-500 rounded-xl px-4 py-2.5 text-sm font-bold transition-all outline-none"
+                                                className="w-full bg-slate-50 dark:bg-slate-800 border-2 border-transparent focus:border-emerald-500 rounded-xl px-4 py-2 text-sm font-bold transition-all outline-none"
                                                 value={persona.eje || ''}
                                                 onChange={(e) => setPersona({ ...persona, eje: e.target.value })}
                                             >
@@ -433,64 +433,64 @@ export default function BuscarPersonaPage() {
                                     <button
                                         type="submit"
                                         disabled={loading}
-                                        className="w-full h-14 bg-indigo-600 hover:bg-indigo-700 text-white rounded-[1.2rem] font-black uppercase tracking-widest text-sm shadow-xl shadow-indigo-600/20 transition-all active:scale-[0.98] flex items-center justify-center gap-3"
+                                        className="w-full h-12 bg-emerald-600 hover:bg-emerald-700 text-white rounded-[1.2rem] font-black uppercase tracking-widest text-sm shadow-xl shadow-emerald-600/20 transition-all active:scale-[0.98] flex items-center justify-center gap-3 border-none mt-4"
                                     >
                                         {loading ? <Loader2 className="animate-spin" /> : <CheckCircle2 size={24} />}
                                         Actualizar Perfil de Asistente
                                     </button>
                                 </form>
                             </div>
+                        </div>
+                    </div>
 
-                            {/* History Visualization (Timeline Style) */}
-                            <div className="space-y-6">
-                                <h3 className="text-xl font-black uppercase tracking-tight flex items-center gap-3 text-slate-800 dark:text-white">
-                                    <Clock size={24} className="text-slate-400" />
-                                    Cronograma de Asistencia
-                                    <span className="bg-slate-100 dark:bg-slate-800 text-slate-500 px-3 py-1 rounded-full text-xs font-black">{asistencias.length}</span>
-                                </h3>
+                    {/* History Visualization (Timeline Style) - Emerald */}
+                    <div className="space-y-6 pt-4">
+                        <h3 className="text-xl font-black uppercase tracking-tight flex items-center gap-3 text-slate-800 dark:text-white">
+                            <Clock size={24} className="text-slate-400" />
+                            Cronograma de Asistencia
+                            <span className="bg-slate-100 dark:bg-slate-800 text-slate-500 px-3 py-1 rounded-full text-xs font-black">{asistencias.length}</span>
+                        </h3>
 
-                                {asistencias.length === 0 ? (
-                                    <div className="card p-12 border-dashed border-2 flex flex-col items-center text-slate-400">
-                                        <AlertTriangle size={48} className="opacity-10 mb-4" />
-                                        <p className="font-bold">No registra asistencias previas en la red.</p>
-                                    </div>
-                                ) : (
-                                    <div className="relative pl-6 space-y-6 before:content-[''] before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-100 dark:before:bg-slate-800">
-                                        {asistencias.map((asistencia) => (
-                                            <div key={asistencia.id} className="relative group animate-slide-right">
-                                                <div className="absolute -left-[1.85rem] top-1.5 w-3 h-3 bg-white dark:bg-slate-900 border-2 border-indigo-500 rounded-full z-10 group-hover:scale-150 transition-transform"></div>
-                                                <div className="card p-5 group-hover:shadow-lg transition-all border-none bg-white dark:bg-slate-900 shadow-sm flex items-center justify-between gap-4">
-                                                    <div className="space-y-1">
-                                                        <div className="text-[10px] font-black uppercase text-indigo-500 tracking-wider">
-                                                            {new Date(asistencia.capacitaciones.dia).toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
-                                                        </div>
-                                                        <h4 className="font-black text-slate-900 dark:text-white uppercase leading-tight tracking-tight">
-                                                            {asistencia.capacitaciones.nombre}
-                                                        </h4>
-                                                        <div className="flex items-center gap-3 text-xs text-slate-500 font-medium">
-                                                            <span className="flex items-center gap-1">📍 {asistencia.capacitaciones.lugar || 'S/D'}</span>
-                                                            <span className="flex items-center gap-1">👤 {asistencia.capacitaciones.disertante || 'S/D'}</span>
-                                                        </div>
-                                                    </div>
-                                                    <div className="flex items-center gap-4">
-                                                        <div className="text-right">
-                                                            <p className="text-[9px] font-black uppercase text-slate-400">Entrada</p>
-                                                            <p className="font-black text-indigo-600 dark:text-indigo-400">{new Date(asistencia.fecha_registro).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} hs</p>
-                                                        </div>
-                                                        <button
-                                                            onClick={() => handleDeleteAsistencia(asistencia.id)}
-                                                            className="p-2 text-slate-300 hover:text-red-500 transition-colors"
-                                                        >
-                                                            <Trash2 size={20} />
-                                                        </button>
-                                                    </div>
+                        {asistencias.length === 0 ? (
+                            <div className="card p-12 border-dashed border-2 flex flex-col items-center text-slate-400 bg-white/50 dark:bg-slate-900/50">
+                                <AlertTriangle size={48} className="opacity-10 mb-4" />
+                                <p className="font-bold">No registra asistencias previas en la red.</p>
+                            </div>
+                        ) : (
+                            <div className="relative pl-6 space-y-4 before:content-[''] before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-100 dark:before:bg-slate-800">
+                                {asistencias.map((asistencia) => (
+                                    <div key={asistencia.id} className="relative group animate-slide-right">
+                                        <div className="absolute -left-[1.85rem] top-1.5 w-3 h-3 bg-white dark:bg-slate-900 border-2 border-emerald-500 rounded-full z-10 group-hover:scale-150 transition-transform"></div>
+                                        <div className="card p-5 group-hover:shadow-lg transition-all border-none bg-white dark:bg-slate-900 shadow-sm flex items-center justify-between gap-4">
+                                            <div className="space-y-1">
+                                                <div className="text-[10px] font-black uppercase text-emerald-500 tracking-wider">
+                                                    {new Date(asistencia.capacitaciones.dia).toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+                                                </div>
+                                                <h4 className="font-black text-slate-900 dark:text-white uppercase leading-tight tracking-tight">
+                                                    {asistencia.capacitaciones.nombre}
+                                                </h4>
+                                                <div className="flex items-center gap-3 text-xs text-slate-500 font-medium">
+                                                    <span className="flex items-center gap-1">📍 {asistencia.capacitaciones.lugar || 'S/D'}</span>
+                                                    <span className="flex items-center gap-1">👤 {asistencia.capacitaciones.disertante || 'S/D'}</span>
                                                 </div>
                                             </div>
-                                        ))}
+                                            <div className="flex items-center gap-4">
+                                                <div className="text-right">
+                                                    <p className="text-[9px] font-black uppercase text-slate-400">Entrada</p>
+                                                    <p className="font-black text-emerald-600 dark:text-emerald-400">{new Date(asistencia.fecha_registro).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} hs</p>
+                                                </div>
+                                                <button
+                                                    onClick={() => handleDeleteAsistencia(asistencia.id)}
+                                                    className="p-2 text-slate-300 hover:text-red-500 transition-colors"
+                                                >
+                                                    <Trash2 size={20} />
+                                                </button>
+                                            </div>
+                                        </div>
                                     </div>
-                                )}
+                                ))}
                             </div>
-                        </div>
+                        )}
                     </div>
                 </div>
             )}
@@ -509,13 +509,13 @@ export default function BuscarPersonaPage() {
                         <div className="flex flex-col gap-3">
                             <button
                                 onClick={confirmDelete}
-                                className="w-full py-4 bg-red-600 hover:bg-red-700 text-white rounded-2xl font-black uppercase tracking-widest text-xs transition-all shadow-xl shadow-red-600/20 active:scale-95"
+                                className="w-full py-4 bg-red-600 hover:bg-red-700 text-white rounded-2xl font-black uppercase tracking-widest text-xs transition-all shadow-xl shadow-red-600/20 active:scale-95 border-none"
                             >
                                 Sí, eliminar ahora
                             </button>
                             <button
                                 onClick={() => setIsDeleteModalOpen(false)}
-                                className="w-full py-4 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-2xl font-black uppercase tracking-widest text-xs transition-colors"
+                                className="w-full py-4 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-2xl font-black uppercase tracking-widest text-xs transition-colors border-none"
                             >
                                 Cancelar
                             </button>
@@ -529,7 +529,7 @@ export default function BuscarPersonaPage() {
 
 function InfoItem({ icon, label, value }: { icon: React.ReactNode, label: string, value: string }) {
     return (
-        <div className="flex items-start gap-3 bg-white/5 p-3 rounded-2xl border border-white/10">
+        <div className="flex items-start gap-3 bg-white/5 p-2 rounded-2xl border border-white/10">
             <div className="text-white/40">{icon}</div>
             <div>
                 <p className="text-[9px] text-white/40 uppercase font-black tracking-widest mb-0.5">{label}</p>
@@ -545,7 +545,7 @@ function CustomInput({ label, value, onChange, type = "text", isMono = false }: 
             <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">{label}</label>
             <input
                 type={type}
-                className={`w-full bg-slate-50 dark:bg-slate-800 border-2 border-transparent focus:border-indigo-500 rounded-xl px-4 py-2.5 text-sm font-bold transition-all outline-none ${isMono ? 'font-mono' : ''}`}
+                className={`w-full bg-slate-50 dark:bg-slate-800 border-2 border-transparent focus:border-emerald-500 rounded-xl px-4 py-2 text-sm font-bold transition-all outline-none ${isMono ? 'font-mono' : ''}`}
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
             />
