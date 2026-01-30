@@ -1,0 +1,21 @@
+{
+  "name": "Red Municipal de Formación Docente",
+  "short_name": "Red Formación",
+  "description": "Sistema de registro de asistencia para la Red Municipal de Formación Docente",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#49b38d",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

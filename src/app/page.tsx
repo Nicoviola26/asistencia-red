@@ -2,17 +2,20 @@
 
 import { useState, useEffect } from 'react';
 import { supabase, type Capacitacion } from '@/lib/supabase';
-import { Search, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Search, Loader2, CheckCircle2, AlertCircle, WifiOff } from 'lucide-react';
 import Link from 'next/link';
+import { useToast } from '@/components/Toast';
 
 export default function RegistrationPage() {
   const [dni, setDni] = useState('');
   const [capacitacionId, setCapacitacionId] = useState('');
   const [capacitaciones, setCapacitaciones] = useState<Capacitacion[]>([]);
   const [loading, setLoading] = useState(false);
+  const [isOffline, setIsOffline] = useState(false);
+  const { showToast } = useToast();
   const [modal, setModal] = useState<{
     show: boolean;
-    type: 'success' | 'error' | 'warning';
+    type: 'success' | 'error' | 'warning' | 'info';
     title: string;
     message: string;
     user?: string;
@@ -24,26 +27,74 @@ export default function RegistrationPage() {
   });
 
   const fetchCapacitaciones = async () => {
-    const { data } = await supabase
-      .from('capacitaciones')
-      .select('*')
-      .eq('activa', true)
-      .order('dia', { ascending: false });
+    try {
+      const { data } = await supabase
+        .from('capacitaciones')
+        .select('*')
+        .eq('activa', true)
+        .order('dia', { ascending: false });
 
-    if (data) setCapacitaciones(data);
+      if (data) {
+        setCapacitaciones(data);
+        localStorage.setItem('cached_capacitaciones', JSON.stringify(data));
+      }
+    } catch (err) {
+      console.error('Offline - usando caché para capacitaciones');
+      const cached = localStorage.getItem('cached_capacitaciones');
+      if (cached) setCapacitaciones(JSON.parse(cached));
+    }
+  };
+
+  const syncOfflineRegistrations = async () => {
+    const pending = JSON.parse(localStorage.getItem('pending_registrations') || '[]');
+    if (pending.length === 0) return;
+
+    showToast('Sincronizando registros offline...', 'info');
+    let successCount = 0;
+
+    for (const reg of pending) {
+      try {
+        const { error } = await supabase.from('asistencias').insert({
+          persona_id: reg.persona_id,
+          capacitacion_id: reg.capacitacion_id,
+          created_at: reg.timestamp // Mantener la hora original si la DB lo permite
+        });
+        if (!error) successCount++;
+      } catch (err) {
+        console.error('Error sincronizando offline:', err);
+      }
+    }
+
+    if (successCount > 0) {
+      showToast(`¡Sincronización exitosa! ${successCount} registros subidos.`, 'success');
+      localStorage.setItem('pending_registrations', '[]');
+    }
   };
 
   useEffect(() => {
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-      setModal({
-        show: true,
-        type: 'error',
-        title: 'Error de Configuración',
-        message: 'Las variables de entorno de Supabase no están configuradas.'
-      });
-      return;
-    }
+    // Offline / Online detection
+    const handleOnline = () => {
+      setIsOffline(false);
+      syncOfflineRegistrations();
+    };
+    const handleOffline = () => setIsOffline(true);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    setIsOffline(!navigator.onLine);
+
+    if (navigator.onLine) syncOfflineRegistrations();
+
+    // Fetch
+    const cached = localStorage.getItem('cached_capacitaciones');
+    if (cached) setCapacitaciones(JSON.parse(cached));
+
     fetchCapacitaciones();
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
   }, []);
 
   async function handleRegister(e: React.FormEvent) {
@@ -59,6 +110,35 @@ export default function RegistrationPage() {
     }
 
     setLoading(true);
+
+    // MODO OFFLINE O FALLO DE CONEXIÓN
+    if (!navigator.onLine) {
+      const { data: persona } = await supabase
+        .from('personas')
+        .select('id, nombre, apellido')
+        .eq('dni', dni.trim())
+        .single();
+
+      // Intentar buscar en caché local si implementamos eso, 
+      // pero por ahora salvaremos el DNI y la capacitación directamente
+      const pending = JSON.parse(localStorage.getItem('pending_registrations') || '[]');
+      pending.push({
+        dni: dni.trim(),
+        capacitacion_id: capacitacionId,
+        timestamp: new Date().toISOString()
+      });
+      localStorage.setItem('pending_registrations', JSON.stringify(pending));
+
+      setModal({
+        show: true,
+        type: 'info',
+        title: 'Guardado Localmente',
+        message: 'No tienes conexión a internet. Tu asistencia se guardó en el dispositivo y se sincronizará automáticamente cuando recuperes la conexión.'
+      });
+      setDni('');
+      setLoading(false);
+      return;
+    }
 
     try {
       // 1. Buscar persona por DNI
@@ -135,12 +215,18 @@ export default function RegistrationPage() {
       }
     } catch (error) {
       console.error(error);
+      // Falla por red? Salvar local
+      const pending = JSON.parse(localStorage.getItem('pending_registrations') || '[]');
+      pending.push({ dni: dni.trim(), capacitacion_id: capacitacionId, timestamp: new Date().toISOString() });
+      localStorage.setItem('pending_registrations', JSON.stringify(pending));
+
       setModal({
         show: true,
-        type: 'error',
-        title: 'Error de Sistema',
-        message: 'Ocurrió un error inesperado. Por favor, intentá nuevamente más tarde.'
+        type: 'info',
+        title: 'Error de Red - Guardado Local',
+        message: 'Hubo un problema al conectar con el servidor. Tu asistencia se guardó localmente y se reintentará subir luego.'
       });
+      setDni('');
     } finally {
       setLoading(false);
     }
@@ -150,11 +236,23 @@ export default function RegistrationPage() {
     <main className="min-h-screen flex flex-col items-center justify-center p-4 bg-slate-50 dark:bg-slate-950">
       <div className="w-full max-w-md animate-fade-in">
         <div className="text-center mb-10">
-          <div className="inline-flex items-center justify-center w-28 h-28 rounded-full bg-white overflow-hidden mb-6 shadow-2xl border-4 border-[var(--primary)] animate-float p-1 ring-8 ring-[var(--primary)]/10">
+          <div className="inline-flex items-center justify-center w-28 h-28 rounded-full bg-white overflow-hidden mb-6 shadow-2xl border-4 border-[var(--primary)] animate-float p-1 ring-8 ring-[var(--primary)]/10 relative">
             <img src="/logo.png" alt="Antigravity Logo" className="w-full h-full object-cover rounded-full" />
+            {isOffline && (
+              <div className="absolute inset-0 bg-slate-900/40 flex items-center justify-center backdrop-blur-[1px]">
+                <WifiOff className="text-white" size={32} />
+              </div>
+            )}
           </div>
           <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight leading-tight max-w-[280px] mx-auto">Red Municipal de Formación Docente</h1>
-          <p className="text-slate-500 dark:text-slate-400 mt-3 font-semibold uppercase tracking-widest text-[10px]">Registro de Asistencia</p>
+          {isOffline ? (
+            <div className="inline-flex items-center gap-2 bg-amber-500/10 text-amber-600 dark:text-amber-400 px-3 py-1 rounded-full mt-3 animate-pulse">
+              <WifiOff size={12} />
+              <span className="text-[10px] font-black uppercase tracking-widest">Modo Offline Activo</span>
+            </div>
+          ) : (
+            <p className="text-slate-500 dark:text-slate-400 mt-3 font-semibold uppercase tracking-widest text-[10px]">Registro de Asistencia</p>
+          )}
         </div>
 
         <div className="card p-8 shadow-2xl border-t-4 border-[var(--primary)]">
@@ -240,10 +338,11 @@ export default function RegistrationPage() {
               onClick={() => setModal({ ...modal, show: false })}
               className={`w-full h-14 rounded-2xl text-lg font-bold transition-all shadow-lg active:scale-95 ${modal.type === 'success' ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-500/20' :
                 modal.type === 'warning' ? 'bg-amber-600 hover:bg-amber-700 text-white shadow-amber-500/20' :
-                  'bg-red-600 hover:bg-red-700 text-white shadow-red-500/20'
+                  modal.type === 'info' ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/20' :
+                    'bg-red-600 hover:bg-red-700 text-white shadow-red-500/20'
                 }`}
             >
-              {modal.type === 'success' ? 'Entendido' : 'Reintentar'}
+              {modal.type === 'success' || modal.type === 'info' ? 'Entendido' : 'Reintentar'}
             </button>
           </div>
         </div>
