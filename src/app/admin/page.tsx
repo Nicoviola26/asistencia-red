@@ -12,7 +12,8 @@ import {
     Activity,
     CalendarCheck,
     MapPin,
-    BarChart3
+    BarChart3,
+    TrendingUp
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, PieChart, Pie } from 'recharts';
 import Link from 'next/link';
@@ -35,6 +36,7 @@ export default function AdminDashboard() {
     const [roleData, setRoleData] = useState<any[]>([]);
     const [showActivity, setShowActivity] = useState(true);
     const [roleCycleIndex, setRoleCycleIndex] = useState(0);
+    const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
         async function fetchStats() {
@@ -123,6 +125,7 @@ export default function AdminDashboard() {
         fetchStats();
         fetchNext();
         fetchChartData();
+        setMounted(true);
     }, []);
 
     useEffect(() => {
@@ -268,26 +271,28 @@ export default function AdminDashboard() {
                         Distribución por Rol
                     </h3>
                     <div className="card p-0 h-[280px] bg-white dark:bg-slate-900 overflow-hidden flex items-center justify-center relative">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <PieChart>
-                                <Pie
-                                    data={roleData}
-                                    cx="50%"
-                                    cy="50%"
-                                    innerRadius={60}
-                                    outerRadius={80}
-                                    paddingAngle={5}
-                                    dataKey="value"
-                                >
-                                    {roleData.map((entry, index) => (
-                                        <Cell key={`cell-${index}`} fill={entry.color} />
-                                    ))}
-                                </Pie>
-                                <Tooltip
-                                    contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
-                                />
-                            </PieChart>
-                        </ResponsiveContainer>
+                        {mounted && (
+                            <ResponsiveContainer width="100%" height="100%">
+                                <PieChart>
+                                    <Pie
+                                        data={roleData}
+                                        cx="50%"
+                                        cy="50%"
+                                        innerRadius={60}
+                                        outerRadius={80}
+                                        paddingAngle={5}
+                                        dataKey="value"
+                                    >
+                                        {roleData.map((entry, index) => (
+                                            <Cell key={`cell-${index}`} fill={entry.color} />
+                                        ))}
+                                    </Pie>
+                                    <Tooltip
+                                        contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                                    />
+                                </PieChart>
+                            </ResponsiveContainer>
+                        )}
                         <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                             <span className="text-2xl font-black text-slate-900 dark:text-white">{stats.totalPersonas}</span>
                             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Inscritos</span>
@@ -336,41 +341,43 @@ export default function AdminDashboard() {
                 </div>
 
                 <div className="card p-8 bg-white dark:bg-slate-900 border-none shadow-xl h-[400px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={chartData} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
-                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                            <XAxis
-                                dataKey="name"
-                                axisLine={false}
-                                tickLine={false}
-                                tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 700 }}
-                                dy={10}
-                            />
-                            <YAxis
-                                axisLine={false}
-                                tickLine={false}
-                                tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 700 }}
-                            />
-                            <Tooltip
-                                cursor={{ fill: 'transparent' }}
-                                contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)', padding: '12px' }}
-                                labelStyle={{ fontWeight: 900, marginBottom: '4px', textTransform: 'uppercase', fontSize: '10px' }}
-                            />
-                            <Bar
-                                dataKey="asistentes"
-                                radius={[10, 10, 0, 0]}
-                                barSize={40}
-                            >
-                                {chartData.map((entry, index) => (
-                                    <Cell
-                                        key={`cell-${index}`}
-                                        fill={index === chartData.length - 1 ? 'var(--primary)' : '#cbd5e1'}
-                                        fillOpacity={index === chartData.length - 1 ? 1 : 0.5}
-                                    />
-                                ))}
-                            </Bar>
-                        </BarChart>
-                    </ResponsiveContainer>
+                    {mounted && (
+                        <ResponsiveContainer width="100%" height="100%">
+                            <BarChart data={chartData} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                                <XAxis
+                                    dataKey="name"
+                                    axisLine={false}
+                                    tickLine={false}
+                                    tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 700 }}
+                                    dy={10}
+                                />
+                                <YAxis
+                                    axisLine={false}
+                                    tickLine={false}
+                                    tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 700 }}
+                                />
+                                <Tooltip
+                                    cursor={{ fill: 'transparent' }}
+                                    contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)', padding: '12px' }}
+                                    labelStyle={{ fontWeight: 900, marginBottom: '4px', textTransform: 'uppercase', fontSize: '10px' }}
+                                />
+                                <Bar
+                                    dataKey="asistentes"
+                                    radius={[10, 10, 0, 0]}
+                                    barSize={40}
+                                >
+                                    {chartData.map((entry, index) => (
+                                        <Cell
+                                            key={`cell-${index}`}
+                                            fill={index === chartData.length - 1 ? 'var(--primary)' : '#cbd5e1'}
+                                            fillOpacity={index === chartData.length - 1 ? 1 : 0.5}
+                                        />
+                                    ))}
+                                </Bar>
+                            </BarChart>
+                        </ResponsiveContainer>
+                    )}
                 </div>
             </div>
         </div>
