@@ -129,16 +129,16 @@ export default function AdminDashboard() {
                 </div>
             </div>
 
-            {/* Next Training Featured Banner */}
+            {/* Next Training Featured Banner - LIGHTER version */}
             {!loadingNext && nextCapacitacion && (
-                <div className="relative overflow-hidden card border-none bg-gradient-to-r from-emerald-600 to-emerald-800 text-white p-1 animate-zoom-in">
+                <div className="relative overflow-hidden card border-none bg-gradient-to-r from-emerald-500 to-emerald-700 text-white p-1 animate-zoom-in">
                     <div className="absolute top-0 right-0 p-8 opacity-10 rotate-12 -mr-8 -mt-8">
                         <CalendarCheck size={160} />
                     </div>
-                    <div className="relative bg-slate-900/20 backdrop-blur-sm rounded-[1.1rem] p-6 flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div className="relative bg-white/10 backdrop-blur-md rounded-[1.1rem] p-6 flex flex-col md:flex-row items-center justify-between gap-6">
                         <div className="flex items-center gap-5">
-                            <div className="w-16 h-16 bg-white/10 rounded-2xl flex flex-col items-center justify-center border border-white/20 shrink-0">
-                                <span className="text-[10px] font-black uppercase opacity-60">
+                            <div className="w-16 h-16 bg-white/20 rounded-2xl flex flex-col items-center justify-center border border-white/30 shrink-0">
+                                <span className="text-[10px] font-black uppercase opacity-90">
                                     {new Date(nextCapacitacion.dia).toLocaleDateString(undefined, { month: 'short' })}
                                 </span>
                                 <span className="text-2xl font-black leading-none">
@@ -147,16 +147,16 @@ export default function AdminDashboard() {
                             </div>
                             <div>
                                 <div className="flex items-center gap-2 mb-1">
-                                    <span className="px-2 py-0.5 bg-emerald-500 text-[9px] font-black uppercase rounded-full">Próximo Evento</span>
-                                    <span className="text-xs font-bold opacity-70 flex items-center gap-1"><MapPin size={12} /> {nextCapacitacion.lugar || 'S/D'}</span>
+                                    <span className="px-2 py-0.5 bg-white text-emerald-600 text-[9px] font-black uppercase rounded-full">Próximo Evento</span>
+                                    <span className="text-xs font-bold opacity-90 flex items-center gap-1"><MapPin size={12} /> {nextCapacitacion.lugar || 'S/D'}</span>
                                 </div>
                                 <h3 className="text-2xl font-black uppercase tracking-tight leading-tight">{nextCapacitacion.nombre}</h3>
-                                <p className="text-sm font-medium opacity-80 mt-1">Con el disertante <span className="font-bold">{nextCapacitacion.disertante || 'Por confirmar'}</span> a las {nextCapacitacion.hora} hs</p>
+                                <p className="text-sm font-medium opacity-90 mt-1">Con el disertante <span className="font-bold">{nextCapacitacion.disertante || 'Por confirmar'}</span> a las {nextCapacitacion.hora} hs</p>
                             </div>
                         </div>
                         <Link
                             href="/admin/asistencia"
-                            className="px-6 py-3 bg-white text-emerald-800 rounded-xl font-black uppercase text-sm hover:scale-105 active:scale-95 transition-all shadow-xl shadow-emerald-900/20"
+                            className="px-6 py-3 bg-white text-emerald-700 rounded-xl font-black uppercase text-sm hover:scale-105 active:scale-95 transition-all shadow-xl shadow-emerald-900/10"
                         >
                             Ver Preparativos
                         </Link>
@@ -224,14 +224,14 @@ export default function AdminDashboard() {
                 {/* Information Sidebar / Stats Carousel */}
                 <div className="flex flex-col">
                     <h3 className="text-xl font-bold px-1 mb-6">Información Clave</h3>
-                    <div className="card p-8 bg-gradient-to-br from-slate-900 to-slate-800 text-white border-0 shadow-2xl relative overflow-hidden group flex flex-col justify-center lg:min-h-[366px]">
+                    <div className="card p-6 bg-gradient-to-br from-slate-900 to-slate-800 text-white border-0 shadow-2xl relative overflow-hidden group flex flex-col justify-center lg:h-[338px]">
                         {/* Decorative Background Icon */}
                         <div className="absolute -right-4 -bottom-4 text-white/5 w-48 h-48 group-hover:scale-110 transition-transform duration-700">
                             {currentSlide.icon}
                         </div>
 
                         <div key={roleCycleIndex % 2} className="relative z-10 animate-fade-in flex flex-col h-full">
-                            <h4 className="font-bold text-slate-300 uppercase tracking-widest text-[10px] mb-8 flex items-center gap-3">
+                            <h4 className="font-bold text-slate-300 uppercase tracking-widest text-[9px] mb-6 flex items-center gap-3">
                                 <div className="flex gap-1.5">
                                     {[0, 1].map(i => (
                                         <div key={i} className={`w-2 h-2 rounded-full transition-all duration-500 ${i === (roleCycleIndex % 2) ? 'bg-emerald-500 w-6' : 'bg-slate-700'}`} />
@@ -241,20 +241,20 @@ export default function AdminDashboard() {
                             </h4>
 
                             <div className="flex-1 flex flex-col justify-center">
-                                <div className="flex items-baseline gap-3 mb-4">
-                                    <p className="text-8xl font-black tabular-nums tracking-tighter leading-none">{currentSlide.value}</p>
-                                    <p className={`${currentSlide.color} text-sm font-black uppercase tracking-widest`}>{currentSlide.sub}</p>
+                                <div className="flex items-baseline gap-2 mb-2">
+                                    <p className="text-7xl font-black tabular-nums tracking-tighter leading-none">{currentSlide.value}</p>
+                                    <p className={`${currentSlide.color} text-[10px] font-black uppercase tracking-widest`}>{currentSlide.sub}</p>
                                 </div>
-                                <p className="text-lg text-slate-400 leading-relaxed max-w-xs mt-4">
+                                <p className="text-sm text-slate-400 leading-tight max-w-xs mt-3">
                                     {roleCycleIndex % 2 === 0
-                                        ? 'Integrantes que forman parte de nuestra red docente municipal.'
-                                        : 'Encuentros realizados para potenciar la educación local.'}
+                                        ? 'Docentes y directivos de nuestra red municipal.'
+                                        : 'Capacitaciones para potenciar la educación.'}
                                 </p>
                             </div>
 
-                            <div className="mt-8 pt-8 border-t border-white/5 text-[10px] text-slate-500 font-bold uppercase tracking-widest flex items-center gap-2">
-                                <Activity size={12} className="text-emerald-500 animate-pulse" />
-                                Datos actualizados en vivo
+                            <div className="mt-6 pt-4 border-t border-white/5 text-[9px] text-slate-500 font-bold uppercase tracking-widest flex items-center gap-2">
+                                <Activity size={10} className="text-emerald-500 animate-pulse" />
+                                Datos en vivo
                             </div>
                         </div>
                     </div>
