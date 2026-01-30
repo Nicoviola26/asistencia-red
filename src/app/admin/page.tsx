@@ -148,7 +148,11 @@ export default function AdminDashboard() {
                             <div>
                                 <div className="flex items-center gap-2 mb-1">
                                     <span className="px-2 py-0.5 bg-white text-emerald-600 text-[9px] font-black uppercase rounded-full">Próximo Evento</span>
-                                    <span className="text-xs font-bold opacity-90 flex items-center gap-1"><MapPin size={12} /> {nextCapacitacion.lugar || 'S/D'}</span>
+                                    <div className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full border border-white/30 text-[9px] font-black uppercase ${nextCapacitacion.activa ? 'bg-emerald-400 text-white' : 'bg-red-500 text-white'}`}>
+                                        <div className={`w-1.5 h-1.5 rounded-full ${nextCapacitacion.activa ? 'bg-white animate-pulse' : 'bg-white'}`} />
+                                        {nextCapacitacion.activa ? 'Habilitada' : 'Deshabilitada'}
+                                    </div>
+                                    <span className="text-xs font-bold opacity-90 flex items-center gap-1 ml-1"><MapPin size={12} /> {nextCapacitacion.lugar || 'S/D'}</span>
                                 </div>
                                 <h3 className="text-2xl font-black uppercase tracking-tight leading-tight">{nextCapacitacion.nombre}</h3>
                                 <p className="text-sm font-medium opacity-90 mt-1">Con el disertante <span className="font-bold">{nextCapacitacion.disertante || 'Por confirmar'}</span> a las {nextCapacitacion.hora} hs</p>
