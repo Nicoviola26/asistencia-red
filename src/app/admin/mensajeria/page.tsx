@@ -198,40 +198,28 @@ export default function MensajeriaPage() {
         setStatus({ type: 'success', text: 'Enviando correos...' });
 
         try {
-            let successCount = 0;
-            let errorCount = 0;
-
-            for (const person of selectedPersonas) {
-                if (!person.correo) continue;
-
-                const res = await fetch('/api/send-email', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        type: 'custom',
-                        email: person.correo,
-                        name: person.nombre,
-                        subject: subject,
-                        message: message,
-                        attachments: individualAttachments
-                    })
+            const res = await fetch('/api/email-queue', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    type: 'custom',
+                    recipients: selectedPersonas,
+                    subject: subject,
+                    message: message,
+                    attachments: individualAttachments
                 })
+            });
 
-                if (res.ok) {
-                    successCount++;
-                } else {
-                    errorCount++;
-                }
-            }
-
-            if (successCount > 0) {
-                setStatus({ type: 'success', text: `Se enviaron ${successCount} correos correctamente.${errorCount > 0 ? ` Fallaron ${errorCount}.` : ''}` });
+            if (res.ok) {
+                const data = await res.json();
+                setStatus({ type: 'success', text: `¡Proceso iniciado! ${selectedPersonas.length} correos puestos en cola para envío en segundo plano.` });
                 setSubject('');
                 setMessage('');
                 setIndividualAttachments([]);
-                setSelectedPersonas([]); // Clear selection after successful send
+                setSelectedPersonas([]);
             } else {
-                setStatus({ type: 'error', text: 'No se pudo enviar ningún correo. Verifique los errores.' });
+                const errData = await res.json();
+                setStatus({ type: 'error', text: 'Error al encolar: ' + (errData.error || 'Desconocido') });
             }
 
         } catch (err: unknown) {
@@ -291,31 +279,29 @@ export default function MensajeriaPage() {
                 return;
             }
 
-            let successCount = 0;
-            for (const person of uniqueRecipients) {
-                if (!person.correo) continue;
-                const res = await fetch('/api/send-email', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        type: 'custom',
-                        email: person.correo,
-                        name: person.nombre,
-                        subject: broadcastSubject,
-                        message: broadcastMessage,
-                        attachments: broadcastAttachments
-                    })
-                })
-                if (res.ok) successCount++;
-            }
+            setStatus({ type: 'success', text: `Encolando ${uniqueRecipients.length} correos...` });
 
-            setStatus({
-                type: 'success',
-                text: `Se enviaron ${successCount} correos de ${uniqueRecipients.length} destinatarios encontrados.`
+            const res = await fetch('/api/email-queue', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    type: 'custom',
+                    recipients: uniqueRecipients,
+                    subject: broadcastSubject,
+                    message: broadcastMessage,
+                    attachments: broadcastAttachments
+                })
             });
-            setBroadcastSubject('');
-            setBroadcastMessage('');
-            setBroadcastAttachments([]);
+
+            if (res.ok) {
+                setStatus({ type: 'success', text: `¡Proceso masivo iniciado! ${uniqueRecipients.length} correos se enviarán en segundo plano. Ya puedes cerrar esta pestaña.` });
+                setBroadcastSubject('');
+                setBroadcastMessage('');
+                setBroadcastAttachments([]);
+            } else {
+                const errData = await res.json();
+                setStatus({ type: 'error', text: 'Error al iniciar envío masivo: ' + (errData.error || 'Desconocido') });
+            }
         } catch (err: unknown) {
             const error = err as Error;
             setStatus({ type: 'error', text: 'Error en el envío masivo: ' + error.message });
