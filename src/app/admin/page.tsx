@@ -223,39 +223,58 @@ export default function AdminDashboard() {
 
                 {/* Information Sidebar / Stats Carousel */}
                 <div className="flex flex-col space-y-6">
-                    <h3 className="text-xl font-bold px-1">Estadísticas Clave</h3>
-                    <div className="flex-1 card p-8 bg-gradient-to-br from-slate-900 to-slate-800 text-white border-0 shadow-2xl relative overflow-hidden group flex flex-col justify-center min-h-[300px] lg:min-h-0">
-                        {/* Decorative Background Icon */}
-                        <div className="absolute -right-4 -bottom-4 text-white/5 w-48 h-48 group-hover:scale-110 transition-transform duration-700">
-                            {currentSlide.icon}
+                    <h3 className="text-xl font-bold px-1">Información Clave</h3>
+                    <div className="space-y-4">
+                        {/* Dynamic Stats Card */}
+                        <div className="card p-6 bg-gradient-to-br from-slate-900 to-slate-800 text-white border-0 shadow-2xl relative overflow-hidden group min-h-[175px] flex flex-col justify-center">
+                            <div className="absolute -right-4 -bottom-4 text-white/5 w-32 h-32 group-hover:scale-110 transition-transform duration-700">
+                                {currentSlide.icon}
+                            </div>
+
+                            <div key={roleCycleIndex % 2} className="relative z-10 animate-fade-in">
+                                <h4 className="font-bold text-slate-300 uppercase tracking-widest text-[9px] mb-4 flex items-center gap-2">
+                                    <div className="flex gap-1">
+                                        {[0, 1].map(i => (
+                                            <div key={i} className={`w-1.5 h-1.5 rounded-full transition-all duration-500 ${i === (roleCycleIndex % 2) ? 'bg-emerald-500 w-4' : 'bg-slate-700'}`} />
+                                        ))}
+                                    </div>
+                                    {currentSlide.label}
+                                </h4>
+                                <div className="flex items-baseline gap-2">
+                                    <p className="text-5xl font-black tabular-nums tracking-tighter">{currentSlide.value}</p>
+                                    <p className={`${currentSlide.color} text-[10px] font-black uppercase tracking-widest`}>{currentSlide.sub}</p>
+                                </div>
+                            </div>
                         </div>
 
-                        <div key={roleCycleIndex % 2} className="relative z-10 animate-fade-in flex flex-col h-full">
-                            <h4 className="font-bold text-slate-300 uppercase tracking-widest text-[10px] mb-8 flex items-center gap-3">
-                                <div className="flex gap-1.5">
-                                    {[0, 1].map(i => (
-                                        <div key={i} className={`w-2 h-2 rounded-full transition-all duration-500 ${i === (roleCycleIndex % 2) ? 'bg-emerald-500 w-6' : 'bg-slate-700'}`} />
-                                    ))}
+                        {/* Next Training Sidebar Card - RESTORED */}
+                        <div className="card p-5 border-dashed border-2 flex flex-col justify-center min-h-[175px] space-y-3">
+                            <h4 className="text-[10px] font-black uppercase text-slate-400 tracking-widest px-1">Próxima Fecha</h4>
+                            {loadingNext ? (
+                                <div className="flex justify-center py-4"><Loader2 className="animate-spin text-slate-300" size={24} /></div>
+                            ) : nextCapacitacion ? (
+                                <div className="space-y-3">
+                                    <div className="flex items-start gap-3">
+                                        <div className="p-2.5 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 rounded-xl shrink-0">
+                                            <CalendarCheck size={20} />
+                                        </div>
+                                        <div>
+                                            <h5 className="font-bold text-sm text-slate-900 dark:text-white leading-tight line-clamp-2 uppercase">{nextCapacitacion.nombre}</h5>
+                                            <p className="text-[11px] font-bold text-[var(--primary)] mt-0.5">
+                                                {new Date(nextCapacitacion.dia).toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'short' })}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800">
+                                        <span className="text-[10px] font-mono text-slate-500">{nextCapacitacion.hora} hs</span>
+                                        <Link href="/admin/capacitaciones" className="text-[10px] font-black text-emerald-600 hover:underline uppercase">Detalles</Link>
+                                    </div>
                                 </div>
-                                {currentSlide.label}
-                            </h4>
-
-                            <div className="flex-1 flex flex-col justify-center">
-                                <div className="flex items-baseline gap-3 mb-4">
-                                    <p className="text-7xl font-black tabular-nums tracking-tighter">{currentSlide.value}</p>
-                                    <p className={`${currentSlide.color} text-sm font-black uppercase tracking-widest`}>{currentSlide.sub}</p>
+                            ) : (
+                                <div className="text-center py-4">
+                                    <p className="text-xs text-slate-400 font-medium">Sin eventos programados</p>
                                 </div>
-                                <p className="text-base text-slate-400 leading-relaxed max-w-xs">
-                                    {roleCycleIndex % 2 === 0
-                                        ? 'Docentes y directivos que forman parte activa de nuestra red municipal.'
-                                        : 'Encuentros de formación realizados para fortalecer el sistema educativo.'}
-                                </p>
-                            </div>
-
-                            <div className="mt-8 pt-8 border-t border-white/5 text-[10px] text-slate-500 font-bold uppercase tracking-widest flex items-center gap-2">
-                                <div className="w-1 h-1 bg-emerald-500 rounded-full animate-pulse"></div>
-                                Actualización en tiempo real
-                            </div>
+                            )}
                         </div>
                     </div>
                 </div>
