@@ -12,7 +12,9 @@ import {
     Activity,
     CalendarCheck,
     ArrowUpRight,
-    TrendingUp
+    TrendingUp,
+    X,
+    Loader2
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -24,6 +26,9 @@ export default function AdminDashboard() {
         lastMonthGrowth: 12
     });
     const [loading, setLoading] = useState(true);
+    const [nextCapacitacion, setNextCapacitacion] = useState<any>(null);
+    const [loadingNext, setLoadingNext] = useState(true);
+    const [showActivity, setShowActivity] = useState(true);
 
     useEffect(() => {
         async function fetchStats() {
@@ -42,7 +47,31 @@ export default function AdminDashboard() {
             });
             setLoading(false);
         }
+
+        async function fetchNext() {
+            setLoadingNext(true);
+            try {
+                const today = new Date().toISOString().split('T')[0];
+                const { data, error } = await supabase
+                    .from('capacitaciones')
+                    .select('*')
+                    .gte('dia', today)
+                    .order('dia', { ascending: true })
+                    .order('hora', { ascending: true })
+                    .limit(1)
+                    .maybeSingle();
+
+                if (error) throw error;
+                setNextCapacitacion(data);
+            } catch (err) {
+                console.error('Error fetching next training:', err);
+            } finally {
+                setLoadingNext(false);
+            }
+        }
+
         fetchStats();
+        fetchNext();
     }, []);
 
     return (
@@ -117,25 +146,66 @@ export default function AdminDashboard() {
 
                 {/* Information Sidebar */}
                 <div className="space-y-6">
-                    <h3 className="text-xl font-bold px-1">Actividad</h3>
-                    <div className="card p-6 bg-gradient-to-br from-slate-900 to-slate-800 text-white border-0 shadow-2xl relative overflow-hidden group">
-                        <TrendingUp className="absolute -right-4 -bottom-4 text-white/5 w-40 h-40 group-hover:scale-110 transition-transform duration-700" />
-                        <div className="relative z-10">
-                            <h4 className="font-bold text-slate-300 uppercase tracking-widest text-[10px] mb-4">Crecimiento Mensual</h4>
-                            <p className="text-4xl font-black mb-2">{stats.lastMonthGrowth}%</p>
-                            <p className="text-sm text-slate-400 mb-6">Incremento en la tasa de asistencia respecto al mes pasado.</p>
-                            <Link href="/admin/asistencia" className="inline-flex items-center gap-2 text-sm font-bold text-emerald-400 hover:text-emerald-300 transition-colors">
-                                Ver estadísticas detalladas <ArrowUpRight size={16} />
-                            </Link>
+                    {showActivity && (
+                        <div className="space-y-4 animate-fade-in">
+                            <div className="flex items-center justify-between px-1">
+                                <h3 className="text-xl font-bold">Actividad</h3>
+                                <button
+                                    onClick={() => setShowActivity(false)}
+                                    className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+                                    title="Cerrar"
+                                >
+                                    <X size={16} />
+                                </button>
+                            </div>
+                            <div className="card p-6 bg-gradient-to-br from-slate-900 to-slate-800 text-white border-0 shadow-2xl relative overflow-hidden group">
+                                <TrendingUp className="absolute -right-4 -bottom-4 text-white/5 w-40 h-40 group-hover:scale-110 transition-transform duration-700" />
+                                <div className="relative z-10">
+                                    <h4 className="font-bold text-slate-300 uppercase tracking-widest text-[10px] mb-4">Crecimiento Mensual</h4>
+                                    <p className="text-4xl font-black mb-2">{stats.lastMonthGrowth}%</p>
+                                    <p className="text-sm text-slate-400 mb-6">Incremento en la tasa de asistencia respecto al mes pasado.</p>
+                                    <Link href="/admin/asistencia" className="inline-flex items-center gap-2 text-sm font-bold text-emerald-400 hover:text-emerald-300 transition-colors">
+                                        Ver estadísticas detalladas <ArrowUpRight size={16} />
+                                    </Link>
+                                </div>
+                            </div>
                         </div>
-                    </div>
+                    )}
 
-                    <div className="card p-6 border-dashed border-2 flex flex-col items-center text-center justify-center space-y-2">
-                        <div className="p-3 bg-slate-100 dark:bg-slate-800 rounded-full mb-2">
-                            <CalendarCheck size={24} className="text-slate-400" />
+                    <div className="space-y-4">
+                        <h3 className="text-xl font-bold px-1">Próximo Evento</h3>
+                        <div className="card p-6 border-dashed border-2 flex flex-col items-center text-center justify-center space-y-3 min-h-[200px]">
+                            {loadingNext ? (
+                                <Loader2 className="animate-spin text-slate-300" size={32} />
+                            ) : nextCapacitacion ? (
+                                <>
+                                    <div className="p-3 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 rounded-full">
+                                        <CalendarCheck size={28} />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <h4 className="font-bold text-slate-900 dark:text-white uppercase leading-tight">{nextCapacitacion.nombre}</h4>
+                                        <p className="text-xs font-bold text-[var(--primary)] uppercase tracking-wide">
+                                            {new Date(nextCapacitacion.dia).toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' })}
+                                        </p>
+                                        <p className="text-xs text-slate-500 font-mono">{nextCapacitacion.hora} hs — {nextCapacitacion.lugar || 'S/D'}</p>
+                                    </div>
+                                    <Link
+                                        href="/admin/capacitaciones"
+                                        className="mt-2 text-[10px] font-black uppercase text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 underline decoration-2 underline-offset-4"
+                                    >
+                                        Gestionar Eventos
+                                    </Link>
+                                </>
+                            ) : (
+                                <>
+                                    <div className="p-3 bg-slate-100 dark:bg-slate-800 rounded-full mb-2">
+                                        <CalendarCheck size={24} className="text-slate-400" />
+                                    </div>
+                                    <h4 className="font-bold text-sm text-slate-400">Sin capacitaciones</h4>
+                                    <p className="text-xs text-slate-500 max-w-[150px]">No hay eventos programados para los próximos días.</p>
+                                </>
+                            )}
                         </div>
-                        <h4 className="font-bold text-sm">Próxima Capacitación</h4>
-                        <p className="text-xs text-slate-500">No hay eventos programados para las próximas 24 horas.</p>
                     </div>
                 </div>
             </div>
