@@ -87,22 +87,14 @@ export default function BuscarPersonaPage() {
         setLoading(false);
     };
 
-    const handleDeleteAsistencia = async (asistenciaId: string) => {
-        if (!confirm('¿Eliminar este registro de asistencia?')) return;
-
-        const { error } = await supabase.from('asistencias').delete().eq('id', asistenciaId);
-
-        if (error) {
-            showToast('Error al eliminar asistencia', 'error');
-        } else {
-            setAsistencias(asistencias.filter(a => a.id !== asistenciaId));
-            showToast('Asistencia eliminada', 'success');
-        }
+    const handleDeleteAsistencia = (asistenciaId: string) => {
+        setDeleteConfig({ type: 'asistencia', id: asistenciaId, count: 1 });
+        setIsDeleteModalOpen(true);
     };
 
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-    const [deleteConfig, setDeleteConfig] = useState<{ type: 'single' | 'bulk', id?: string, count: number }>({ type: 'single', count: 0 });
+    const [deleteConfig, setDeleteConfig] = useState<{ type: 'single' | 'bulk' | 'asistencia', id?: string, count: number }>({ type: 'single', count: 0 });
 
     const toggleSelect = (id: string) => {
         setSelectedIds(prev =>
@@ -146,6 +138,11 @@ export default function BuscarPersonaPage() {
                 setSelectedIds([]);
                 setPersona(null);
                 showToast('Personas eliminadas correctamente', 'success');
+            } else if (deleteConfig.type === 'asistencia' && deleteConfig.id) {
+                const { error } = await supabase.from('asistencias').delete().eq('id', deleteConfig.id);
+                if (error) throw error;
+                setAsistencias(prev => prev.filter(a => a.id !== deleteConfig.id));
+                showToast('Asistencia eliminada correctamente', 'success');
             }
         } catch (err: any) {
             showToast('Error al eliminar: ' + err.message, 'error');
@@ -502,9 +499,15 @@ export default function BuscarPersonaPage() {
                         <div className="w-20 h-20 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-3xl flex items-center justify-center mx-auto mb-6">
                             <AlertTriangle size={40} />
                         </div>
-                        <h3 className="text-2xl font-black text-slate-900 dark:text-white mb-2 uppercase tracking-tight">¿Estás Seguro?</h3>
+                        <h3 className="text-2xl font-black text-slate-900 dark:text-white mb-2 uppercase tracking-tight">
+                            {deleteConfig.type === 'asistencia' ? '¿Eliminar Asistencia?' : '¿Estás Seguro?'}
+                        </h3>
                         <p className="text-slate-500 font-medium mb-8 leading-relaxed">
-                            Se eliminará permanentemente a <span className="font-black text-red-500">{deleteConfig.count === 1 ? 'este usuario' : `${deleteConfig.count} usuarios`}</span> y todos sus registros. Esta acción no tiene vuelta atrás.
+                            {deleteConfig.type === 'asistencia' ? (
+                                <>Se eliminará permanentemente <span className="font-black text-red-500">este registro de asistencia</span>. Esta acción no tiene vuelta atrás.</>
+                            ) : (
+                                <>Se eliminará permanentemente a <span className="font-black text-red-500">{deleteConfig.count === 1 ? 'este usuario' : `${deleteConfig.count} usuarios`}</span> y todos sus registros. Esta acción no tiene vuelta atrás.</>
+                            )}
                         </p>
                         <div className="flex flex-col gap-3">
                             <button
