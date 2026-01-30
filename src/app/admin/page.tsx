@@ -100,7 +100,7 @@ export default function AdminDashboard() {
         {
             label: 'Red Municipal de Formación',
             value: stats.totalPersonas,
-            sub: 'Inscriptos Totales',
+            sub: 'Inscritos Totales',
             color: 'text-emerald-400',
             icon: <Users size={40} className="text-emerald-500/20" />
         },

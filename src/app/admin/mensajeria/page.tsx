@@ -286,7 +286,7 @@ export default function MensajeriaPage() {
             const uniqueRecipients = Array.from(new Map(recipients.map(item => [item.correo, item])).values());
 
             if (uniqueRecipients.length === 0) {
-                setStatus({ type: 'error', text: 'No hay destinatarios con correo válidos para esta selección.' });
+                setStatus({ type: 'error', text: 'No hay destinatarios con correo válido para esta selección.' });
                 setSending(false);
                 return;
             }
