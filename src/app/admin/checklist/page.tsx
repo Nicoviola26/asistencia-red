@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { ClipboardList, CheckCircle2, ChevronRight, HelpCircle, FastForward, Play, CheckCircle, Plus, Trash2, X, AlertTriangle } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { ClipboardList, CheckCircle2, ChevronRight, HelpCircle, FastForward, Play, CheckCircle, Plus, Trash2, X, AlertTriangle, Loader2 } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
 
 interface Task {
     id: string;
@@ -28,46 +29,95 @@ export default function ChecklistPage() {
     const [mounted, setMounted] = useState(false);
     const [showResetModal, setShowResetModal] = useState(false);
 
-    useEffect(() => {
-        const saved = localStorage.getItem('asistencia_checklist_v2');
-        if (saved) {
-            setTasks(JSON.parse(saved));
-        } else {
-            setTasks(DEFAULT_TASKS);
+    const [loading, setLoading] = useState(true);
+
+    const fetchTasks = useCallback(async () => {
+        setLoading(true);
+        const { data, error } = await supabase
+            .from('checklist')
+            .select('*')
+            .order('created_at', { ascending: true });
+
+        if (data && data.length > 0) {
+            setTasks(data);
+        } else if (data && data.length === 0) {
+            // Seed if empty
+            const { error: insertError } = await supabase.from('checklist').insert(
+                DEFAULT_TASKS.map(({ id, ...rest }) => ({ ...rest }))
+            );
+            if (!insertError) {
+                const { data: newData } = await supabase.from('checklist').select('*').order('created_at', { ascending: true });
+                if (newData) setTasks(newData);
+            }
         }
-        setMounted(true);
+        setLoading(false);
     }, []);
 
     useEffect(() => {
-        if (mounted) {
-            localStorage.setItem('asistencia_checklist_v2', JSON.stringify(tasks));
-        }
-    }, [tasks, mounted]);
+        fetchTasks();
+        setMounted(true);
+    }, [fetchTasks]);
 
-    const toggleTask = (id: string) => {
-        setTasks(prev => prev.map(t => t.id === id ? { ...t, completed: !t.completed } : t));
+    const toggleTask = async (id: string) => {
+        const task = tasks.find(t => t.id === id);
+        if (!task) return;
+
+        const { error } = await supabase
+            .from('checklist')
+            .update({ completed: !task.completed })
+            .eq('id', id);
+
+        if (!error) {
+            setTasks(prev => prev.map(t => t.id === id ? { ...t, completed: !t.completed } : t));
+        }
     };
 
-    const addTask = (e: React.FormEvent) => {
+    const addTask = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!newTask.trim()) return;
-        const task: Task = {
-            id: Date.now().toString(),
-            text: newTask,
-            completed: false,
-            category: newCategory
-        };
-        setTasks(prev => [...prev, task]);
-        setNewTask('');
+
+        const { data, error } = await supabase
+            .from('checklist')
+            .insert({
+                text: newTask,
+                completed: false,
+                category: newCategory
+            })
+            .select()
+            .single();
+
+        if (data && !error) {
+            setTasks(prev => [...prev, data]);
+            setNewTask('');
+        }
     };
 
-    const removeTask = (id: string) => {
-        setTasks(prev => prev.filter(t => t.id !== id));
+    const removeTask = async (id: string) => {
+        const { error } = await supabase
+            .from('checklist')
+            .delete()
+            .eq('id', id);
+
+        if (!error) {
+            setTasks(prev => prev.filter(t => t.id !== id));
+        }
     };
 
-    const resetTasks = () => {
-        setTasks(DEFAULT_TASKS);
-        setShowResetModal(false);
+    const resetTasks = async () => {
+        const { error: deleteError } = await supabase
+            .from('checklist')
+            .delete()
+            .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all
+
+        if (!deleteError) {
+            const { error: insertError } = await supabase.from('checklist').insert(
+                DEFAULT_TASKS.map(({ id, ...rest }) => ({ ...rest }))
+            );
+            if (!insertError) {
+                fetchTasks();
+                setShowResetModal(false);
+            }
+        }
     };
 
     if (!mounted) return null;

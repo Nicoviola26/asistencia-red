@@ -11,12 +11,10 @@ import {
     Users,
     Activity,
     CalendarCheck,
-    ArrowUpRight,
-    TrendingUp,
-    X,
-    Loader2,
-    MapPin
+    MapPin,
+    BarChart3
 } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, PieChart, Pie } from 'recharts';
 import Link from 'next/link';
 
 export default function AdminDashboard() {
@@ -33,6 +31,8 @@ export default function AdminDashboard() {
     const [loading, setLoading] = useState(true);
     const [nextCapacitacion, setNextCapacitacion] = useState<any>(null);
     const [loadingNext, setLoadingNext] = useState(true);
+    const [chartData, setChartData] = useState<any[]>([]);
+    const [roleData, setRoleData] = useState<any[]>([]);
     const [showActivity, setShowActivity] = useState(true);
     const [roleCycleIndex, setRoleCycleIndex] = useState(0);
 
@@ -60,7 +60,42 @@ export default function AdminDashboard() {
                 totalCapacitaciones: capacitaciones.count || 0,
                 porRol: perRol
             });
+
+            // Prepare Pie Chart Data
+            setRoleData([
+                { name: 'Docentes', value: perRol.docente, color: '#3b82f6' },
+                { name: 'Directivos', value: perRol.directivo, color: '#a855f7' },
+                { name: 'Estudiantes', value: perRol.estudiante, color: '#22c55e' },
+            ]);
+
             setLoading(false);
+        }
+
+        async function fetchChartData() {
+            try {
+                const { data: caps } = await supabase
+                    .from('capacitaciones')
+                    .select('id, nombre')
+                    .order('dia', { ascending: false })
+                    .limit(5);
+
+                if (caps) {
+                    const data = await Promise.all(caps.map(async (c) => {
+                        const { count } = await supabase
+                            .from('asistencias')
+                            .select('*', { count: 'exact', head: true })
+                            .eq('capacitacion_id', c.id);
+                        return {
+                            name: c.nombre.length > 15 ? c.nombre.substring(0, 12) + '...' : c.nombre,
+                            fullName: c.nombre,
+                            asistentes: count || 0
+                        };
+                    }));
+                    setChartData(data.reverse());
+                }
+            } catch (err) {
+                console.error('Error fetching chart data:', err);
+            }
         }
 
         async function fetchNext() {
@@ -87,6 +122,7 @@ export default function AdminDashboard() {
 
         fetchStats();
         fetchNext();
+        fetchChartData();
     }, []);
 
     useEffect(() => {
@@ -225,11 +261,40 @@ export default function AdminDashboard() {
                     </div>
                 </div>
 
-                {/* Information Sidebar / Stats Carousel */}
-                <div className="flex flex-col">
-                    <h3 className="text-xl font-bold px-1 mb-6">Información Clave</h3>
-                    <div className="card p-6 bg-gradient-to-br from-slate-900 to-slate-800 text-white border-0 shadow-2xl relative overflow-hidden group flex flex-col justify-center lg:h-[338px]">
-                        {/* Decorative Background Icon */}
+                {/* Sidebar: Distribución y Estadísticas */}
+                <div className="flex flex-col gap-6">
+                    <h3 className="text-xl font-bold px-1 flex items-center gap-2">
+                        <TrendingUp size={20} className="text-emerald-500" />
+                        Distribución por Rol
+                    </h3>
+                    <div className="card p-0 h-[280px] bg-white dark:bg-slate-900 overflow-hidden flex items-center justify-center relative">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <PieChart>
+                                <Pie
+                                    data={roleData}
+                                    cx="50%"
+                                    cy="50%"
+                                    innerRadius={60}
+                                    outerRadius={80}
+                                    paddingAngle={5}
+                                    dataKey="value"
+                                >
+                                    {roleData.map((entry, index) => (
+                                        <Cell key={`cell-${index}`} fill={entry.color} />
+                                    ))}
+                                </Pie>
+                                <Tooltip
+                                    contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                                />
+                            </PieChart>
+                        </ResponsiveContainer>
+                        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                            <span className="text-2xl font-black text-slate-900 dark:text-white">{stats.totalPersonas}</span>
+                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Inscritos</span>
+                        </div>
+                    </div>
+
+                    <div className="card p-6 bg-gradient-to-br from-slate-900 to-slate-800 text-white border-0 shadow-2xl relative overflow-hidden group flex flex-col justify-center flex-1 min-h-[200px]">
                         <div className="absolute -right-4 -bottom-4 text-white/5 w-48 h-48 group-hover:scale-110 transition-transform duration-700">
                             {currentSlide.icon}
                         </div>
@@ -249,11 +314,6 @@ export default function AdminDashboard() {
                                     <p className="text-7xl font-black tabular-nums tracking-tighter leading-none">{currentSlide.value}</p>
                                     <p className={`${currentSlide.color} text-[10px] font-black uppercase tracking-widest`}>{currentSlide.sub}</p>
                                 </div>
-                                <p className="text-sm text-slate-400 leading-tight max-w-xs mt-3">
-                                    {roleCycleIndex % 2 === 0
-                                        ? 'Docentes y directivos de nuestra red municipal.'
-                                        : 'Capacitaciones para potenciar la educación.'}
-                                </p>
                             </div>
 
                             <div className="mt-6 pt-4 border-t border-white/5 text-[9px] text-slate-500 font-bold uppercase tracking-widest flex items-center gap-2">
@@ -262,6 +322,55 @@ export default function AdminDashboard() {
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
+
+            {/* Analytics Section */}
+            <div className="space-y-6">
+                <div className="flex items-center gap-3">
+                    <h3 className="text-xl font-bold flex items-center gap-2">
+                        <BarChart3 size={24} className="text-[var(--primary)]" />
+                        Impacto de Capacitaciones
+                    </h3>
+                    <div className="h-px flex-1 bg-slate-100 dark:bg-slate-800" />
+                </div>
+
+                <div className="card p-8 bg-white dark:bg-slate-900 border-none shadow-xl h-[400px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={chartData} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                            <XAxis
+                                dataKey="name"
+                                axisLine={false}
+                                tickLine={false}
+                                tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 700 }}
+                                dy={10}
+                            />
+                            <YAxis
+                                axisLine={false}
+                                tickLine={false}
+                                tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 700 }}
+                            />
+                            <Tooltip
+                                cursor={{ fill: 'transparent' }}
+                                contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)', padding: '12px' }}
+                                labelStyle={{ fontWeight: 900, marginBottom: '4px', textTransform: 'uppercase', fontSize: '10px' }}
+                            />
+                            <Bar
+                                dataKey="asistentes"
+                                radius={[10, 10, 0, 0]}
+                                barSize={40}
+                            >
+                                {chartData.map((entry, index) => (
+                                    <Cell
+                                        key={`cell-${index}`}
+                                        fill={index === chartData.length - 1 ? 'var(--primary)' : '#cbd5e1'}
+                                        fillOpacity={index === chartData.length - 1 ? 1 : 0.5}
+                                    />
+                                ))}
+                            </Bar>
+                        </BarChart>
+                    </ResponsiveContainer>
                 </div>
             </div>
         </div>
