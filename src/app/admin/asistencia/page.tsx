@@ -179,41 +179,43 @@ export default function AsistenciaControlPage() {
             </div>
 
             {/* Title Section */}
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 print:hidden">
-                <div className="space-y-2">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 print:hidden">
+                <div className="space-y-1">
                     <div className="flex items-center gap-2 text-[var(--primary)] font-bold uppercase tracking-widest text-[10px]">
                         <Users size={14} />
                         Gestión de Audiencia
                     </div>
                     <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight leading-none">Control de Asistencia</h2>
-                    <p className="text-slate-500 font-medium">Monitorea y analiza el impacto de cada capacitación en tiempo real.</p>
+                    {!selectedCapacitacion && (
+                        <p className="text-slate-500 font-medium mt-2">Monitorea y analiza el impacto de cada capacitación en tiempo real.</p>
+                    )}
                 </div>
 
-                <div className="flex flex-wrap items-center gap-3">
+                <div className="flex flex-wrap sm:flex-nowrap items-center gap-2">
                     <button
                         onClick={exportGeneralStats}
                         disabled={loading || capacitaciones.length === 0}
-                        className="btn-primary bg-slate-900 hover:bg-slate-800 h-11 px-5 flex items-center justify-center gap-2 group shadow-xl shadow-slate-900/10 border-none transition-all active:scale-95"
+                        className="btn-primary bg-slate-900 hover:bg-slate-800 h-10 px-4 flex items-center justify-center gap-2 group shadow-xl shadow-slate-900/10 border-none transition-all active:scale-95 whitespace-nowrap"
                     >
-                        {loading ? <Loader2 className="animate-spin" size={18} /> : <Download size={18} className="group-hover:-translate-y-0.5 transition-transform" />}
-                        <span className="text-[11px] font-black uppercase tracking-wider">Estadísticas Globales</span>
+                        {loading ? <Loader2 className="animate-spin" size={16} /> : <Download size={16} className="group-hover:-translate-y-0.5 transition-transform" />}
+                        <span className="text-[10px] font-black uppercase tracking-wider">Estadísticas Globales</span>
                     </button>
 
                     {selectedCapacitacion && (
                         <>
                             <button
                                 onClick={handlePrint}
-                                className="btn-primary bg-white border-2 border-slate-100 text-slate-600 hover:bg-slate-50 hover:border-slate-200 h-11 px-5 flex items-center justify-center gap-2 shadow-sm transition-all active:scale-95"
+                                className="btn-primary bg-white border-2 border-slate-100 text-slate-600 hover:bg-slate-50 hover:border-slate-200 h-10 px-4 flex items-center justify-center gap-2 shadow-sm transition-all active:scale-95 whitespace-nowrap"
                             >
-                                <Printer size={18} className="text-slate-400" />
-                                <span className="text-[11px] font-black uppercase tracking-wider">Generar Acta</span>
+                                <Printer size={16} className="text-slate-400" />
+                                <span className="text-[10px] font-black uppercase tracking-wider">Generar Acta</span>
                             </button>
                             <button
                                 onClick={exportToExcel}
-                                className="btn-primary bg-emerald-600 hover:bg-emerald-700 h-11 px-5 flex items-center justify-center gap-2 shadow-xl shadow-emerald-600/20 border-none transition-all active:scale-95"
+                                className="btn-primary bg-emerald-600 hover:bg-emerald-700 h-10 px-4 flex items-center justify-center gap-2 shadow-xl shadow-emerald-600/20 border-none transition-all active:scale-95 whitespace-nowrap"
                             >
-                                <FileText size={18} />
-                                <span className="text-[11px] font-black uppercase tracking-wider">Excel Detallado</span>
+                                <FileText size={16} />
+                                <span className="text-[10px] font-black uppercase tracking-wider">Excel Detallado</span>
                             </button>
                         </>
                     )}
@@ -242,6 +244,9 @@ export default function AsistenciaControlPage() {
 
                     {selectedCapacitacion && currentCap && (
                         <div className="space-y-4 pt-4 border-t border-slate-200 dark:border-slate-700 animate-fade-in">
+                            <p className="text-[11px] text-slate-500 font-medium italic border-l-2 border-emerald-500 pl-3 py-1">
+                                "Monitorea y analiza el impacto de cada capacitación en tiempo real."
+                            </p>
                             <div className="flex items-center gap-3 text-sm font-medium">
                                 <Calendar size={16} className="text-[var(--primary)]" />
                                 {new Date(currentCap.dia).toLocaleDateString()}
