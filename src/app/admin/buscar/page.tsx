@@ -310,20 +310,35 @@ export default function BuscarPersonaPage() {
             {persona && (
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-fade-in">
                     {/* Persona Info */}
-                    <div className="card p-6 h-fit bg-slate-800 text-white">
-                        <div className="flex flex-col items-center text-center space-y-4">
-                            <div className="w-20 h-20 bg-slate-700 rounded-full flex items-center justify-center border-4 border-slate-600 shadow-lg">
-                                <User size={40} className="text-[var(--primary)]" />
+                    <div className="card border-none bg-gradient-to-br from-slate-800 to-slate-900 text-white shadow-2xl overflow-hidden relative group">
+                        {/* Decorative element */}
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--primary)]/10 rounded-full -mr-16 -mt-16 blur-3xl group-hover:bg-[var(--primary)]/20 transition-all duration-500"></div>
+
+                        <div className="relative p-8 flex flex-col items-center text-center space-y-6">
+                            <div className="relative">
+                                <div className="w-24 h-24 bg-slate-700/50 rounded-2xl flex items-center justify-center border-2 border-slate-600 shadow-xl backdrop-blur-sm group-hover:scale-105 transition-transform duration-500">
+                                    <User size={48} className="text-[var(--primary)]" />
+                                </div>
+                                <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-emerald-500 rounded-full border-4 border-slate-800 flex items-center justify-center shadow-lg">
+                                    <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                                </div>
                             </div>
+
                             <div>
-                                <h3 className="text-xl font-bold uppercase">{persona.nombre} {persona.apellido}</h3>
-                                <p className="text-emerald-400 font-mono text-sm">{persona.dni}</p>
+                                <h3 className="text-2xl font-black uppercase tracking-tight text-white mb-1 shadow-sm">
+                                    {persona.nombre} {persona.apellido}
+                                </h3>
+                                <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-emerald-400 font-mono text-xs font-bold">
+                                    <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>
+                                    {persona.dni}
+                                </div>
                             </div>
-                            <div className="w-full pt-4 space-y-3 text-left">
-                                <InfoItem icon={<Building2 size={16} />} label="Institución" value={persona.institucion || 'No especificada'} />
-                                <InfoItem icon={<User size={16} />} label="Rol" value={persona.rol} />
-                                <InfoItem icon={<MapPin size={16} />} label="Eje" value={persona.eje || 'No especificado'} />
-                                <InfoItem icon={<Clock size={16} />} label="Email" value={persona.correo || '-'} />
+
+                            <div className="w-full pt-6 space-y-4 text-left border-t border-slate-700/50">
+                                <InfoItem icon={<Building2 size={18} className="text-emerald-500" />} label="Institución" value={persona.institucion || 'No especificada'} />
+                                <InfoItem icon={<User size={18} className="text-purple-400" />} label="Rol" value={persona.rol} />
+                                <InfoItem icon={<MapPin size={18} className="text-blue-400" />} label="Eje" value={persona.eje || 'No especificado'} />
+                                <InfoItem icon={<Clock size={18} className="text-amber-400" />} label="Email" value={persona.correo || '-'} />
                             </div>
                         </div>
                     </div>
@@ -537,10 +552,10 @@ export default function BuscarPersonaPage() {
 function InfoItem({ icon, label, value }: { icon: React.ReactNode, label: string, value: string }) {
     return (
         <div className="flex items-start gap-3">
-            <div className="mt-0.5 text-slate-400">{icon}</div>
+            <div className="mt-0.5">{icon}</div>
             <div>
-                <p className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">{label}</p>
-                <p className="text-sm font-medium">{value}</p>
+                <p className="text-[10px] text-slate-400 uppercase font-bold tracking-wider mb-0.5">{label}</p>
+                <p className="text-sm font-semibold leading-tight">{value}</p>
             </div>
         </div>
     );
