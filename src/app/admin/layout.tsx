@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { LayoutDashboard, Users, FilePlus, Calendar, Search, LogOut, Lock, Loader2, ClipboardList, Sun, Moon, Mail } from 'lucide-react';
 import Link from 'next/link';
+import HelpModal from '@/components/HelpModal';
 
 export default function AdminLayout({
     children,
@@ -133,6 +134,7 @@ export default function AdminLayout({
                 </nav>
 
                 <div className="p-4 mt-auto border-t border-slate-700 space-y-2">
+                    <HelpModal />
                     <button
                         onClick={toggleDarkMode}
                         className="w-full flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white transition-colors text-sm"
