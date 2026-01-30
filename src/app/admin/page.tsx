@@ -96,22 +96,32 @@ export default function AdminDashboard() {
         return () => clearInterval(interval);
     }, []);
 
-    const roleSlides = [
-        { label: 'Participantes Totales', value: stats.totalPersonas, sub: 'En la red', color: 'text-emerald-400' },
-        { label: 'Docentes', value: stats.porRol.docente, sub: 'Activos', color: 'text-blue-400' },
-        { label: 'Directivos', value: stats.porRol.directivo, sub: 'Registrados', color: 'text-purple-400' },
-        { label: 'Estudiantes Avanzados', value: stats.porRol.estudiante, sub: 'Inscriptos', color: 'text-amber-400' },
+    const statSlides = [
+        {
+            label: 'Red Municipal de Formación',
+            value: stats.totalPersonas,
+            sub: 'Inscriptos Totales',
+            color: 'text-emerald-400',
+            icon: <Users size={40} className="text-emerald-500/20" />
+        },
+        {
+            label: 'Programa de Capacitación',
+            value: stats.totalCapacitaciones,
+            sub: 'Eventos Realizados',
+            color: 'text-purple-400',
+            icon: <GraduationCap size={40} className="text-purple-500/20" />
+        },
     ];
 
-    const currentSlide = roleSlides[roleCycleIndex];
+    const currentSlide = statSlides[roleCycleIndex % 2];
 
     return (
         <div className="space-y-8 animate-fade-in">
             {/* Dashboard Headers */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
                 <div>
-                    <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">Panel de Control</h2>
-                    <p className="text-slate-500 dark:text-slate-400 mt-1 font-medium">Resumen general de la Red de Formación Docente</p>
+                    <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight leading-none">Panel de Control</h2>
+                    <p className="text-slate-500 dark:text-slate-400 mt-2 font-medium">Gestión integral de la Red de Formación Docente</p>
                 </div>
                 <div className="glass px-4 py-2 rounded-2xl flex items-center gap-2 text-sm font-bold text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/30">
                     <Activity size={16} />
@@ -211,40 +221,43 @@ export default function AdminDashboard() {
                     </div>
                 </div>
 
-                {/* Information Sidebar */}
-                <div className="space-y-6">
-                    {showActivity && (
-                        <div className="space-y-4 animate-fade-in">
-                            <div className="flex items-center justify-between px-1">
-                                <h3 className="text-xl font-bold">Estadísticas de Red</h3>
-                                <button
-                                    onClick={() => setShowActivity(false)}
-                                    className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
-                                    title="Cerrar"
-                                >
-                                    <X size={16} />
-                                </button>
-                            </div>
-                            <div className="card p-6 bg-gradient-to-br from-slate-900 to-slate-800 text-white border-0 shadow-2xl relative overflow-hidden group min-h-[220px] flex flex-col justify-center">
-                                <Users className="absolute -right-4 -bottom-4 text-white/5 w-40 h-40 group-hover:scale-110 transition-transform duration-700" />
-                                <div key={roleCycleIndex} className="relative z-10 animate-fade-in">
-                                    <h4 className="font-bold text-slate-300 uppercase tracking-widest text-[10px] mb-4 flex items-center gap-2">
-                                        <div className="flex gap-1">
-                                            {[0, 1, 2, 3].map(i => (
-                                                <div key={i} className={`w-1.5 h-1.5 rounded-full transition-all ${i === roleCycleIndex ? 'bg-emerald-500 w-4' : 'bg-slate-700'}`} />
-                                            ))}
-                                        </div>
-                                        {currentSlide.label}
-                                    </h4>
-                                    <div className="flex items-baseline gap-2 mb-2">
-                                        <p className="text-6xl font-black tabular-nums">{currentSlide.value}</p>
-                                        <p className={`${currentSlide.color} text-xs font-black uppercase tracking-tight`}>{currentSlide.sub}</p>
-                                    </div>
-                                    <p className="text-sm text-slate-400 leading-relaxed mb-4">Actualizado en tiempo real desde la plataforma.</p>
+                {/* Information Sidebar / Stats Carousel */}
+                <div className="flex flex-col space-y-6">
+                    <h3 className="text-xl font-bold px-1">Estadísticas Clave</h3>
+                    <div className="flex-1 card p-8 bg-gradient-to-br from-slate-900 to-slate-800 text-white border-0 shadow-2xl relative overflow-hidden group flex flex-col justify-center min-h-[300px] lg:min-h-0">
+                        {/* Decorative Background Icon */}
+                        <div className="absolute -right-4 -bottom-4 text-white/5 w-48 h-48 group-hover:scale-110 transition-transform duration-700">
+                            {currentSlide.icon}
+                        </div>
+
+                        <div key={roleCycleIndex % 2} className="relative z-10 animate-fade-in flex flex-col h-full">
+                            <h4 className="font-bold text-slate-300 uppercase tracking-widest text-[10px] mb-8 flex items-center gap-3">
+                                <div className="flex gap-1.5">
+                                    {[0, 1].map(i => (
+                                        <div key={i} className={`w-2 h-2 rounded-full transition-all duration-500 ${i === (roleCycleIndex % 2) ? 'bg-emerald-500 w-6' : 'bg-slate-700'}`} />
+                                    ))}
                                 </div>
+                                {currentSlide.label}
+                            </h4>
+
+                            <div className="flex-1 flex flex-col justify-center">
+                                <div className="flex items-baseline gap-3 mb-4">
+                                    <p className="text-7xl font-black tabular-nums tracking-tighter">{currentSlide.value}</p>
+                                    <p className={`${currentSlide.color} text-sm font-black uppercase tracking-widest`}>{currentSlide.sub}</p>
+                                </div>
+                                <p className="text-base text-slate-400 leading-relaxed max-w-xs">
+                                    {roleCycleIndex % 2 === 0
+                                        ? 'Docentes y directivos que forman parte activa de nuestra red municipal.'
+                                        : 'Encuentros de formación realizados para fortalecer el sistema educativo.'}
+                                </p>
+                            </div>
+
+                            <div className="mt-8 pt-8 border-t border-white/5 text-[10px] text-slate-500 font-bold uppercase tracking-widest flex items-center gap-2">
+                                <div className="w-1 h-1 bg-emerald-500 rounded-full animate-pulse"></div>
+                                Actualización en tiempo real
                             </div>
                         </div>
-                    )}
+                    </div>
                 </div>
             </div>
         </div>
