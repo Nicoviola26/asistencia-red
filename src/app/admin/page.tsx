@@ -159,13 +159,16 @@ export default function AdminDashboard() {
                                 </button>
                             </div>
                             <div className="card p-6 bg-gradient-to-br from-slate-900 to-slate-800 text-white border-0 shadow-2xl relative overflow-hidden group">
-                                <TrendingUp className="absolute -right-4 -bottom-4 text-white/5 w-40 h-40 group-hover:scale-110 transition-transform duration-700" />
+                                <Users className="absolute -right-4 -bottom-4 text-white/5 w-40 h-40 group-hover:scale-110 transition-transform duration-700" />
                                 <div className="relative z-10">
-                                    <h4 className="font-bold text-slate-300 uppercase tracking-widest text-[10px] mb-4">Crecimiento Mensual</h4>
-                                    <p className="text-4xl font-black mb-2">{stats.lastMonthGrowth}%</p>
-                                    <p className="text-sm text-slate-400 mb-6">Incremento en la tasa de asistencia respecto al mes pasado.</p>
-                                    <Link href="/admin/asistencia" className="inline-flex items-center gap-2 text-sm font-bold text-emerald-400 hover:text-emerald-300 transition-colors">
-                                        Ver estadísticas detalladas <ArrowUpRight size={16} />
+                                    <h4 className="font-bold text-slate-300 uppercase tracking-widest text-[10px] mb-4">Participantes Totales</h4>
+                                    <div className="flex items-baseline gap-2 mb-2">
+                                        <p className="text-5xl font-black">{stats.totalPersonas}</p>
+                                        <p className="text-emerald-400 text-xs font-bold uppercase tracking-tight">Docentes</p>
+                                    </div>
+                                    <p className="text-sm text-slate-400 mb-6 leading-relaxed">Cantidad total de personas registradas en la Red de Formación.</p>
+                                    <Link href="/admin/personas" className="inline-flex items-center gap-2 text-sm font-bold text-emerald-400 hover:text-emerald-300 transition-colors">
+                                        Gestionar Inscriptos <ArrowUpRight size={16} />
                                     </Link>
                                 </div>
                             </div>
