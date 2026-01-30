@@ -189,30 +189,31 @@ export default function AsistenciaControlPage() {
                     <p className="text-slate-500 font-medium">Monitorea y analiza el impacto de cada capacitación en tiempo real.</p>
                 </div>
 
-                <div className="flex flex-wrap gap-3">
+                <div className="flex flex-wrap items-center gap-3">
                     <button
                         onClick={exportGeneralStats}
                         disabled={loading || capacitaciones.length === 0}
-                        className="btn-primary bg-slate-800 hover:bg-slate-700 h-11 flex items-center justify-center gap-2 group"
+                        className="btn-primary bg-slate-900 hover:bg-slate-800 h-11 px-5 flex items-center justify-center gap-2 group shadow-xl shadow-slate-900/10 border-none transition-all active:scale-95"
                     >
-                        {loading ? <Loader2 className="animate-spin" size={18} /> : <Download size={18} className="group-hover:translate-y-0.5 transition-transform" />}
-                        Estadísticas Globales
+                        {loading ? <Loader2 className="animate-spin" size={18} /> : <Download size={18} className="group-hover:-translate-y-0.5 transition-transform" />}
+                        <span className="text-[11px] font-black uppercase tracking-wider">Estadísticas Globales</span>
                     </button>
+
                     {selectedCapacitacion && (
                         <>
                             <button
                                 onClick={handlePrint}
-                                className="btn-primary bg-white border border-slate-200 text-slate-900 hover:bg-slate-50 h-11 flex items-center justify-center gap-2 shadow-sm"
+                                className="btn-primary bg-white border-2 border-slate-100 text-slate-600 hover:bg-slate-50 hover:border-slate-200 h-11 px-5 flex items-center justify-center gap-2 shadow-sm transition-all active:scale-95"
                             >
-                                <Printer size={18} />
-                                Generar Acta
+                                <Printer size={18} className="text-slate-400" />
+                                <span className="text-[11px] font-black uppercase tracking-wider">Generar Acta</span>
                             </button>
                             <button
                                 onClick={exportToExcel}
-                                className="btn-primary h-11 flex items-center justify-center gap-2"
+                                className="btn-primary bg-emerald-600 hover:bg-emerald-700 h-11 px-5 flex items-center justify-center gap-2 shadow-xl shadow-emerald-600/20 border-none transition-all active:scale-95"
                             >
                                 <FileText size={18} />
-                                Excel Detallado
+                                <span className="text-[11px] font-black uppercase tracking-wider">Excel Detallado</span>
                             </button>
                         </>
                     )}
