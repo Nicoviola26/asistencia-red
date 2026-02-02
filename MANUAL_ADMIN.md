@@ -1,76 +1,78 @@
-# 📔 Manual del Administrador
-## Red Municipal de Formación Docente - Sistema de Asistencia
+# 📖 Guía Paso a Paso para Coordinadores
+## Sistema de Asistencia - Red Municipal de Formación Docente
 
-Este manual detalla todas las funcionalidades del Panel de Administración, diseñado para gestionar de forma integral la formación docente de la red municipal.
-
----
-
-## 1. Acceso y Panel Principal
-El panel principal ofrece una visión general del sistema.
-*   **Métricas en Vivo:** Visualiza el total de docentes inscritos, asistencias registradas y capacitaciones realizadas.
-*   **Próximo Evento:** Una tarjeta destacada muestra la capacitación más cercana, su disertante, lugar y estado (Habilitada/Deshabilitada).
-*   **Accesos Directos:** Botones rápidos para las tareas más frecuentes.
+Esta guía está escrita para ayudarte a usar el sistema de la manera más sencilla posible, incluso si no tienes mucha experiencia con computadoras.
 
 ---
 
-## 2. Gestión de Capacitaciones 🎓
-Ubicación: `/admin/capacitaciones`
-Desde aquí puedes crear, editar y eliminar los eventos de formación.
-*   **Crear Evento:** Define nombre, fecha, hora, lugar, disertante y descripción.
-*   **Estado Activa:** Solo las capacitaciones marcadas como "Activas" aparecerán en el formulario público para los docentes. Esto te permite preparar eventos con antelación sin que sean visibles todavía.
+## 1. ¿Qué es este sistema?
+Es una herramienta digital para que la Municipalidad pueda:
+1.  Saber quiénes asisten a las capacitaciones.
+2.  Tener una lista de todos los docentes y directivos de la ciudad.
+3.  Enviarles información y certificados por correo de forma automática.
 
 ---
 
-## 3. Control de Asistencia y Reportes 📋
-Ubicación: `/admin/asistencia`
-Permite visualizar quiénes asistieron a cada evento.
-*   **Filtro por Evento:** Selecciona una capacitación para ver la lista de asistentes.
-*   **Exportar PDF:** Genera un "Acta de Asistencia" limpia y profesional, lista para imprimir o archivar digitalmente.
-*   **Búsqueda Rápida:** Filtra asistentes por nombre o DNI dentro de la lista.
+## 2. Cómo entrar al sistema
+1.  Entra a la dirección web que se te entregó.
+2.  Haz clic en el enlace pequeño que dice **"Acceso Administrador"** al final de la página.
+3.  Escribe la contraseña (por defecto es `admin123`) y presiona el botón azul.
 
 ---
 
-## 4. Mensajería y Notificaciones (Sistema Robusto) ✉️
-Ubicación: `/admin/mensajeria`
-Este módulo permite comunicación directa con los docentes.
+## 3. Cómo cargar a una Persona (Docente o Directivo) 👤
+Si llega alguien nuevo que no está en el sistema, sigue estos pasos:
+1.  En el menú de la izquierda, haz clic en **"Cargar Persona"**.
+2.  Verás un formulario. Completa los datos:
+    *   **DNI:** El número sin puntos ni espacios.
+    *   **Nombre y Apellido.**
+    *   **Correo Electrónico:** Es muy importante para que le lleguen los certificados.
+    *   **Rol:** Elige si es Docente, Directivo o Estudiante.
+3.  Haz clic en el botón verde **"Registrar Persona"**. ¡Listo!
 
-### Envío Individual
-Busca a un docente por nombre o DNI, agrégalo a la lista de destinatarios y redacta un mensaje personalizado con archivos adjuntos.
-
-### Envío Masivo (Broadcast)
-*   **Por Capacitación:** Envía un mensaje a todos los que asistieron a un evento específico (ideal para enviar material de lectura o certificados).
-*   **Por Rol:** Envía a todos los Docentes, Directivos o Estudiantes de la base de datos.
-
-### Funcionamiento en Segundo Plano (QStash)
-Al presionar "Enviar", el sistema encola los correos. **Puedes cerrar la pestaña del navegador inmediatamente**. Los correos se enviarán uno a uno automáticamente, asegurando que lleguen a destino aunque sean cientos de destinatarios.
+> **Truco para expertos:** Si tienes una lista de Excel con muchas personas, también puedes usar el botón de "Importar desde Excel" en esa misma pantalla para cargarlas todas juntas.
 
 ---
 
-## 5. Checklist de Coordinación ⚡
-Ubicación: `/admin/checklist`
-Una herramienta colaborativa para el equipo de coordinación.
-*   **Pasos Pre-Evento:** (ej: Confirmar sonido, imprimir listas).
-*   **Durante el Evento:** (ej: Control de refrigerio).
-*   **Post-Evento:** (ej: Enviar encuestas de satisfacción).
-*   **Sincronización Real:** Si un administrador marca una tarea como completa, todos los demás verán el cambio al instante.
+## 4. Cómo crear una nueva Capacitación (Evento) 🎓
+Antes de un evento, debes crearlo en el sistema:
+1.  En el menú de la izquierda, ve a **"Gestionar Capacitaciones"**.
+2.  Haz clic en el botón **"Nueva Capacitación"**.
+3.  Completa los datos:
+    *   **Nombre:** ¿Cómo se llama el curso o charla?
+    *   **Día y Hora:** Cuándo se hace.
+    *   **Disertante:** Quién da la charla.
+    *   **Estado:** Asegúrate de que esté en **"Habilitada"** (así los docentes podrán inscribirse cuando lleguen).
+4.  Presiona **"Crear Capacitación"**.
 
 ---
 
-## 6. Gestión de Personas 👥
-Ubicación: `/admin/personas`
-Administra la base de datos de la Red de Formación.
-*   **Alta Individual:** Registro manual de un nuevo docente.
-*   **Importación Masiva:** Permite cargar cientos de personas desde un archivo Excel siguiendo la plantilla correspondiente.
+## 5. Cómo ver quiénes asistieron y sacar el PDF 📋
+Cuando el evento termina y quieres la lista oficial:
+1.  Ve a **"Control Asistencia"** en el menú.
+2.  Arriba verás un buscador. Elige el nombre de la capacitación que acaba de pasar.
+3.  Aparecerá la lista de todos los que pusieron su DNI ese día.
+4.  Si quieres imprimirla o guardarla, haz clic en el botón **"Exportar PDF"**. Se descargará un documento listo para presentar.
 
 ---
 
-## 7. Modo Offline y Resiliencia 📡
-El sistema está preparado para fallos de internet en los eventos:
-1.  Si el sitio de registro pierde conexión, verás un aviso de **"Modo Offline"**.
-2.  Los docentes pueden seguir registrando su DNI normalmente.
-3.  Los datos se guardan en el dispositivo.
-4.  Cuando el dispositivo recupera señal, el sistema **sincroniza automáticamente** todos los datos pendientes hacia la base de datos central sin intervención manual.
+## 6. Enviar mensajes por correo ✉️
+¿Quieres enviarles material de lectura a todos los que asistieron?
+1.  Ve a **"Mensajería"**.
+2.  Busca la sección **"Envío Masivo"**.
+3.  Elige "Por Capacitación" y selecciona el evento.
+4.  Escribe el **Asunto** y el **Mensaje** (como si fuera un mail normal).
+5.  Presiona **"Iniciar Envío Masivo"**.
+6.  **Importante:** Ya puedes cerrar la página. El sistema seguirá enviando los mails uno por uno aunque tú apagues la computadora.
 
 ---
 
-> **Soporte Técnico:** Para cambios en las variables de entorno o configuración de dominios, contactar al desarrollador del sistema.
+## 7. Preguntas Frecuentes (S.O.S)
+*   **¿Qué pasa si se corta el internet en el evento?**
+    Nada. El sistema seguirá recibiendo los DNI de los docentes y los guardará "escondidos" en el navegador. En cuanto el aparato vuelva a tener internet, se subirán solos a la lista.
+*   **¿Puedo abrir esto desde mi celular?**
+    Sí. Todo el sistema funciona perfecto en celulares y tablets.
+
+---
+
+*Manual redactado para una gestión simple y eficiente.*
