@@ -226,9 +226,9 @@ export default function AdminDashboard() {
                 </div>
 
                 {/* Information Sidebar / Stats Carousel */}
-                <div className="flex flex-col">
+                <div className="flex flex-col h-full">
                     <h3 className="text-xl font-bold px-1 mb-6">Información Clave</h3>
-                    <div className="card p-6 bg-gradient-to-br from-slate-900 to-slate-800 text-white border-0 shadow-2xl relative overflow-hidden group flex flex-col justify-center lg:h-[338px]">
+                    <div className="card p-6 bg-gradient-to-br from-slate-900 to-slate-800 text-white border-0 shadow-2xl relative overflow-hidden group flex flex-col justify-center flex-1">
                         {/* Decorative Background Icon */}
                         <div className="absolute -right-4 -bottom-4 text-white/5 w-48 h-48 group-hover:scale-110 transition-transform duration-700">
                             {currentSlide.icon}
@@ -296,7 +296,7 @@ function NavCard({ href, icon, title, description }: { href: string, icon: React
     return (
         <Link
             href={href}
-            className="group flex flex-col p-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl hover:border-[var(--primary)] hover:shadow-2xl hover:shadow-[var(--primary)]/5 transition-all duration-300"
+            className="group flex flex-col h-full p-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl hover:border-[var(--primary)] hover:shadow-2xl hover:shadow-[var(--primary)]/5 transition-all duration-300"
         >
             <div className="p-3 w-fit bg-slate-50 dark:bg-slate-800 rounded-xl mb-4 group-hover:scale-110 transition-transform duration-300">
                 {icon}
