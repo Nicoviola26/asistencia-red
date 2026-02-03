@@ -49,7 +49,14 @@ export default function AsistenciaControlPage() {
             `)
             .eq('capacitacion_id', id) as any;
 
-        if (data) setAsistencias(data);
+        if (data) {
+            const sortedData = [...data].sort((a: any, b: any) => {
+                const nameA = `${a.personas.apellido} ${a.personas.nombre}`.toLowerCase();
+                const nameB = `${b.personas.apellido} ${b.personas.nombre}`.toLowerCase();
+                return nameA.localeCompare(nameB);
+            });
+            setAsistencias(sortedData);
+        }
         setLoading(false);
     }
 
@@ -161,20 +168,55 @@ export default function AsistenciaControlPage() {
 
     return (
         <div className="space-y-8 animate-fade-in">
-            {/* Print Header */}
-            <div className="hidden print:block mb-8 border-b-2 border-slate-900 pb-6 text-center">
-                <div className="flex justify-center mb-4">
-                    <img src="/logo.png" alt="Logo" className="h-20 w-auto" />
-                </div>
-                <h1 className="text-2xl font-black uppercase tracking-tight">Acta de Asistencia Docente</h1>
-                <p className="text-sm font-bold mt-2">Red Municipal de Formación Docente</p>
+            {/* Print Header and List */}
+            <div className="hidden print:block mb-8 pb-6">
+                <div className="border-b-2 border-slate-900 pb-6 text-center">
+                    <div className="flex justify-center mb-4">
+                        <img src="/logo.png" alt="Logo" className="h-20 w-auto" />
+                    </div>
+                    <h1 className="text-2xl font-black uppercase tracking-tight">Acta de Asistencia Docente</h1>
+                    <p className="text-sm font-bold mt-2">Red Municipal de Formación Docente</p>
 
-                <div className="mt-8 grid grid-cols-2 text-left text-sm gap-y-2 border p-4 rounded-lg bg-slate-50">
-                    <p><strong>Evento:</strong> {currentCap?.nombre}</p>
-                    <p><strong>Fecha:</strong> {currentCap ? new Date(currentCap.dia).toLocaleDateString() : '-'}</p>
-                    <p><strong>Lugar:</strong> {currentCap?.lugar || '-'}</p>
-                    <p><strong>Disertante:</strong> {currentCap?.disertante || '-'}</p>
-                    <p><strong>Total Presentes:</strong> {asistencias.length}</p>
+                    <div className="mt-8 grid grid-cols-2 text-left text-sm gap-y-2 border p-4 rounded-lg bg-slate-50">
+                        <p><strong>Evento:</strong> {currentCap?.nombre}</p>
+                        <p><strong>Fecha:</strong> {currentCap ? new Date(currentCap.dia).toLocaleDateString() : '-'}</p>
+                        <p><strong>Lugar:</strong> {currentCap?.lugar || '-'}</p>
+                        <p><strong>Disertante:</strong> {currentCap?.disertante || '-'}</p>
+                        <p><strong>Total Presentes:</strong> {asistencias.length} asistentes</p>
+                    </div>
+                </div>
+
+                <div className="mt-8">
+                    <h2 className="text-lg font-bold uppercase mb-4 text-slate-800 border-b pb-2">Listado Detallado de Asistentes</h2>
+                    <table className="w-full text-left border-collapse text-xs">
+                        <thead>
+                            <tr className="bg-slate-100">
+                                <th className="border p-2">Nombre y Apellido</th>
+                                <th className="border p-2">DNI</th>
+                                <th className="border p-2">Rol / Función</th>
+                                <th className="border p-2">Institución</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {asistencias.map((a: any) => (
+                                <tr key={a.id} className="border-b">
+                                    <td className="border p-2 font-bold uppercase">{a.personas.nombre} {a.personas.apellido}</td>
+                                    <td className="border p-2 font-mono">{a.personas.dni}</td>
+                                    <td className="border p-2 uppercase">{a.personas.rol}</td>
+                                    <td className="border p-2 text-[10px]">{a.personas.institucion || '-'}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div className="mt-20 flex justify-between px-10">
+                    <div className="text-center border-t border-slate-900 pt-2 w-48">
+                        <p className="text-[10px] font-bold">Firma del Responsable</p>
+                    </div>
+                    <div className="text-center border-t border-slate-900 pt-2 w-48">
+                        <p className="text-[10px] font-bold">Aclaración y DNI</p>
+                    </div>
                 </div>
             </div>
 
