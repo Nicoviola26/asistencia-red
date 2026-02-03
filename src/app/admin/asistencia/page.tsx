@@ -125,7 +125,13 @@ export default function AsistenciaControlPage() {
 
                     const stats = asistencias_list.reduce((acc: any, curr: any) => {
                         let rol = (curr.personas?.rol || 'Sin asignar').toLowerCase().trim();
-                        if (rol.includes('estudiante')) rol = 'estudiante avanzado';
+
+                        // Unificación de roles para estadísticas
+                        if (rol.includes('docen') || rol.includes('prof')) rol = 'docente';
+                        if (rol.includes('direc') || rol.includes('vice')) rol = 'directivo';
+                        if (rol.includes('estud')) rol = 'estudiante avanzado';
+                        if (rol.includes('agen') || rol.includes('muni')) rol = 'agente municipal';
+
                         acc[rol] = (acc[rol] || 0) + 1;
                         return acc;
                     }, {});
@@ -141,6 +147,7 @@ export default function AsistenciaControlPage() {
                         'Docentes': stats['docente'] || 0,
                         'Directivos': stats['directivo'] || 0,
                         'Estud. Avanzados': stats['estudiante avanzado'] || 0,
+                        'Agentes Municipales': stats['agente municipal'] || 0,
                         'Sin Rol': stats['sin asignar'] || 0,
                         'Porcentaje Participación': `${percentage}%`
                     };

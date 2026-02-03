@@ -13,7 +13,7 @@ export type Persona = {
     correo: string | null;
     celular: string | null;
     institucion: string | null;
-    rol: 'estudiante' | 'docente' | 'asistente';
+    rol: 'estudiante' | 'docente' | 'asistente' | 'directivo' | 'estudiante avanzado' | 'agente municipal';
 };
 
 export type Capacitacion = {

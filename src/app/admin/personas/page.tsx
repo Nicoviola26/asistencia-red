@@ -106,14 +106,14 @@ export default function CargarPersonaPage() {
 
                     // Mapeo y normalización de roles
                     let rolFinal = 'Docente';
-                    if (rawRol.includes('dir')) {
-                        rolFinal = esFemenino ? 'Directora' : 'Director';
-                    } else if (rawRol.includes('vice')) {
-                        rolFinal = esFemenino ? 'Vicedirectora' : 'Vicedirector';
+                    if (rawRol.includes('dir') || rawRol.includes('vice')) {
+                        rolFinal = 'Directivo';
                     } else if (rawRol.includes('sec')) {
-                        rolFinal = esFemenino ? 'Secretaria' : 'Secretario';
+                        rolFinal = 'Secretario/a';
                     } else if (rawRol.includes('estud')) {
                         rolFinal = 'Estudiante Avanzado';
+                    } else if (rawRol.includes('agen') || rawRol.includes('muni')) {
+                        rolFinal = 'Agente Municipal';
                     } else if (rawRol.includes('docen') || rawRol.includes('prof')) {
                         rolFinal = 'Docente';
                     }
@@ -229,6 +229,7 @@ export default function CargarPersonaPage() {
                                     >
                                         <option value="docente">Docente</option>
                                         <option value="directivo">Directivo</option>
+                                        <option value="agente municipal">Agente Municipal</option>
                                         <option value="estudiante avanzado">Estudiante Avanzado</option>
                                     </select>
                                 </div>

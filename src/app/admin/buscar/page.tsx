@@ -403,6 +403,7 @@ export default function BuscarPersonaPage() {
                                                 >
                                                     <option value="docente">Docente</option>
                                                     <option value="directivo">Directivo</option>
+                                                    <option value="agente municipal">Agente Municipal</option>
                                                     <option value="estudiante avanzado">Estudiante Avanzado</option>
                                                 </select>
                                             </div>
