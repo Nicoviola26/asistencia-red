@@ -366,9 +366,61 @@ export default function AsistenciaControlPage() {
                                 </div>
 
                                 {loading ? (
-                                    <div className="flex flex-col items-center justify-center py-24 text-slate-400">
-                                        <Loader2 className="animate-spin mb-4" size={40} />
-                                        <p className="font-medium animate-pulse">Obteniendo registros de la base de datos...</p>
+                                    <div className="p-6 space-y-4 animate-fade-in">
+                                        {/* Loading Header */}
+                                        <div className="flex items-center justify-center gap-3 py-8 border-b border-slate-100 dark:border-slate-800">
+                                            <div className="relative">
+                                                <Loader2 className="animate-spin text-[var(--primary)]" size={32} />
+                                                <div className="absolute inset-0 animate-ping opacity-20">
+                                                    <Loader2 size={32} className="text-[var(--primary)]" />
+                                                </div>
+                                            </div>
+                                            <div className="space-y-1">
+                                                <p className="font-black text-slate-700 dark:text-slate-300 text-sm uppercase tracking-tight">Cargando Asistencia</p>
+                                                <p className="text-xs text-slate-400 font-medium">Obteniendo registros de la base de datos...</p>
+                                            </div>
+                                        </div>
+
+                                        {/* Skeleton Table */}
+                                        <div className="space-y-3">
+                                            {[...Array(6)].map((_, i) => (
+                                                <div
+                                                    key={i}
+                                                    className="flex items-center gap-4 p-4 bg-slate-50/50 dark:bg-slate-900/30 rounded-xl border border-slate-100 dark:border-slate-800 animate-pulse"
+                                                    style={{ animationDelay: `${i * 100}ms` }}
+                                                >
+                                                    {/* Avatar placeholder */}
+                                                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-slate-200 to-slate-300 dark:from-slate-700 dark:to-slate-800 flex-shrink-0" />
+
+                                                    {/* Content placeholder */}
+                                                    <div className="flex-1 space-y-2">
+                                                        <div className="h-4 bg-gradient-to-r from-slate-200 to-slate-300 dark:from-slate-700 dark:to-slate-800 rounded-lg w-3/4" />
+                                                        <div className="h-3 bg-gradient-to-r from-slate-200 to-slate-300 dark:from-slate-700 dark:to-slate-800 rounded-lg w-1/2" />
+                                                    </div>
+
+                                                    {/* DNI placeholder */}
+                                                    <div className="hidden sm:block w-24 h-4 bg-gradient-to-r from-slate-200 to-slate-300 dark:from-slate-700 dark:to-slate-800 rounded-lg" />
+
+                                                    {/* Role badge placeholder */}
+                                                    <div className="hidden md:block w-20 h-6 bg-gradient-to-r from-slate-200 to-slate-300 dark:from-slate-700 dark:to-slate-800 rounded-full" />
+
+                                                    {/* Time placeholder */}
+                                                    <div className="hidden lg:block w-16 h-4 bg-gradient-to-r from-slate-200 to-slate-300 dark:from-slate-700 dark:to-slate-800 rounded-lg" />
+                                                </div>
+                                            ))}
+                                        </div>
+
+                                        {/* Loading Stats */}
+                                        <div className="flex items-center justify-center gap-6 pt-6 border-t border-slate-100 dark:border-slate-800">
+                                            <div className="flex items-center gap-2 text-xs text-slate-400">
+                                                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                                                <span className="font-medium">Conectando con Supabase</span>
+                                            </div>
+                                            <div className="flex items-center gap-2 text-xs text-slate-400">
+                                                <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" style={{ animationDelay: '200ms' }} />
+                                                <span className="font-medium">Procesando datos</span>
+                                            </div>
+                                        </div>
                                     </div>
                                 ) : filteredAsistencias.length === 0 ? (
                                     <div className="flex flex-col items-center justify-center py-24 text-slate-400 border-2 border-dashed border-slate-100 dark:border-slate-800 m-4 rounded-3xl">
