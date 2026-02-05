@@ -179,7 +179,7 @@ export default function AsistenciaControlPage() {
             <div className="hidden print:block mb-8 pb-6">
                 <div className="border-b-2 border-slate-900 pb-6 text-center">
                     <div className="flex justify-center mb-4">
-                        <img src="/logo.png" alt="Logo" className="h-20 w-auto" />
+                        <img src="/logo.png" width={80} height={80} alt="Logo" className="h-20 w-auto" />
                     </div>
                     <h1 className="text-2xl font-black uppercase tracking-tight">Acta de Asistencia Docente</h1>
                     <p className="text-sm font-bold mt-2">Red Municipal de Formación Docente</p>

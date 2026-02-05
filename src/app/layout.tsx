@@ -18,7 +18,6 @@ export const viewport = {
 };
 
 import { ToastProvider } from "@/components/Toast";
-import SWRegistration from "@/components/SWRegistration";
 
 export default function RootLayout({
   children,
@@ -29,7 +28,6 @@ export default function RootLayout({
     <html lang="es">
       <body className={inter.className}>
         <ToastProvider>
-          <SWRegistration />
           {children}
         </ToastProvider>
       </body>
