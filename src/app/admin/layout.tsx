@@ -134,8 +134,8 @@ export default function AdminLayout({
             <aside className="w-full md:w-64 bg-slate-800 text-white flex flex-col shadow-xl z-20 shrink-0 print:hidden">
                 <div className="p-6">
                     <Link href="/admin" className="flex items-center gap-3 text-xl font-bold tracking-tight">
-                        <div className="w-10 h-10 rounded-full bg-white overflow-hidden shadow-lg border-2 border-[var(--primary)] p-0.5 shrink-0">
-                            <img src="/logo.png" width={40} height={40} alt="Logo" className="w-full h-full object-cover rounded-full" />
+                        <div className="w-10 h-10 rounded-full bg-white overflow-hidden shadow-lg border-2 border-[var(--primary)] p-0.5 shrink-0" style={{ width: '40px', height: '40px', borderRadius: '50%' }}>
+                            <img src="/logo.png" width={40} height={40} alt="Logo" className="w-full h-full object-cover rounded-full" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
                         </div>
                         <span className="leading-tight text-lg">Red Municipal</span>
                     </Link>
