@@ -141,7 +141,7 @@ export default function ChecklistPage() {
                             <ClipboardList size={14} />
                             Planificación Logística
                         </div>
-                        <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight leading-none">Cosas a Tener en Cuenta</h2>
+                        <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight leading-none">Aspectos a Tener en Cuenta</h2>
                         <p className="text-slate-500 font-medium">Cronograma de tareas para que la Capacitación sea un ÉXITO</p>
                     </div>
                     <button
