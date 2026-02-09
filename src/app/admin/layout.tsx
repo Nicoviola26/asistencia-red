@@ -16,6 +16,26 @@ export default function AdminLayout({
     const [darkMode, setDarkMode] = useState<boolean>(false);
 
     useEffect(() => {
+        // Version check - Limpiar caché viejo si hay actualización
+        const CURRENT_VERSION = '3.1.0';
+        const storedVersion = localStorage.getItem('app_version');
+
+        if (storedVersion !== CURRENT_VERSION) {
+            // Guardar tema antes de limpiar
+            const savedTheme = localStorage.getItem('admin_theme');
+
+            // Nueva versión detectada - limpiar storage
+            localStorage.clear();
+            sessionStorage.clear();
+
+            // Restaurar tema
+            if (savedTheme) {
+                localStorage.setItem('admin_theme', savedTheme);
+            }
+            localStorage.setItem('app_version', CURRENT_VERSION);
+            console.log('Admin cache cleared - New version:', CURRENT_VERSION);
+        }
+
         // Auth check - Usa sessionStorage para que expire al cerrar la pestaña
         const auth = sessionStorage.getItem('admin_auth');
         if (auth === 'true') {

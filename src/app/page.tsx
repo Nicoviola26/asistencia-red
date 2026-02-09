@@ -42,7 +42,20 @@ export default function RegistrationPage() {
     }
   };
 
+
   useEffect(() => {
+    // Version check - Limpiar caché viejo si hay actualización
+    const CURRENT_VERSION = '3.1.0';
+    const storedVersion = localStorage.getItem('app_version');
+
+    if (storedVersion !== CURRENT_VERSION) {
+      // Nueva versión detectada - limpiar todo el storage
+      localStorage.clear();
+      sessionStorage.clear();
+      localStorage.setItem('app_version', CURRENT_VERSION);
+      console.log('Cache cleared - New version:', CURRENT_VERSION);
+    }
+
     fetchCapacitaciones();
   }, []);
 
