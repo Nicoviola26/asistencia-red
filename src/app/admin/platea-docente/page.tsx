@@ -380,7 +380,7 @@ export default function PlateaDocentePage() {
                             </thead>
                             <tbody className="divide-y divide-slate-100 dark:divide-slate-800/50">
                                 {filteredDocentes.map((d, index) => (
-                                    <tr key={d.id} className={`group transition-colors ${d.premio_entregado ? 'bg-emerald-50/30' : 'hover:bg-slate-50'}`}>
+                                    <tr key={d.id} className={`group transition-colors ${d.premio_entregado ? 'bg-emerald-100/40 dark:bg-emerald-900/20' : 'hover:bg-slate-50 dark:hover:bg-slate-900/50'}`}>
                                         <td className="px-6 py-4">
                                             <input
                                                 type="checkbox"
