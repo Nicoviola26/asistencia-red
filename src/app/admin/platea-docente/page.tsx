@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '@/lib/supabase';
-import { Download, Loader2, Search, GraduationCap, Medal, Star, Trophy, CheckCircle2, Circle } from 'lucide-react';
+import { Download, Loader2, Search, GraduationCap, Medal, Star, Trophy, CheckCircle2, Circle, Mail, Copy, X, CheckCheck } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { useToast } from '@/components/Toast';
 
@@ -26,6 +26,8 @@ export default function PlateaDocentePage() {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [filterEntregados, setFilterEntregados] = useState<'all' | 'pending' | 'delivered'>('all');
+    const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+    const [selectedPerson, setSelectedPerson] = useState<DocenteDestacado | null>(null);
 
     useEffect(() => {
         fetchDocentesDestacados();
@@ -34,10 +36,6 @@ export default function PlateaDocentePage() {
     async function fetchDocentesDestacados() {
         setLoading(true);
         try {
-            // First fetch all personas to get the premio_entregado status
-            // This is needed because the nested join in asistencias might be complex to get the updated status directly
-            // if we rely only on the 'asistencias' query
-            // However, let's try to get everything via asistencias first, but selecting premio_entregado
             const { data, error } = await supabase
                 .from('asistencias')
                 .select(`
@@ -51,7 +49,6 @@ export default function PlateaDocentePage() {
             if (error) throw error;
 
             if (data) {
-                // Process data to group by person
                 const personasMap = new Map<string, {
                     person: any;
                     capacitaciones: Set<string>;
@@ -62,7 +59,6 @@ export default function PlateaDocentePage() {
                     const person = registro.personas;
                     if (!person) return;
 
-                    // REMOVED ROLE FILTER: Now checking everyone with >= 3 attendances
                     if (!personasMap.has(person.id)) {
                         personasMap.set(person.id, {
                             person,
@@ -75,7 +71,6 @@ export default function PlateaDocentePage() {
                     entry.dates.push(registro.fecha_registro);
                 });
 
-                // Filter for >= 3 unique trainings and format
                 const list: DocenteDestacado[] = [];
                 personasMap.forEach((entry) => {
                     if (entry.capacitaciones.size >= 3) {
@@ -96,7 +91,6 @@ export default function PlateaDocentePage() {
                     }
                 });
 
-                // Sort by total attendances (desc) then name (asc)
                 list.sort((a, b) => {
                     if (b.total_asistencias !== a.total_asistencias) {
                         return b.total_asistencias - a.total_asistencias;
@@ -124,7 +118,6 @@ export default function PlateaDocentePage() {
 
             if (error) throw error;
 
-            // Optimistic update
             setDocentes(prev => prev.map(d =>
                 d.id === id ? { ...d, premio_entregado: newState } : d
             ));
@@ -134,6 +127,48 @@ export default function PlateaDocentePage() {
             console.error('Error updating prize status:', err);
             showToast('Error al actualizar estado', 'error');
         }
+    };
+
+    const toggleSelection = (id: string) => {
+        setSelectedIds(prev => {
+            const newSet = new Set(prev);
+            if (newSet.has(id)) {
+                newSet.delete(id);
+            } else {
+                newSet.add(id);
+            }
+            return newSet;
+        });
+    };
+
+    const toggleSelectAll = () => {
+        if (selectedIds.size === filteredDocentes.length) {
+            setSelectedIds(new Set());
+        } else {
+            setSelectedIds(new Set(filteredDocentes.map(d => d.id)));
+        }
+    };
+
+    const copySelectedEmails = () => {
+        const selectedDocentes = docentes.filter(d => selectedIds.has(d.id));
+        const emails = selectedDocentes.map(d => d.email).filter(e => e && e.trim() !== '');
+
+        if (emails.length === 0) {
+            showToast('No hay correos válidos en la selección', 'error');
+            return;
+        }
+
+        navigator.clipboard.writeText(emails.join(', '));
+        showToast(`${emails.length} correo(s) copiado(s) al portapapeles`, 'success');
+    };
+
+    const copyEmail = (email: string | null) => {
+        if (!email || email.trim() === '') {
+            showToast('No hay correo disponible', 'error');
+            return;
+        }
+        navigator.clipboard.writeText(email);
+        showToast('Correo copiado al portapapeles', 'success');
     };
 
     const filteredDocentes = useMemo(() => {
@@ -199,6 +234,15 @@ export default function PlateaDocentePage() {
                 </div>
 
                 <div className="flex items-center gap-3">
+                    {selectedIds.size > 0 && (
+                        <button
+                            onClick={copySelectedEmails}
+                            className="btn-primary bg-blue-600 hover:bg-blue-700 h-10 px-5 flex items-center justify-center gap-2 group shadow-lg shadow-blue-600/20 border-none transition-all active:scale-[0.97] whitespace-nowrap"
+                        >
+                            <Mail size={14} />
+                            <span className="text-[10px] font-black uppercase tracking-widest">Copiar {selectedIds.size} Email(s)</span>
+                        </button>
+                    )}
                     <button
                         onClick={exportToExcel}
                         disabled={loading || docentes.length === 0}
@@ -319,6 +363,14 @@ export default function PlateaDocentePage() {
                         <table className="w-full text-left border-collapse">
                             <thead>
                                 <tr className="bg-slate-50 dark:bg-slate-950/50">
+                                    <th className="px-6 py-4 text-[10px] font-black uppercase text-slate-400 tracking-widest w-12">
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedIds.size === filteredDocentes.length && filteredDocentes.length > 0}
+                                            onChange={toggleSelectAll}
+                                            className="w-4 h-4 rounded border-slate-300 text-amber-600 focus:ring-amber-500"
+                                        />
+                                    </th>
                                     <th className="px-6 py-4 text-[10px] font-black uppercase text-slate-400 tracking-widest w-12 text-center">#</th>
                                     <th className="px-6 py-4 text-[10px] font-black uppercase text-slate-400 tracking-widest">Participante</th>
                                     <th className="px-6 py-4 text-[10px] font-black uppercase text-slate-400 tracking-widest hidden md:table-cell">Datos Contacto</th>
@@ -329,12 +381,21 @@ export default function PlateaDocentePage() {
                             <tbody className="divide-y divide-slate-100 dark:divide-slate-800/50">
                                 {filteredDocentes.map((d, index) => (
                                     <tr key={d.id} className={`group transition-colors ${d.premio_entregado ? 'bg-emerald-50/30' : 'hover:bg-slate-50'}`}>
+                                        <td className="px-6 py-4">
+                                            <input
+                                                type="checkbox"
+                                                checked={selectedIds.has(d.id)}
+                                                onChange={() => toggleSelection(d.id)}
+                                                className="w-4 h-4 rounded border-slate-300 text-amber-600 focus:ring-amber-500"
+                                                onClick={(e) => e.stopPropagation()}
+                                            />
+                                        </td>
                                         <td className="px-6 py-4 text-center font-mono text-xs text-slate-400">
                                             {index + 1}
                                         </td>
-                                        <td className="px-6 py-4">
+                                        <td className="px-6 py-4 cursor-pointer" onClick={() => setSelectedPerson(d)}>
                                             <div>
-                                                <p className="font-bold text-slate-900 dark:text-white uppercase leading-tight flex items-center gap-2">
+                                                <p className="font-bold text-slate-900 dark:text-white uppercase leading-tight flex items-center gap-2 hover:text-amber-600 transition-colors">
                                                     {d.apellido} {d.nombre}
                                                     {d.total_asistencias >= 5 && <Star size={12} className="text-amber-500 fill-amber-500" />}
                                                 </p>
@@ -348,8 +409,22 @@ export default function PlateaDocentePage() {
                                         </td>
                                         <td className="px-6 py-4 hidden md:table-cell">
                                             <div className="text-xs text-slate-500 space-y-0.5">
-                                                <p>{d.celular || 'S/ celular'}</p>
-                                                <p className="opacity-80 text-[10px]">{d.email || 'S/ email'}</p>
+                                                <p className="flex items-center gap-2">
+                                                    {d.celular || 'S/ celular'}
+                                                </p>
+                                                <p className="opacity-80 text-[10px] flex items-center gap-2">
+                                                    {d.email ? (
+                                                        <>
+                                                            <span className="truncate max-w-[200px]">{d.email}</span>
+                                                            <button
+                                                                onClick={(e) => { e.stopPropagation(); copyEmail(d.email); }}
+                                                                className="text-blue-500 hover:text-blue-700"
+                                                            >
+                                                                <Copy size={12} />
+                                                            </button>
+                                                        </>
+                                                    ) : 'S/ email'}
+                                                </p>
                                             </div>
                                         </td>
                                         <td className="px-6 py-4 text-center">
@@ -362,7 +437,7 @@ export default function PlateaDocentePage() {
                                         </td>
                                         <td className="px-6 py-4 text-right">
                                             <button
-                                                onClick={() => togglePremio(d.id, d.premio_entregado)}
+                                                onClick={(e) => { e.stopPropagation(); togglePremio(d.id, d.premio_entregado); }}
                                                 className={`
                                                     inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wide transition-all
                                                     ${d.premio_entregado
@@ -392,9 +467,81 @@ export default function PlateaDocentePage() {
                 )}
             </div>
 
-            <div className="text-[10px] text-slate-400 text-center uppercase tracking-widest mt-8">
-                * Para visualizar los cambios correctamente, asegúrate de actualizar la base de datos
-            </div>
+            {/* Modal de detalles */}
+            {selectedPerson && (
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in" onClick={() => setSelectedPerson(null)}>
+                    <div className="card max-w-2xl w-full p-8 relative animate-scale-in" onClick={(e) => e.stopPropagation()}>
+                        <button
+                            onClick={() => setSelectedPerson(null)}
+                            className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition-colors"
+                        >
+                            <X size={24} />
+                        </button>
+
+                        <div className="flex items-center gap-4 mb-6">
+                            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-white text-2xl font-black">
+                                {selectedPerson.nombre[0]}{selectedPerson.apellido[0]}
+                            </div>
+                            <div>
+                                <h2 className="text-2xl font-black text-slate-900 dark:text-white">
+                                    {selectedPerson.nombre} {selectedPerson.apellido}
+                                </h2>
+                                <p className="text-sm text-slate-500 font-medium uppercase">{selectedPerson.rol}</p>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                            <div className="space-y-1">
+                                <p className="text-xs font-bold uppercase text-slate-400 tracking-wider">DNI</p>
+                                <p className="text-lg font-mono font-bold">{selectedPerson.dni}</p>
+                            </div>
+                            <div className="space-y-1">
+                                <p className="text-xs font-bold uppercase text-slate-400 tracking-wider">Institución</p>
+                                <p className="text-sm font-medium">{selectedPerson.institucion || 'No especificada'}</p>
+                            </div>
+                            <div className="space-y-1">
+                                <p className="text-xs font-bold uppercase text-slate-400 tracking-wider">Celular</p>
+                                <p className="text-sm font-medium">{selectedPerson.celular || 'No disponible'}</p>
+                            </div>
+                            <div className="space-y-1">
+                                <p className="text-xs font-bold uppercase text-slate-400 tracking-wider">Correo Electrónico</p>
+                                <div className="flex items-center gap-2">
+                                    <p className="text-sm font-medium truncate">{selectedPerson.email || 'No disponible'}</p>
+                                    {selectedPerson.email && (
+                                        <button
+                                            onClick={() => copyEmail(selectedPerson.email)}
+                                            className="p-1.5 rounded-lg bg-blue-100 text-blue-600 hover:bg-blue-200 transition-colors"
+                                        >
+                                            <Copy size={16} />
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="border-t border-slate-200 dark:border-slate-700 pt-4">
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="text-center p-4 bg-amber-50 dark:bg-amber-900/20 rounded-xl">
+                                    <p className="text-xs font-bold uppercase text-amber-600 dark:text-amber-400 mb-1">Capacitaciones</p>
+                                    <p className="text-3xl font-black text-amber-600 dark:text-amber-400">{selectedPerson.total_asistencias}</p>
+                                </div>
+                                <div className="text-center p-4 bg-slate-50 dark:bg-slate-900/20 rounded-xl">
+                                    <p className="text-xs font-bold uppercase text-slate-600 dark:text-slate-400 mb-1">Estado Premio</p>
+                                    <p className="text-lg font-black">
+                                        {selectedPerson.premio_entregado ? (
+                                            <span className="text-emerald-600 flex items-center justify-center gap-2">
+                                                <CheckCheck size={20} /> Entregado
+                                            </span>
+                                        ) : (
+                                            <span className="text-slate-500">Pendiente</span>
+                                        )}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
