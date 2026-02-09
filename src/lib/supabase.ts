@@ -14,6 +14,7 @@ export type Persona = {
     celular: string | null;
     institucion: string | null;
     rol: 'estudiante' | 'docente' | 'asistente' | 'directivo' | 'estudiante avanzado' | 'agente municipal';
+    premio_entregado?: boolean;
 };
 
 export type Capacitacion = {
