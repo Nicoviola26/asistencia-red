@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { supabase, type Capacitacion } from '@/lib/supabase';
+import { publicSupabase, type Capacitacion } from '@/lib/supabase';
 import { Search, Loader2, CheckCircle2, AlertCircle, Lock } from 'lucide-react';
 import Link from 'next/link';
 import { useToast } from '@/components/Toast';
@@ -27,7 +27,7 @@ export default function RegistrationPage() {
 
   const fetchCapacitaciones = async () => {
     try {
-      const { data } = await supabase
+      const { data } = await publicSupabase
         .from('capacitaciones')
         .select('*')
         .eq('activa', true)
@@ -75,7 +75,7 @@ export default function RegistrationPage() {
 
     try {
       // 1. Buscar persona por DNI
-      const { data: persona, error: personaError } = await supabase
+      const { data: persona, error: personaError } = await publicSupabase
         .from('personas')
         .select('id, nombre, apellido, correo')
         .eq('dni', dni.trim())
@@ -93,7 +93,7 @@ export default function RegistrationPage() {
       }
 
       // 2. Verificar si ya asistió
-      const { data: existingAsistencia } = await supabase
+      const { data: existingAsistencia } = await publicSupabase
         .from('asistencias')
         .select('id')
         .eq('persona_id', persona.id)
@@ -112,7 +112,7 @@ export default function RegistrationPage() {
       }
 
       // 3. Registrar asistencia
-      const { error: insertError } = await supabase
+      const { error: insertError } = await publicSupabase
         .from('asistencias')
         .insert({
           persona_id: persona.id,

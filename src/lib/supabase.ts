@@ -5,6 +5,13 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
+// Cliente seguro para la parte pública que NO usa localStorage (evita crashes por caché viejo)
+export const publicSupabase = createClient(supabaseUrl, supabaseAnonKey, {
+    auth: {
+        persistSession: false // Esto evita que lea/escriba en localStorage
+    }
+});
+
 export type Persona = {
     id: string;
     dni: string;
