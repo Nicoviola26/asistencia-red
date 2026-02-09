@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase, type Capacitacion } from '@/lib/supabase';
-import { Search, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Search, Loader2, CheckCircle2, AlertCircle, Lock } from 'lucide-react';
 import Link from 'next/link';
 import { useToast } from '@/components/Toast';
 
@@ -147,7 +147,21 @@ export default function RegistrationPage() {
   }
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center p-4 bg-slate-50 dark:bg-slate-950">
+    <main className="min-h-screen flex flex-col items-center justify-center p-4 bg-slate-50 dark:bg-slate-950 relative">
+      {/* Admin Access Button - Top Right */}
+      <Link
+        href="/admin"
+        className="fixed top-6 right-6 z-50 group"
+        title="Acceso Administrador"
+      >
+        <div className="relative">
+          <div className="absolute inset-0 bg-slate-900 dark:bg-slate-100 rounded-full opacity-0 group-hover:opacity-10 blur-xl transition-opacity" />
+          <div className="relative w-12 h-12 bg-white dark:bg-slate-900 rounded-full shadow-lg border border-slate-200 dark:border-slate-800 flex items-center justify-center transition-all group-hover:scale-110 group-hover:shadow-xl group-hover:border-[var(--primary)]">
+            <Lock size={20} className="text-slate-600 dark:text-slate-400 group-hover:text-[var(--primary)] transition-colors" />
+          </div>
+        </div>
+      </Link>
+
       <div className="w-full max-w-md animate-fade-in">
         <div className="text-center mb-10">
           <div className="inline-flex items-center justify-center w-28 h-28 rounded-full bg-white overflow-hidden mb-6 shadow-2xl border-4 border-[var(--primary)] animate-float p-1 ring-8 ring-[var(--primary)]/10 relative" style={{ width: '112px', height: '112px', borderRadius: '50%' }}>
@@ -249,16 +263,6 @@ export default function RegistrationPage() {
           </div>
         </div>
       )}
-
-
-      <footer className="mt-12 text-center">
-        <Link
-          href="/admin"
-          className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 text-xs transition-colors"
-        >
-          Acceso Administrador
-        </Link>
-      </footer>
     </main>
   );
 }
