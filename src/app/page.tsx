@@ -168,7 +168,7 @@ export default function RegistrationPage() {
             <img src="/logo.png" width={112} height={112} alt="Antigravity Logo" className="w-full h-full object-cover rounded-full" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
           </div>
           <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight leading-tight max-w-[280px] mx-auto">Red Municipal de Formación Docente</h1>
-          <p className="text-slate-500 dark:text-slate-400 mt-3 font-semibold uppercase tracking-widest text-[10px] text-emerald-600">SISTEMA ACTUALIZADO V3 - SI VES ESTO, FUNCIONA</p>
+          <p className="text-slate-500 dark:text-slate-400 mt-3 font-semibold uppercase tracking-widest text-[10px] text-emerald-600">SISTEMA ACTUALIZADO V3.1 - VERSIÓN MÓVIL</p>
         </div>
 
         <div className="card p-8 shadow-2xl border-t-4 border-[var(--primary)]">
