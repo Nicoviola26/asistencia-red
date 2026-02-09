@@ -16,15 +16,15 @@ export default function AdminLayout({
     const [darkMode, setDarkMode] = useState<boolean>(false);
 
     useEffect(() => {
-        // Auth check
-        const auth = localStorage.getItem('admin_auth');
+        // Auth check - Usa sessionStorage para que expire al cerrar la pestaña
+        const auth = sessionStorage.getItem('admin_auth');
         if (auth === 'true') {
             setIsAuthenticated(true);
         } else {
             setIsAuthenticated(false);
         }
 
-        // Dark mode check
+        // Dark mode check - localStorage para que persista
         const savedTheme = localStorage.getItem('admin_theme');
         if (savedTheme === 'dark') {
             setDarkMode(true);
@@ -53,7 +53,7 @@ export default function AdminLayout({
         const masterPassword = process.env.NEXT_PUBLIC_MASTER_PASSWORD || 'MasterRecovery2026#Antigravity';
 
         if (password === adminPassword || password === masterPassword) {
-            localStorage.setItem('admin_auth', 'true');
+            sessionStorage.setItem('admin_auth', 'true');
             setIsAuthenticated(true);
             setError('');
             setPassword(''); // Limpiamos el campo
@@ -63,7 +63,7 @@ export default function AdminLayout({
     };
 
     const handleLogout = () => {
-        localStorage.removeItem('admin_auth');
+        sessionStorage.removeItem('admin_auth');
         setIsAuthenticated(false);
         window.location.href = '/';
     };
