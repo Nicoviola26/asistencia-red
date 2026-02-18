@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase, type Capacitacion } from '@/lib/supabase';
-import { Mail, Search, Users, Loader2, Send, CheckCircle2, AlertCircle, X, Paperclip, FileIcon } from 'lucide-react';
+import { Mail, Search, Users, Loader2, Send, CheckCircle2, AlertCircle, X, Paperclip, FileIcon, Copy, Download, ClipboardCheck } from 'lucide-react';
 
 export default function MensajeriaPage() {
     const [capacitaciones, setCapacitaciones] = useState<Capacitacion[]>([]);
@@ -144,6 +144,92 @@ export default function MensajeriaPage() {
             setIndividualAttachments(prev => prev.filter((_, i) => i !== index));
         }
     };
+
+    const copyEmailsToClipboard = (emails: string[]) => {
+        const chunks = [];
+        for (let i = 0; i < emails.length; i += 25) {
+            chunks.push(emails.slice(i, i + 25).join(', '));
+        }
+        const text = chunks.join('\n\n--- Grupo de 25 ---\n\n');
+        navigator.clipboard.writeText(text);
+        setStatus({ type: 'success', text: 'Correos copiados al portapapeles (separados cada 25).' });
+        setTimeout(() => setStatus(null), 3000);
+    };
+
+    const exportEmailsToTxt = (emails: string[]) => {
+        const chunks = [];
+        for (let i = 0; i < emails.length; i += 25) {
+            chunks.push(`--- GRUPO ${(i / 25) + 1} ---\n` + emails.slice(i, i + 25).join(', '));
+        }
+        const text = chunks.join('\n\n');
+        const blob = new Blob([text], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'correos_seleccionados.txt';
+        a.click();
+        URL.revokeObjectURL(url);
+        setStatus({ type: 'success', text: 'Archivo TXT exportado con éxito.' });
+        setTimeout(() => setStatus(null), 3000);
+    };
+
+    const handleActionOnBroadcast = async (action: 'copy' | 'export') => {
+        setLoading(true);
+        try {
+            const emails = await getBroadcastEmails();
+            if (emails.length === 0) {
+                setStatus({ type: 'error', text: 'No hay correos para procesar.' });
+                return;
+            }
+            if (action === 'copy') copyEmailsToClipboard(emails);
+            else exportEmailsToTxt(emails);
+        } catch (error) {
+            setStatus({ type: 'error', text: 'Error al obtener los correos.' });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    async function getBroadcastEmails(): Promise<string[]> {
+        let recipients: PersonaSimple[] = [];
+
+        if (broadcastType === 'capacitacion') {
+            if (!selectedCapacitacion) return [];
+            const { data: asistencias } = await supabase
+                .from('asistencias')
+                .select('personas(id, nombre, correo)')
+                .eq('capacitacion_id', selectedCapacitacion);
+
+            if (asistencias) {
+                recipients = (asistencias as any[])
+                    .map(a => a.personas)
+                    .filter((p): p is PersonaSimple => !!p && !!p.correo);
+            }
+        } else {
+            if (!selectedRole) return [];
+            let query = supabase
+                .from('personas')
+                .select('id, nombre, apellido, correo')
+                .neq('correo', null)
+                .neq('correo', '');
+
+            if (selectedRole !== 'todos') {
+                query = query.ilike('rol', `%${selectedRole}%`);
+            }
+
+            const { data } = await query;
+            if (data) recipients = data as PersonaSimple[];
+        }
+
+        // Deduplicate and filter nulls
+        const uniqueEmails = Array.from(new Set(
+            recipients
+                .map(p => p.correo)
+                .filter((email): email is string => !!email && email.trim() !== '')
+        ));
+
+        return uniqueEmails;
+    }
 
 
 
@@ -406,8 +492,26 @@ export default function MensajeriaPage() {
 
                         {/* Selected List */}
                         {selectedPersonas.length > 0 && (
-                            <div className="space-y-2">
-                                <p className="text-xs font-bold uppercase text-slate-400 tracking-wider">Destinatarios seleccionados ({selectedPersonas.length})</p>
+                            <div className="space-y-3">
+                                <div className="flex items-center justify-between">
+                                    <p className="text-xs font-bold uppercase text-slate-400 tracking-wider">Destinatarios seleccionados ({selectedPersonas.length})</p>
+                                    <div className="flex gap-2">
+                                        <button
+                                            onClick={() => copyEmailsToClipboard(selectedPersonas.map(p => p.correo).filter((e): e is string => !!e))}
+                                            className="text-[10px] flex items-center gap-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 px-2 py-1 rounded transition-colors font-bold text-slate-600 dark:text-slate-400"
+                                            title="Copiar lista de correos"
+                                        >
+                                            <Copy size={12} /> Copiar
+                                        </button>
+                                        <button
+                                            onClick={() => exportEmailsToTxt(selectedPersonas.map(p => p.correo).filter((e): e is string => !!e))}
+                                            className="text-[10px] flex items-center gap-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 px-2 py-1 rounded transition-colors font-bold text-slate-600 dark:text-slate-400"
+                                            title="Exportar a TXT"
+                                        >
+                                            <Download size={12} /> TXT
+                                        </button>
+                                    </div>
+                                </div>
                                 <div className="flex flex-wrap gap-2">
                                     {selectedPersonas.map(persona => (
                                         <div key={persona.id} className="flex items-center gap-2 p-2 bg-slate-50 dark:bg-slate-900/50 rounded-lg border border-slate-200 dark:border-slate-800 animate-in fade-in zoom-in duration-200">
@@ -568,8 +672,32 @@ export default function MensajeriaPage() {
 
                         <div className="p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl border border-emerald-100 dark:border-emerald-800/50">
                             <div className="flex items-center justify-between">
-                                <p className="text-sm font-medium text-emerald-800 dark:text-emerald-400">Destinatarios estimados:</p>
-                                <p className="text-2xl font-bold text-emerald-900 dark:text-emerald-300">{recipientCount}</p>
+                                <div>
+                                    <p className="text-sm font-medium text-emerald-800 dark:text-emerald-400">Destinatarios estimados:</p>
+                                    <p className="text-2xl font-bold text-emerald-900 dark:text-emerald-300">{recipientCount}</p>
+                                </div>
+                                {recipientCount > 0 && (
+                                    <div className="flex flex-col gap-2">
+                                        <button
+                                            type="button"
+                                            onClick={() => handleActionOnBroadcast('copy')}
+                                            disabled={loading}
+                                            className="text-[10px] flex items-center gap-1.5 bg-white dark:bg-emerald-900/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 px-2.5 py-1.5 rounded-lg border border-emerald-200 dark:border-emerald-800 transition-all font-bold text-emerald-700 dark:text-emerald-400 shadow-sm"
+                                        >
+                                            {loading ? <Loader2 size={12} className="animate-spin" /> : <Copy size={12} />}
+                                            Copiar Correos
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => handleActionOnBroadcast('export')}
+                                            disabled={loading}
+                                            className="text-[10px] flex items-center gap-1.5 bg-white dark:bg-emerald-900/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 px-2.5 py-1.5 rounded-lg border border-emerald-200 dark:border-emerald-800 transition-all font-bold text-emerald-700 dark:text-emerald-400 shadow-sm"
+                                        >
+                                            {loading ? <Loader2 size={12} className="animate-spin" /> : <Download size={12} />}
+                                            Exportar TXT
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                             <p className="text-[10px] text-emerald-600 mt-1 uppercase tracking-wider font-bold">Se enviará un correo a cada uno</p>
                         </div>
