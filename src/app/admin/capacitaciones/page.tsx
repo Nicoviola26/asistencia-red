@@ -107,7 +107,7 @@ export default function CargarCapacitacionPage() {
             hora: cap.hora,
             lugar: cap.lugar || '',
             disertante: cap.disertante || '',
-            activa: (cap as any).activa ?? true
+            activa: cap.activa ?? true
         });
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
@@ -302,7 +302,7 @@ function CapacitacionCard({ cap, onToggleActiva, onEdit, onDelete, isPast }: {
             <div className="space-y-1">
                 <div className="flex items-center gap-2">
                     <h4 className="font-bold text-lg uppercase leading-none">{cap.nombre}</h4>
-                    {!(cap as any).activa && (
+                    {!cap.activa && (
                         <span className="px-2 py-0.5 bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 text-[10px] font-bold uppercase rounded">Deshabilitada</span>
                     )}
                 </div>
@@ -317,11 +317,11 @@ function CapacitacionCard({ cap, onToggleActiva, onEdit, onDelete, isPast }: {
 
             <div className="flex items-center gap-2">
                 <button
-                    onClick={() => onToggleActiva(cap.id, (cap as any).activa ?? true)}
-                    className={`p-2 rounded-lg transition-colors ${(cap as any).activa ? 'text-emerald-500 hover:bg-emerald-50' : 'text-slate-400 hover:bg-slate-100'}`}
-                    title={(cap as any).activa ? 'Ocultar para asistentes' : 'Mostrar para asistentes'}
+                    onClick={() => onToggleActiva(cap.id, cap.activa ?? true)}
+                    className={`p-2 rounded-lg transition-colors ${cap.activa ? 'text-emerald-500 hover:bg-emerald-50' : 'text-slate-400 hover:bg-slate-100'}`}
+                    title={cap.activa ? 'Ocultar para asistentes' : 'Mostrar para asistentes'}
                 >
-                    {(cap as any).activa ? <Eye size={20} /> : <EyeOff size={20} />}
+                    {cap.activa ? <Eye size={20} /> : <EyeOff size={20} />}
                 </button>
                 <button
                     onClick={() => onEdit(cap)}

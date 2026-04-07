@@ -179,7 +179,7 @@ export default function AsistenciaControlPage() {
             <div className="hidden print:block mb-8 pb-6">
                 <div className="border-b-2 border-slate-900 pb-6 text-center">
                     <div className="flex justify-center mb-4">
-                        <img src="/logo.png" width={80} height={80} alt="Logo" className="h-20 w-auto" style={{ height: '80px', width: 'auto' }} />
+                        <img src="/logo.png" width={80} height={80} alt="Logo MCSF" className="h-20 w-auto" style={{ height: '80px', width: 'auto' }} />
                     </div>
                     <h1 className="text-2xl font-black uppercase tracking-tight">Acta de Asistencia Docente</h1>
                     <p className="text-sm font-bold mt-2">Red Municipal de Formación Docente</p>
@@ -300,15 +300,15 @@ export default function AsistenciaControlPage() {
                                 <Calendar size={16} className="text-[var(--primary)]" />
                                 {new Date(currentCap.dia).toLocaleDateString()}
                             </div>
-                            <div className="p-4 bg-emerald-500/10 rounded-2xl border border-emerald-500/20">
-                                <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-black uppercase tracking-widest mb-2">Impacto Directo</p>
+                            <div className="p-4 bg-slate-900/5 rounded-2xl border border-slate-900/10">
+                                <p className="text-[10px] text-slate-800 dark:text-slate-100 font-black uppercase tracking-widest mb-2">Impacto Directo</p>
                                 <div className="flex items-baseline gap-1">
-                                    <span className="text-4xl font-black text-emerald-600 dark:text-emerald-400">{asistenciaPercentage}%</span>
+                                    <span className="text-4xl font-black text-slate-900 dark:text-slate-100">{asistenciaPercentage}%</span>
                                     <span className="text-xs font-bold text-slate-500">asist.</span>
                                 </div>
                                 <div className="mt-3 w-full bg-slate-200 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
                                     <div
-                                        className="bg-emerald-500 h-full transition-all duration-1000"
+                                        className="bg-[var(--primary)] h-full transition-all duration-1000"
                                         style={{ width: `${asistenciaPercentage}%` }}
                                     />
                                 </div>

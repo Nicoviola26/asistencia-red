@@ -1,0 +1,38 @@
+[
+  {
+    "id": "44e3d3a3-7e16-4efb-a752-0a2659ce6c47",
+    "nombre": "ia en la escuea",
+    "dia": "2026-01-24",
+    "hora": "10:00:00",
+    "lugar": "Federacion",
+    "disertante": "Walterio",
+    "activa": true
+  },
+  {
+    "id": "0f95e520-78fa-40e5-a2dc-0d623e4821b1",
+    "nombre": "identidad",
+    "dia": "2026-02-01",
+    "hora": "09:00:00",
+    "lugar": "zoom",
+    "disertante": "nicolas",
+    "activa": true
+  },
+  {
+    "id": "0031e29a-10c0-4f77-96a6-aa5c3221f54e",
+    "nombre": "Primeros auxilios ",
+    "dia": "2026-04-30",
+    "hora": "10:00:00",
+    "lugar": "Estación Belgrano - Auditorio 5",
+    "disertante": "Cobem",
+    "activa": true
+  },
+  {
+    "id": "b83a7b67-bf82-418d-af39-7a7c1d41df24",
+    "nombre": "walterio en tu casa",
+    "dia": "2026-01-31",
+    "hora": "20:00:00",
+    "lugar": "Federacion",
+    "disertante": "walter",
+    "activa": false
+  }
+]

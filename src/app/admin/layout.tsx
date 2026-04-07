@@ -94,9 +94,9 @@ export default function AdminLayout({
                 <div className="w-full max-w-sm text-center space-y-8 animate-fade-in">
                     {/* Animated Abstract Logo */}
                     <div className="relative w-24 h-24 mx-auto">
-                        <div className="absolute inset-0 bg-emerald-500/20 rounded-full animate-ping" />
-                        <div className="relative bg-white dark:bg-slate-900 w-24 h-24 rounded-full shadow-2xl flex items-center justify-center border-4 border-emerald-500 p-1">
-                            <div className="w-12 h-12 bg-emerald-500 rounded-lg animate-spin" />
+                        <div className="absolute inset-0 bg-slate-900/20 rounded-full animate-ping" />
+                        <div className="relative bg-white dark:bg-slate-900 w-24 h-24 rounded-full shadow-2xl flex items-center justify-center border-4 border-[var(--primary)] p-1">
+                            <div className="w-12 h-12 bg-[var(--primary)] rounded-lg animate-spin" />
                         </div>
                     </div>
 
@@ -158,8 +158,8 @@ export default function AdminLayout({
             <aside className="w-full md:w-64 bg-slate-800 text-white flex flex-col shadow-xl z-20 shrink-0 print:hidden">
                 <div className="p-6">
                     <Link href="/admin" className="flex items-center gap-3 text-xl font-bold tracking-tight">
-                        <div className="w-10 h-10 rounded-full bg-white overflow-hidden shadow-lg border-2 border-[var(--primary)] p-0.5 shrink-0" style={{ width: '40px', height: '40px', borderRadius: '50%' }}>
-                            <img src="/logo.png" width={40} height={40} alt="Logo" className="w-full h-full object-cover rounded-full" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
+                        <div className="w-16 h-8 rounded bg-transparent overflow-hidden p-0.5 shrink-0">
+                            <img src="/logo.png" width={64} height={32} alt="Logo MCSF" className="w-full h-full object-contain" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                         </div>
                         <span className="leading-tight text-lg">Red Municipal</span>
                     </Link>
@@ -210,7 +210,7 @@ function SidebarLink({ href, icon, label }: { href: string, icon: React.ReactNod
             href={href}
             className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/10 active:bg-white/20 transition-all font-medium group"
         >
-            <div className="text-emerald-400 group-hover:scale-110 transition-transform">{icon}</div>
+            <div className="text-[var(--primary)] group-hover:scale-110 transition-transform">{icon}</div>
             <span>{label}</span>
         </Link>
     );

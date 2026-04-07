@@ -177,11 +177,11 @@ export default function RegistrationPage() {
 
       <div className="w-full max-w-md animate-fade-in">
         <div className="text-center mb-10">
-          <div className="inline-flex items-center justify-center w-28 h-28 rounded-full bg-white overflow-hidden mb-6 shadow-2xl border-4 border-[var(--primary)] animate-float p-1 ring-8 ring-[var(--primary)]/10 relative" style={{ width: '112px', height: '112px', borderRadius: '50%' }}>
-            <img src="/logo.png" width={112} height={112} alt="Antigravity Logo" className="w-full h-full object-cover rounded-full" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
+          <div className="inline-flex items-center justify-center w-full max-w-[280px] h-24 rounded-2xl bg-transparent overflow-hidden mb-8 animate-float p-2 relative" style={{ width: '100%', maxWidth: '280px', height: '96px', borderRadius: '16px' }}>
+            <img src="/logo.png" width={280} height={96} alt="Logo Municipalidad de Santa Fe" className="w-full h-full object-contain" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
           </div>
           <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight leading-tight max-w-[280px] mx-auto">Red Municipal de Formación Docente</h1>
-          <p className="text-slate-500 dark:text-slate-400 mt-3 font-semibold uppercase tracking-widest text-[10px] text-emerald-600">SISTEMA ACTUALIZADO V3.1 - VERSIÓN MÓVIL</p>
+          <p className="text-slate-500 dark:text-slate-400 mt-3 font-semibold uppercase tracking-widest text-[10px] text-slate-900 dark:text-slate-100">SISTEMA ACTUALIZADO V3.1 - VERSIÓN MÓVIL</p>
         </div>
 
         <div className="card p-8 shadow-2xl border-t-4 border-[var(--primary)]">
@@ -244,11 +244,11 @@ export default function RegistrationPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
           <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl p-10 max-w-sm w-full text-center border border-slate-200 dark:border-slate-800 animate-zoom-in relative overflow-hidden">
             {/* Background Accent */}
-            <div className={`absolute top-0 left-0 w-full h-2 ${modal.type === 'success' ? 'bg-emerald-500' :
+            <div className={`absolute top-0 left-0 w-full h-2 ${modal.type === 'success' ? 'bg-[var(--primary)]' :
               modal.type === 'warning' ? 'bg-amber-500' : 'bg-red-500'
               }`} />
 
-            <div className={`w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6 ${modal.type === 'success' ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-500' :
+            <div className={`w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6 ${modal.type === 'success' ? 'bg-slate-100 dark:bg-slate-800 text-[var(--primary)]' :
               modal.type === 'warning' ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-500' :
                 'bg-red-100 dark:bg-red-900/30 text-red-500'
               }`}>
@@ -265,7 +265,7 @@ export default function RegistrationPage() {
 
             <button
               onClick={() => setModal({ ...modal, show: false })}
-              className={`w-full h-14 rounded-2xl text-lg font-bold transition-all shadow-lg active:scale-95 ${modal.type === 'success' ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-500/20' :
+              className={`w-full h-14 rounded-2xl text-lg font-bold transition-all shadow-lg active:scale-95 ${modal.type === 'success' ? 'bg-[var(--primary)] hover:opacity-90 text-white shadow-slate-900/20' :
                 modal.type === 'warning' ? 'bg-amber-600 hover:bg-amber-700 text-white shadow-amber-500/20' :
                   modal.type === 'info' ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/20' :
                     'bg-red-600 hover:bg-red-700 text-white shadow-red-500/20'

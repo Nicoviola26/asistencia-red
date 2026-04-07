@@ -1,0 +1,74 @@
+[
+  {
+    "id": "faa428a2-8ca4-4bdf-9a8a-067b3367778b",
+    "persona_id": "6c9b3f4f-daa0-4410-827a-0c2904f2e471",
+    "capacitacion_id": "0f95e520-78fa-40e5-a2dc-0d623e4821b1",
+    "fecha_registro": "2026-01-29T16:56:47.956732+00:00"
+  },
+  {
+    "id": "43595b86-c6cc-4e86-bc1f-81ea35bd8277",
+    "persona_id": "6c9b3f4f-daa0-4410-827a-0c2904f2e471",
+    "capacitacion_id": "44e3d3a3-7e16-4efb-a752-0a2659ce6c47",
+    "fecha_registro": "2026-01-29T17:03:58.90568+00:00"
+  },
+  {
+    "id": "56357df0-3e69-4246-b0ef-5f0c101d11bb",
+    "persona_id": "888e48a6-32d4-488f-a94a-de66aa7a06d1",
+    "capacitacion_id": "0031e29a-10c0-4f77-96a6-aa5c3221f54e",
+    "fecha_registro": "2026-01-29T23:41:23.254471+00:00"
+  },
+  {
+    "id": "28f22176-8633-4be2-aaa9-e884de58f0ab",
+    "persona_id": "888e48a6-32d4-488f-a94a-de66aa7a06d1",
+    "capacitacion_id": "0f95e520-78fa-40e5-a2dc-0d623e4821b1",
+    "fecha_registro": "2026-01-30T00:52:26.47867+00:00"
+  },
+  {
+    "id": "efa7e8c8-749f-499e-9ecd-deaf479d11cd",
+    "persona_id": "b1cf2f16-a988-4889-b93d-43a698a56c0c",
+    "capacitacion_id": "0031e29a-10c0-4f77-96a6-aa5c3221f54e",
+    "fecha_registro": "2026-02-02T13:06:05.55707+00:00"
+  },
+  {
+    "id": "b81535f6-06f6-464e-a69a-83010f0f410c",
+    "persona_id": "b1cf2f16-a988-4889-b93d-43a698a56c0c",
+    "capacitacion_id": "0f95e520-78fa-40e5-a2dc-0d623e4821b1",
+    "fecha_registro": "2026-02-02T13:06:10.642781+00:00"
+  },
+  {
+    "id": "3802fd56-9f31-4475-9fbe-cf92e9b307c8",
+    "persona_id": "7bf17e69-2a70-45e7-a83d-bb3e60bd0b25",
+    "capacitacion_id": "0031e29a-10c0-4f77-96a6-aa5c3221f54e",
+    "fecha_registro": "2026-02-02T13:06:37.522346+00:00"
+  },
+  {
+    "id": "70a04d16-17a5-4980-983d-9004e3690395",
+    "persona_id": "1dc62a48-64ca-4ae7-9f12-5fde811d30af",
+    "capacitacion_id": "0031e29a-10c0-4f77-96a6-aa5c3221f54e",
+    "fecha_registro": "2026-02-02T13:07:15.655901+00:00"
+  },
+  {
+    "id": "1e939f0c-ce67-4bd2-a3e2-d5a00587bfff",
+    "persona_id": "21b31d61-fb84-447b-9557-3a830d4dfb35",
+    "capacitacion_id": "0031e29a-10c0-4f77-96a6-aa5c3221f54e",
+    "fecha_registro": "2026-02-02T13:07:33.102711+00:00"
+  },
+  {
+    "id": "f3689be0-e4f1-4d93-872b-bcca6ae1a8ac",
+    "persona_id": "7bf17e69-2a70-45e7-a83d-bb3e60bd0b25",
+    "capacitacion_id": "44e3d3a3-7e16-4efb-a752-0a2659ce6c47",
+    "fecha_registro": "2026-02-06T14:24:48.065748+00:00"
+  },
+  {
+    "id": "97827bd3-5c4a-484c-a48d-e773629daab6",
+    "persona_id": "6c9b3f4f-daa0-4410-827a-0c2904f2e471",
+    "capacitacion_id": "0031e29a-10c0-4f77-96a6-aa5c3221f54e",
+    "fecha_registro": "2026-02-06T14:25:33.029557+00:00"
+  },
+  {
+    "id": "144dd0d1-6a1c-47e3-b554-41cb9ad10205",
+    "persona_id": "b1cf2f16-a988-4889-b93d-43a698a56c0c",
+    "capacitacion_id": "44e3d3a3-7e16-4efb-a752-0a2659ce6c47",
+    "fecha_registro": "2026-02-09T11:25:50.959143+00:00"
+  }
+]

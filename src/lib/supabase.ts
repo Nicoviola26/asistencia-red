@@ -21,6 +21,7 @@ export type Persona = {
     celular: string | null;
     institucion: string | null;
     rol: 'estudiante' | 'docente' | 'asistente' | 'directivo' | 'estudiante avanzado' | 'agente municipal';
+    eje?: string | null;
     premio_entregado?: boolean;
 };
 
@@ -31,6 +32,7 @@ export type Capacitacion = {
     hora: string;
     lugar: string | null;
     disertante: string | null;
+    activa?: boolean;
 };
 
 export type Asistencia = {

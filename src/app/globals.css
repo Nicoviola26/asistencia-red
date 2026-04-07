@@ -3,11 +3,11 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --background: #f8fafc;
+  --background: #f1f5f9;
   --foreground: #0f172a;
-  --primary: #49b38d;
+  --primary: #0e2954;
   --primary-foreground: #ffffff;
-  --success: #49b38d;
+  --success: #0e2954;
   --success-foreground: #ffffff;
   --card: #ffffff;
   --card-foreground: #1e293b;
@@ -18,7 +18,7 @@
 .dark {
   --background: #0f172a;
   --foreground: #f1f5f9;
-  --primary: #49b38d;
+  --primary: #0e2954;
   --primary-foreground: #ffffff;
   --card: #1e293b;
   --card-foreground: #f8fafc;
@@ -61,7 +61,7 @@ body {
   }
 
   .btn-primary {
-    @apply px-4 py-2 bg-[var(--primary)] text-white rounded-lg font-medium transition-all hover:opacity-90 active:scale-95 disabled:opacity-50 disabled:pointer-events-none shadow-md shadow-emerald-500/10;
+    @apply px-4 py-2 bg-[var(--primary)] text-white rounded-lg font-medium transition-all hover:opacity-90 active:scale-95 disabled:opacity-50 disabled:pointer-events-none shadow-md shadow-slate-900/10;
   }
 
   .btn-success {

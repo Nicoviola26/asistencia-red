@@ -28,29 +28,42 @@ export default function ChecklistPage() {
     const [newCategory, setNewCategory] = useState<Task['category']>('previo');
     const [mounted, setMounted] = useState(false);
     const [showResetModal, setShowResetModal] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [isAdding, setIsAdding] = useState(false);
 
     const [loading, setLoading] = useState(true);
 
     const fetchTasks = useCallback(async () => {
         setLoading(true);
-        const { data, error } = await supabase
-            .from('checklist')
-            .select('*')
-            .order('created_at', { ascending: true });
+        setError(null);
+        try {
+            const { data, error } = await supabase
+                .from('checklist')
+                .select('*')
+                .order('created_at', { ascending: true });
 
-        if (data && data.length > 0) {
-            setTasks(data);
-        } else if (data && data.length === 0) {
-            // Seed if empty
-            const { error: insertError } = await supabase.from('checklist').insert(
-                DEFAULT_TASKS.map(({ id, ...rest }) => ({ ...rest }))
-            );
-            if (!insertError) {
-                const { data: newData } = await supabase.from('checklist').select('*').order('created_at', { ascending: true });
-                if (newData) setTasks(newData);
+            if (error) throw error;
+
+            if (data && data.length > 0) {
+                setTasks(data);
+            } else if (data && data.length === 0) {
+                // Seed if empty
+                const { error: insertError } = await supabase.from('checklist').insert(
+                    DEFAULT_TASKS.map(({ id, ...rest }) => ({ ...rest }))
+                );
+                if (!insertError) {
+                    const { data: newData } = await supabase.from('checklist').select('*').order('created_at', { ascending: true });
+                    if (newData) setTasks(newData);
+                } else {
+                    throw insertError;
+                }
             }
+        } catch (err: any) {
+            console.error('Error fetching tasks:', err);
+            setError(err.message || 'Error al cargar las tareas');
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     }, []);
 
     useEffect(() => {
@@ -74,21 +87,35 @@ export default function ChecklistPage() {
 
     const addTask = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!newTask.trim()) return;
+        if (!newTask.trim() || isAdding) return;
 
-        const { data, error } = await supabase
-            .from('checklist')
-            .insert({
-                text: newTask,
-                completed: false,
-                category: newCategory
-            })
-            .select()
-            .single();
+        setIsAdding(true);
+        setError(null);
 
-        if (data && !error) {
-            setTasks(prev => [...prev, data]);
-            setNewTask('');
+        try {
+            const { data, error } = await supabase
+                .from('checklist')
+                .insert({
+                    text: newTask,
+                    completed: false,
+                    category: newCategory
+                })
+                .select()
+                .single();
+
+            if (error) throw error;
+
+            if (data) {
+                setTasks(prev => [...prev, data]);
+                setNewTask('');
+            }
+        } catch (err: any) {
+            console.error('Error adding task:', err);
+            setError(`Error al agregar: ${err.message || 'Error desconocido'}`);
+            // Auto hide error after 5s
+            setTimeout(() => setError(null), 5000);
+        } finally {
+            setIsAdding(false);
         }
     };
 
@@ -152,6 +179,17 @@ export default function ChecklistPage() {
                     </button>
                 </div>
 
+                {/* Error Banner */}
+                {error && (
+                    <div className="p-4 bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 text-red-700 dark:text-red-400 text-sm font-medium flex items-center justify-between animate-shake">
+                        <div className="flex items-center gap-2">
+                            <AlertTriangle size={18} />
+                            {error}
+                        </div>
+                        <button onClick={() => setError(null)}><X size={16} /></button>
+                    </div>
+                )}
+
                 {/* Progress Bar */}
                 <div className="card p-6 bg-white dark:bg-slate-900 border-l-4 border-[var(--primary)] shadow-md">
                     <div className="flex items-center justify-between mb-2">
@@ -185,8 +223,9 @@ export default function ChecklistPage() {
                         <option value="durante">Durante</option>
                         <option value="despues">Después</option>
                     </select>
-                    <button type="submit" className="btn-primary flex items-center gap-2">
-                        <Plus size={18} /> Agregar
+                    <button type="submit" disabled={isAdding} className="btn-primary flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                        {isAdding ? <Loader2 size={18} className="animate-spin" /> : <Plus size={18} />} 
+                        {isAdding ? 'Agregando...' : 'Agregar'}
                     </button>
                 </form>
 
