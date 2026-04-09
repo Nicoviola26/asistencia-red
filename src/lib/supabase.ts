@@ -43,3 +43,12 @@ export type Asistencia = {
     persona?: Persona;
     capacitacion?: Capacitacion;
 };
+
+export type Certificado = {
+    id: string;
+    dni: string;
+    archivo_url: string;
+    nombre_archivo: string;
+    fecha_subida: string;
+    observaciones?: string;
+};

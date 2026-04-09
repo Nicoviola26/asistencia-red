@@ -171,6 +171,7 @@ export default function AdminLayout({
                     <SidebarLink href="/admin/personas" icon={<FilePlus size={20} />} label="Cargar Persona" />
                     <SidebarLink href="/admin/platea-docente" icon={<GraduationCap size={20} />} label="Platea Docente" />
                     <SidebarLink href="/admin/capacitaciones" icon={<Calendar size={20} />} label="Gestionar Capacitaciones" />
+                    <SidebarLink href="/admin/certificados" icon={<GraduationCap size={20} />} label="Gestión Certificados" />
                     <SidebarLink href="/admin/mensajeria" icon={<Mail size={20} />} label="Mensajería" />
                     <SidebarLink href="/admin/checklist" icon={<ClipboardList size={20} />} label="Aspectos a Tener en Cuenta" />
                 </nav>
