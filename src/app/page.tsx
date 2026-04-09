@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { publicSupabase, type Capacitacion } from '@/lib/supabase';
-import { Search, Loader2, CheckCircle2, AlertCircle, Lock, FileText } from 'lucide-react';
+import { Search, Loader2, CheckCircle2, AlertCircle, Lock } from 'lucide-react';
 import Link from 'next/link';
 import { useToast } from '@/components/Toast';
 
@@ -237,16 +237,6 @@ export default function RegistrationPage() {
               {loading ? <Loader2 className="animate-spin" /> : 'Registrar Asistencia'}
             </button>
           </form>
-
-          <div className="mt-8 pt-6 border-t border-slate-100 dark:border-slate-800 text-center">
-            <Link 
-              href="/certificados" 
-              className="inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-[var(--primary)] transition-colors group"
-            >
-              <FileText size={18} className="group-hover:rotate-12 transition-transform" />
-              <span>¿BUSCÁS TU CERTIFICADO?</span>
-            </Link>
-          </div>
         </div>
       </div>
 
