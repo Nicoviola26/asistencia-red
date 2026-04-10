@@ -86,14 +86,20 @@ export default function CargarPersonaPage() {
                     console.log('Fila procesada - Columnas normalizadas:', Object.keys(normalized));
 
                     const get = (...candidates: string[]) => {
+                        // 1. Intentar coincidencia exacta con los candidatos
                         for (const c of candidates) {
                             if (normalized[c] != null && normalized[c] !== '') return normalized[c];
                         }
-                        // Búsqueda por palabra clave si no hay coincidencia exacta
-                        const findByKeyword = (kw: string) => {
-                            const foundKey = Object.keys(normalized).find(k => k.includes(kw));
-                            return foundKey ? normalized[foundKey] : null;
-                        };
+                        
+                        // 2. Intentar coincidencia por palabra clave (si alguna columna contiene la palabra clave)
+                        for (const c of candidates) {
+                            // Solo usar candidatos cortos como palabras clave para evitar falsos positivos
+                            if (c.length < 3) continue;
+                            const foundKey = Object.keys(normalized).find(k => k.includes(c));
+                            if (foundKey && normalized[foundKey] != null && normalized[foundKey] !== '') {
+                                return normalized[foundKey];
+                            }
+                        }
                         return '';
                     };
 
@@ -102,7 +108,7 @@ export default function CargarPersonaPage() {
 
                     // Mapeo y normalización de roles mejorado
                     let rolFinal = 'Docente';
-                    if (rawRol.includes('dir') || rawRol.includes('vice') || rawRol.includes('rector')) {
+                    if (rawRol.includes('dir') || rawRol.includes('vice') || rawRol.includes('rector') || rawRol.includes('direc')) {
                         rolFinal = 'Directivo';
                     } else if (rawRol.includes('sec')) {
                         rolFinal = 'Secretario/a';
@@ -118,10 +124,10 @@ export default function CargarPersonaPage() {
                         dni: String(get('dni', 'documento', 'dnisinpuntos', 'nrodocumento', 'numdocumento', 'documentodeidentidad', 'ndocumento')).replace(/\D/g, '').trim(),
                         nombre: nombreStr,
                         apellido: String(get('apellido', 'apellidos')).trim(),
-                        correo: String(get('correo', 'email', 'mail', 'correoelectronico', 'correoelectronicoqueutiliceconfrecuencia', 'emaildecontacto', 'direcciondecorreo')).trim(),
-                        celular: String(get('celular', 'telefono', 'whatsapp', 'telefonodecontacto', 'telefonodecontactoconaccesoawhatsapp', 'numerodecontacto', 'movil', 'tel', 'nrotel', 'numerodecelular')).trim(),
+                        correo: String(get('correo', 'email', 'mail', 'correoelectronico', 'emaildecontacto', 'direcciondecorreo')).trim(),
+                        celular: String(get('celular', 'telefono', 'whatsapp', 'telefonodecontacto', 'numerodecontacto', 'movil', 'tel', 'nrotel', 'numerodecelular')).trim(),
                         institucion: String(
-                            get('institucion', 'organizacion', 'institucionalaquepertenece', 'entidad', 'escuela', 'colegio')
+                            get('institucion', 'organizacion', 'institucionalaquepertenece', 'entidad', 'escuela', 'colegio', 'lugar')
                         ).trim(),
                         rol: rolFinal,
                         eje: String(get('eje', 'sector', 'area', 'tematica', 'trayecto')).trim()
