@@ -18,10 +18,11 @@ export default function DescargarCertificadosPage() {
         setLoading(true);
         setSearched(true);
         try {
+            const cleanedDni = dni.replace(/\D/g, '').trim();
             const { data, error } = await publicSupabase
                 .from('certificados')
                 .select('*')
-                .eq('dni', dni.trim())
+                .eq('dni', cleanedDni)
                 .order('fecha_subida', { ascending: false });
 
             if (error) throw error;

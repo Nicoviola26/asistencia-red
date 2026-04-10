@@ -168,7 +168,7 @@ export default function CertificadosAdminPage() {
                                 className="input-field"
                                 placeholder="Ej: 30123456"
                                 value={dni}
-                                onChange={(e) => setDni(e.target.value)}
+                                onChange={(e) => setDni(e.target.value.replace(/\D/g, '').slice(0, 8))}
                                 required
                             />
                         </div>

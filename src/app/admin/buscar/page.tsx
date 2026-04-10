@@ -168,7 +168,15 @@ export default function BuscarPersonaPage() {
                 .order('apellido', { ascending: true });
 
             if (query.trim()) {
-                queryBuilder = queryBuilder.or(`dni.eq.${query.trim()},nombre.ilike.%${query.trim()}%,apellido.ilike.%${query.trim()}%,rol.ilike.%${query.trim()}%`);
+                const cleanedQuery = query.trim();
+                const onlyDigits = cleanedQuery.replace(/\D/g, '');
+                
+                // If it looks like a DNI (only digits or dots/spaces that result in digits), try exact match on DNI too
+                if (onlyDigits.length >= 7 && onlyDigits.length <= 8) {
+                    queryBuilder = queryBuilder.or(`dni.eq.${onlyDigits},nombre.ilike.%${cleanedQuery}%,apellido.ilike.%${cleanedQuery}%,rol.ilike.%${cleanedQuery}%`);
+                } else {
+                    queryBuilder = queryBuilder.or(`dni.ilike.%${cleanedQuery}%,nombre.ilike.%${cleanedQuery}%,apellido.ilike.%${cleanedQuery}%,rol.ilike.%${cleanedQuery}%`);
+                }
             }
 
             const { data: results, error: searchError } = await queryBuilder;

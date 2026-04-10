@@ -78,7 +78,7 @@ export default function CargarPersonaPage() {
                             .toLowerCase()
                             .normalize('NFD')
                             .replace(/[\u0300-\u036f]/g, '') // quitar acentos
-                            .replace(/\s+/g, ''); // quitar espacios
+                            .replace(/[^a-z0-9]/g, ''); // quitar todo lo que no sea letra o número (espacios, paréntesis, puntos, etc)
                         normalized[k] = value;
                     });
 
@@ -119,7 +119,7 @@ export default function CargarPersonaPage() {
                     }
 
                     return {
-                        dni: String(get('dni', 'documento')).trim(),
+                        dni: String(get('dni', 'documento', 'dnisinpuntos', 'nrodocumento', 'numdocumento', 'documentodeidentidad', 'ndocumento')).replace(/\D/g, '').trim(),
                         nombre: nombreStr,
                         apellido: String(get('apellido')).trim(),
                         correo: String(get('correo', 'email', 'mail', 'correoelectronico')).trim(),
@@ -128,11 +128,13 @@ export default function CargarPersonaPage() {
                             get(
                                 'institucion',
                                 'organizacion',
-                                'institucionalaquepertenece'
+                                'institucionalaquepertenece',
+                                'entidad',
+                                'escuela'
                             )
                         ).trim(),
                         rol: rolFinal,
-                        eje: String(get('eje')).trim()
+                        eje: String(get('eje', 'sector', 'area', 'tematica')).trim()
                     };
                 }).filter(p => p.dni && p.nombre);
 
@@ -314,7 +316,7 @@ export default function CargarPersonaPage() {
                                 </p>
                             </div>
                             <div className="flex flex-wrap justify-center gap-2">
-                                {['dni', 'nombre', 'apellido', 'institucion', 'rol', 'categoria', 'celular', 'eje', 'WhatsApp', 'institución a la que pertenece'].map(tag => (
+                                {['dni', 'documento', 'DNI (sin puntos)', 'distrito', 'nombre', 'apellido', 'institucion', 'escuela', 'rol', 'categoria', 'celular', 'eje', 'WhatsApp', 'Nro de Documento'].map(tag => (
                                     <span key={tag} className="px-2 py-1 bg-white dark:bg-slate-800 rounded text-[10px] font-mono border border-slate-200 dark:border-slate-700">
                                         {tag}
                                     </span>
