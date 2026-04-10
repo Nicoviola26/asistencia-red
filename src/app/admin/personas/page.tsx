@@ -71,70 +71,60 @@ export default function CargarPersonaPage() {
 
                 // Normalizar datos (mapear columnas comunes ignorando mayúsculas, espacios y acentos)
                 const personasToInsert = data.map((item: any) => {
-                    const normalized: Record<string, unknown> = {};
+                    const normalized: Record<string, any> = {};
                     Object.entries(item).forEach(([key, value]) => {
                         const k = key
                             .toString()
                             .toLowerCase()
                             .normalize('NFD')
-                            .replace(/[\u0300-\u036f]/g, '') // quitar acentos
-                            .replace(/[^a-z0-9]/g, ''); // quitar todo lo que no sea letra o número (espacios, paréntesis, puntos, etc)
+                            .replace(/[\u0300-\u036f]/g, '')
+                            .replace(/[^a-z0-9]/g, '');
                         normalized[k] = value;
                     });
+
+                    // Log para depuración en consola del navegador
+                    console.log('Fila procesada - Columnas normalizadas:', Object.keys(normalized));
 
                     const get = (...candidates: string[]) => {
                         for (const c of candidates) {
                             if (normalized[c] != null && normalized[c] !== '') return normalized[c];
                         }
+                        // Búsqueda por palabra clave si no hay coincidencia exacta
+                        const findByKeyword = (kw: string) => {
+                            const foundKey = Object.keys(normalized).find(k => k.includes(kw));
+                            return foundKey ? normalized[foundKey] : null;
+                        };
                         return '';
                     };
 
-                    // Lógica para detectar género y normalizar rol
-                    const nombreStr = String(get('nombre')).trim();
-                    const rawRol = String(get('rol', 'categoria', 'cargo', 'funcion')).toLowerCase().trim();
-                    const generoExcel = String(get('sexo', 'genero', 'genero')).toLowerCase().trim();
+                    const nombreStr = String(get('nombre', 'nombreyapellido', 'nombres', 'datos')).trim();
+                    const rawRol = String(get('rol', 'categoria', 'cargo', 'funcion', 'puesto', 'jerarquia', 'condicion', 'escalafon')).toLowerCase().trim();
 
-                    // Heurística simple para género si no viene en el Excel
-                    let esFemenino = generoExcel.startsWith('f') || generoExcel.startsWith('mue'); // 'femenino' o 'mujer'
-                    if (!generoExcel) {
-                        const primerNombre = nombreStr.split(' ')[0].toLowerCase();
-                        // Si termina en 'a', suele ser femenino (con excepciones, pero es la mejor apuesta simple)
-                        if (primerNombre.endsWith('a') && !['lucas', 'nicolas', 'matias', 'tomas'].includes(primerNombre)) {
-                            esFemenino = true;
-                        }
-                    }
-
-                    // Mapeo y normalización de roles
+                    // Mapeo y normalización de roles mejorado
                     let rolFinal = 'Docente';
-                    if (rawRol.includes('dir') || rawRol.includes('vice')) {
+                    if (rawRol.includes('dir') || rawRol.includes('vice') || rawRol.includes('rector')) {
                         rolFinal = 'Directivo';
                     } else if (rawRol.includes('sec')) {
                         rolFinal = 'Secretario/a';
-                    } else if (rawRol.includes('estud')) {
+                    } else if (rawRol.includes('estud') || rawRol.includes('alumno')) {
                         rolFinal = 'Estudiante Avanzado';
-                    } else if (rawRol.includes('agen') || rawRol.includes('muni')) {
+                    } else if (rawRol.includes('agen') || rawRol.includes('muni') || rawRol.includes('admin')) {
                         rolFinal = 'Agente Municipal';
-                    } else if (rawRol.includes('docen') || rawRol.includes('prof')) {
+                    } else if (rawRol.includes('docen') || rawRol.includes('prof') || rawRol.includes('maest')) {
                         rolFinal = 'Docente';
                     }
 
                     return {
                         dni: String(get('dni', 'documento', 'dnisinpuntos', 'nrodocumento', 'numdocumento', 'documentodeidentidad', 'ndocumento')).replace(/\D/g, '').trim(),
                         nombre: nombreStr,
-                        apellido: String(get('apellido')).trim(),
+                        apellido: String(get('apellido', 'apellidos')).trim(),
                         correo: String(get('correo', 'email', 'mail', 'correoelectronico', 'correoelectronicoqueutiliceconfrecuencia', 'emaildecontacto', 'direcciondecorreo')).trim(),
-                        celular: String(get('celular', 'telefono', 'whatsapp', 'telefonodecontacto', 'telefonodecontactoconaccesoawhatsapp', 'numerodecontacto', 'movil', 'tel', 'nrotel')).trim(),
+                        celular: String(get('celular', 'telefono', 'whatsapp', 'telefonodecontacto', 'telefonodecontactoconaccesoawhatsapp', 'numerodecontacto', 'movil', 'tel', 'nrotel', 'numerodecelular')).trim(),
                         institucion: String(
-                            get(
-                                'institucion',
-                                'organizacion',
-                                'institucionalaquepertenece',
-                                'entidad',
-                                'escuela'
-                            )
+                            get('institucion', 'organizacion', 'institucionalaquepertenece', 'entidad', 'escuela', 'colegio')
                         ).trim(),
                         rol: rolFinal,
-                        eje: String(get('eje', 'sector', 'area', 'tematica')).trim()
+                        eje: String(get('eje', 'sector', 'area', 'tematica', 'trayecto')).trim()
                     };
                 }).filter(p => p.dni && p.nombre);
 
