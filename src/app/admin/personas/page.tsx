@@ -60,7 +60,7 @@ export default function CargarPersonaPage() {
         reader.onload = async (evt) => {
             try {
                 const dataBuffer = evt.target?.result;
-                const wb = XLSX.read(dataBuffer, { type: 'array' });
+                const wb = XLSX.read(dataBuffer, { type: 'array', codepage: 65001 });
                 const wsname = wb.SheetNames[0];
                 const ws = wb.Sheets[wsname];
                 const data = XLSX.utils.sheet_to_json(ws);
