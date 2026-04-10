@@ -122,8 +122,8 @@ export default function CargarPersonaPage() {
                         dni: String(get('dni', 'documento', 'dnisinpuntos', 'nrodocumento', 'numdocumento', 'documentodeidentidad', 'ndocumento')).replace(/\D/g, '').trim(),
                         nombre: nombreStr,
                         apellido: String(get('apellido')).trim(),
-                        correo: String(get('correo', 'email', 'mail', 'correoelectronico')).trim(),
-                        celular: String(get('celular', 'telefono', 'whatsapp')).trim(),
+                        correo: String(get('correo', 'email', 'mail', 'correoelectronico', 'correoelectronicoqueutiliceconfrecuencia', 'emaildecontacto', 'direcciondecorreo')).trim(),
+                        celular: String(get('celular', 'telefono', 'whatsapp', 'telefonodecontacto', 'telefonodecontactoconaccesoawhatsapp', 'numerodecontacto', 'movil', 'tel', 'nrotel')).trim(),
                         institucion: String(
                             get(
                                 'institucion',
@@ -316,7 +316,7 @@ export default function CargarPersonaPage() {
                                 </p>
                             </div>
                             <div className="flex flex-wrap justify-center gap-2">
-                                {['dni', 'documento', 'DNI (sin puntos)', 'distrito', 'nombre', 'apellido', 'institucion', 'escuela', 'rol', 'categoria', 'celular', 'eje', 'WhatsApp', 'Nro de Documento'].map(tag => (
+                                {['dni', 'documento', 'DNI (sin puntos)', 'nombre', 'apellido', 'institucion', 'escuela', 'rol', 'celular', 'Teléfono de contacto', 'eje', 'WhatsApp', 'Email', 'Correo Electrónico'].map(tag => (
                                     <span key={tag} className="px-2 py-1 bg-white dark:bg-slate-800 rounded text-[10px] font-mono border border-slate-200 dark:border-slate-700">
                                         {tag}
                                     </span>
