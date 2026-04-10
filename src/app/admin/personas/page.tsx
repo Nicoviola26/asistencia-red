@@ -59,8 +59,8 @@ export default function CargarPersonaPage() {
         const reader = new FileReader();
         reader.onload = async (evt) => {
             try {
-                const bstr = evt.target?.result;
-                const wb = XLSX.read(bstr, { type: 'binary' });
+                const dataBuffer = evt.target?.result;
+                const wb = XLSX.read(dataBuffer, { type: 'array' });
                 const wsname = wb.SheetNames[0];
                 const ws = wb.Sheets[wsname];
                 const data = XLSX.utils.sheet_to_json(ws);
@@ -160,7 +160,7 @@ export default function CargarPersonaPage() {
                 if (fileInputRef.current) fileInputRef.current.value = '';
             }
         };
-        reader.readAsBinaryString(file);
+        reader.readAsArrayBuffer(file);
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
