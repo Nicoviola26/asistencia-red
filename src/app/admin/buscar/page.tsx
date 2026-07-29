@@ -20,6 +20,32 @@ export default function BuscarPersonaPage() {
     const [asistencias, setAsistencias] = useState<any[]>([]);
     const [error, setError] = useState('');
 
+    const handleExportVCard = (p: any) => {
+        const vcard = [
+            'BEGIN:VCARD',
+            'VERSION:3.0',
+            `FN:${p.nombre} ${p.apellido}`,
+            `N:${p.apellido};${p.nombre};;;`,
+            `TEL;TYPE=CELL:${p.celular || ''}`,
+            `EMAIL:${p.correo || ''}`,
+            `ORG:${p.institucion || ''}`,
+            `TITLE:${p.rol || ''}`,
+            `NOTE:DNI: ${p.dni} | Eje: ${p.eje || 'General'}`,
+            'END:VCARD'
+        ].join('\r\n');
+
+        const blob = new Blob([vcard], { type: 'text/vcard;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${p.nombre}_${p.apellido}.vcf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        showToast('Contacto exportado como vCard', 'success');
+    };
+
     const handleDownloadParticipants = async () => {
         setExporting(true);
         try {
@@ -371,6 +397,13 @@ export default function BuscarPersonaPage() {
                                             <InfoItem label="WhatsApp" value={persona.celular || 'S/D'} icon={<Phone size={16} />} />
                                             <InfoItem label="Correo" value={persona.correo || 'S/D'} icon={<Mail size={16} />} />
                                         </div>
+                                        <button
+                                            onClick={() => handleExportVCard(persona)}
+                                            className="mt-6 w-full flex items-center justify-center gap-2 py-3 bg-white/10 hover:bg-white/20 rounded-2xl border border-white/20 text-xs font-black uppercase tracking-widest transition-all active:scale-[0.97] backdrop-blur-md"
+                                        >
+                                            <Download size={14} />
+                                            Exportar Contacto
+                                        </button>
                                     </div>
                                 </div>
                             </div>
