@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { LayoutDashboard, Users, FilePlus, Calendar, Search, LogOut, Lock, Loader2, ClipboardList, Sun, Moon, Mail, GraduationCap } from 'lucide-react';
+import { LayoutDashboard, Users, FilePlus, Calendar, Search, LogOut, Lock, Loader2, ClipboardList, Sun, Moon, Mail, GraduationCap, FileText } from 'lucide-react';
 import Link from 'next/link';
 import HelpModal from '@/components/HelpModal';
 
@@ -171,7 +171,7 @@ export default function AdminLayout({
                     <SidebarLink href="/admin/personas" icon={<FilePlus size={20} />} label="Cargar Persona" />
                     <SidebarLink href="/admin/platea-docente" icon={<GraduationCap size={20} />} label="Platea Docente" />
                     <SidebarLink href="/admin/capacitaciones" icon={<Calendar size={20} />} label="Gestionar Capacitaciones" />
-                    <SidebarLink href="/admin/mensajeria" icon={<Mail size={20} />} label="Mensajería" />
+                    <SidebarLink href="/admin/certificados" icon={<FileText size={20} />} label="Gestionar Certificados" />
                     <SidebarLink href="/admin/checklist" icon={<ClipboardList size={20} />} label="Aspectos a Tener en Cuenta" />
                 </nav>
 
