@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { supabase, type Capacitacion, type Asistencia } from '@/lib/supabase';
-import { Download, Loader2, Users, Calendar, FileText, Printer, Search, ArrowUpRight, CheckCircle2, UserCheck, GraduationCap } from 'lucide-react';
+import { supabase, type Capacitacion } from '@/lib/supabase';
+import { Download, Loader2, Users, Calendar, FileText, Printer, Search, UserCheck, GraduationCap, UserPlus, UserX } from 'lucide-react';
 import { useToast } from '@/components/Toast';
+import ModalConvocados from '@/components/ModalConvocados';
 import * as XLSX from 'xlsx';
 
 export default function AsistenciaControlPage() {
@@ -13,7 +14,9 @@ export default function AsistenciaControlPage() {
     const [asistencias, setAsistencias] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
     const [totalPersonas, setTotalPersonas] = useState(0);
+    const [totalConvocados, setTotalConvocados] = useState(0);
     const [searchTerm, setSearchTerm] = useState('');
+    const [showConvocados, setShowConvocados] = useState(false);
 
     useEffect(() => {
         fetchCapacitaciones();
@@ -40,14 +43,22 @@ export default function AsistenciaControlPage() {
 
     async function fetchAsistencias(id: string) {
         setLoading(true);
-        const { data } = await supabase
-            .from('asistencias')
-            .select(`
-                id,
-                fecha_registro,
-                personas (dni, nombre, apellido, rol, institucion, celular, eje)
-            `)
-            .eq('capacitacion_id', id) as any;
+        const [{ data }, { count }] = await Promise.all([
+            supabase
+                .from('asistencias')
+                .select(`
+                    id,
+                    fecha_registro,
+                    personas (dni, nombre, apellido, rol, institucion, celular, eje)
+                `)
+                .eq('capacitacion_id', id) as any,
+            supabase
+                .from('capacitacion_personas')
+                .select('id', { count: 'exact', head: true })
+                .eq('capacitacion_id', id) as any,
+        ]);
+
+        setTotalConvocados(count || 0);
 
         if (data) {
             const sortedData = [...data].sort((a: any, b: any) => {
@@ -112,7 +123,8 @@ export default function AsistenciaControlPage() {
                     disertante,
                     asistencias(
                         personas(rol)
-                    )
+                    ),
+                    capacitacion_personas(id)
                 `)
                 .order('dia', { ascending: false });
 
@@ -122,6 +134,7 @@ export default function AsistenciaControlPage() {
                 const worksheetData = data.map((c: any) => {
                     const asistencias_list = c.asistencias || [];
                     const count = asistencias_list.length;
+                    const convocados = (c.capacitacion_personas || []).length;
 
                     const stats = asistencias_list.reduce((acc: any, curr: any) => {
                         let rol = (curr.personas?.rol || 'Sin asignar').toLowerCase().trim();
@@ -136,14 +149,19 @@ export default function AsistenciaControlPage() {
                         return acc;
                     }, {});
 
-                    const percentage = totalPersonas > 0 ? Math.round((count / totalPersonas) * 100) : 0;
+                    // Sin padrón cargado se cae al total de la red, que es un
+                    // denominador inflado y no representa al público del evento.
+                    const base = convocados > 0 ? convocados : totalPersonas;
+                    const percentage = base > 0 ? Math.round((count / base) * 100) : 0;
 
                     return {
                         Capacitación: c.nombre,
                         Fecha: new Date(c.dia).toLocaleDateString(),
                         Lugar: c.lugar || 'S/D',
                         Disertante: c.disertante || 'S/D',
+                        Convocados: convocados > 0 ? convocados : 'S/D',
                         'Total Asistentes': count,
+                        Ausentes: convocados > 0 ? convocados - count : 'S/D',
                         'Docentes': stats['docente'] || 0,
                         'Directivos': stats['directivo'] || 0,
                         'Estud. Avanzados': stats['estudiante avanzado'] || 0,
@@ -167,9 +185,14 @@ export default function AsistenciaControlPage() {
         }
     };
 
-    const asistenciaPercentage = totalPersonas > 0
-        ? Math.round((asistencias.length / totalPersonas) * 100)
+    // El porcentaje solo es confiable si hay padrón de convocados cargado: sin
+    // él, dividir por toda la red da un número artificialmente bajo.
+    const hayPadron = totalConvocados > 0;
+    const baseCalculo = hayPadron ? totalConvocados : totalPersonas;
+    const asistenciaPercentage = baseCalculo > 0
+        ? Math.round((asistencias.length / baseCalculo) * 100)
         : 0;
+    const ausentes = hayPadron ? Math.max(totalConvocados - asistencias.length, 0) : null;
 
     const currentCap = capacitaciones.find(c => c.id === selectedCapacitacion);
 
@@ -189,7 +212,10 @@ export default function AsistenciaControlPage() {
                         <p><strong>Fecha:</strong> {currentCap ? new Date(currentCap.dia).toLocaleDateString() : '-'}</p>
                         <p><strong>Lugar:</strong> {currentCap?.lugar || '-'}</p>
                         <p><strong>Disertante:</strong> {currentCap?.disertante || '-'}</p>
+                        {hayPadron && <p><strong>Convocados:</strong> {totalConvocados}</p>}
                         <p><strong>Total Presentes:</strong> {asistencias.length} asistentes</p>
+                        {ausentes !== null && <p><strong>Ausentes:</strong> {ausentes}</p>}
+                        {hayPadron && <p><strong>Asistencia:</strong> {asistenciaPercentage}%</p>}
                     </div>
                 </div>
 
@@ -253,6 +279,13 @@ export default function AsistenciaControlPage() {
                     {selectedCapacitacion && (
                         <>
                             <button
+                                onClick={() => setShowConvocados(true)}
+                                className="btn-primary bg-emerald-600 hover:bg-emerald-700 h-10 px-5 flex items-center justify-center gap-2 group shadow-lg shadow-emerald-600/20 border-none transition-all active:scale-[0.97] whitespace-nowrap"
+                            >
+                                <UserPlus size={14} className="group-hover:scale-110 transition-transform" />
+                                <span className="text-[10px] font-black uppercase tracking-widest">Convocados / Presentes</span>
+                            </button>
+                            <button
                                 onClick={handlePrint}
                                 className="btn-primary bg-indigo-600 hover:bg-indigo-700 text-white h-10 px-5 flex items-center justify-center gap-2 group shadow-lg shadow-indigo-600/20 border-none transition-all active:scale-[0.97] whitespace-nowrap"
                             >
@@ -261,7 +294,7 @@ export default function AsistenciaControlPage() {
                             </button>
                             <button
                                 onClick={exportToExcel}
-                                className="btn-primary bg-emerald-600 hover:bg-emerald-700 h-10 px-5 flex items-center justify-center gap-2 group shadow-lg shadow-emerald-600/20 border-none transition-all active:scale-[0.97] whitespace-nowrap"
+                                className="btn-primary bg-slate-800 hover:bg-slate-900 h-10 px-5 flex items-center justify-center gap-2 group shadow-lg shadow-slate-900/20 border-none transition-all active:scale-[0.97] whitespace-nowrap"
                             >
                                 <FileText size={14} className="group-hover:rotate-6 transition-transform" />
                                 <span className="text-[10px] font-black uppercase tracking-widest">Exportar Excel</span>
@@ -293,15 +326,14 @@ export default function AsistenciaControlPage() {
 
                     {selectedCapacitacion && currentCap && (
                         <div className="space-y-4 pt-4 border-t border-slate-200 dark:border-slate-700 animate-fade-in">
-                            <p className="text-[11px] text-slate-500 font-medium italic border-l-2 border-emerald-500 pl-3 py-1">
-                                "Monitorea y analiza el impacto de cada capacitación en tiempo real."
-                            </p>
                             <div className="flex items-center gap-3 text-sm font-medium">
                                 <Calendar size={16} className="text-[var(--primary)]" />
                                 {new Date(currentCap.dia).toLocaleDateString()}
                             </div>
                             <div className="p-4 bg-slate-900/5 rounded-2xl border border-slate-900/10">
-                                <p className="text-[10px] text-slate-800 dark:text-slate-100 font-black uppercase tracking-widest mb-2">Impacto Directo</p>
+                                <p className="text-[10px] text-slate-800 dark:text-slate-100 font-black uppercase tracking-widest mb-2">
+                                    {hayPadron ? 'Asistencia Real' : 'Impacto Directo'}
+                                </p>
                                 <div className="flex items-baseline gap-1">
                                     <span className="text-4xl font-black text-slate-900 dark:text-slate-100">{asistenciaPercentage}%</span>
                                     <span className="text-xs font-bold text-slate-500">asist.</span>
@@ -313,9 +345,37 @@ export default function AsistenciaControlPage() {
                                     />
                                 </div>
                                 <p className="text-[10px] text-slate-500 font-bold mt-2 uppercase">
-                                    {asistencias.length} de {totalPersonas} personas
+                                    {hayPadron
+                                        ? `${asistencias.length} de ${totalConvocados} convocados`
+                                        : `${asistencias.length} de ${totalPersonas} personas`}
                                 </p>
+                                {ausentes !== null && (
+                                    <p className="text-[10px] text-amber-600 dark:text-amber-400 font-bold mt-1 uppercase">
+                                        {ausentes} ausentes
+                                    </p>
+                                )}
                             </div>
+
+                            {!hayPadron ? (
+                                <div className="p-4 bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800 rounded-2xl">
+                                    <p className="text-[10px] text-amber-800 dark:text-amber-300 font-bold uppercase tracking-wider leading-relaxed">
+                                        Sin padrón cargado: el porcentaje usa las {totalPersonas} personas de toda la red, no el público del evento.
+                                    </p>
+                                    <button
+                                        onClick={() => setShowConvocados(true)}
+                                        className="mt-3 w-full btn-primary bg-amber-600 hover:bg-amber-700 h-9 border-none shadow-lg shadow-amber-600/20 active:scale-[0.97]"
+                                    >
+                                        <span className="text-[10px] font-black uppercase tracking-widest">Cargar Convocados</span>
+                                    </button>
+                                </div>
+                            ) : (
+                                <button
+                                    onClick={() => setShowConvocados(true)}
+                                    className="w-full btn-primary bg-slate-800 hover:bg-slate-900 h-9 border-none shadow-lg shadow-slate-900/20 active:scale-[0.97]"
+                                >
+                                    <span className="text-[10px] font-black uppercase tracking-widest">Editar Padrón ({totalConvocados})</span>
+                                </button>
+                            )}
                         </div>
                     )}
                 </div>
@@ -325,24 +385,30 @@ export default function AsistenciaControlPage() {
                     {selectedCapacitacion ? (
                         <div className="space-y-6">
                             {/* Detailed Stats Row */}
-                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                                <MiniStatCard
+                                    label="Convocados"
+                                    value={totalConvocados}
+                                    icon={<Users size={20} className="text-slate-500" />}
+                                    color="bg-slate-500/10 text-slate-600"
+                                />
                                 <MiniStatCard
                                     label="Asistentes"
                                     value={asistencias.length}
-                                    icon={<Users size={20} className="text-blue-500" />}
+                                    icon={<UserCheck size={20} className="text-blue-500" />}
                                     color="bg-blue-500/10 text-blue-600"
+                                />
+                                <MiniStatCard
+                                    label="Ausentes"
+                                    value={ausentes ?? '-'}
+                                    icon={<UserX size={20} className="text-amber-500" />}
+                                    color="bg-amber-500/10 text-amber-600"
                                 />
                                 <MiniStatCard
                                     label="Roles Únicos"
                                     value={new Set(asistencias.map(a => a.personas.rol)).size}
                                     icon={<GraduationCap size={20} className="text-purple-500" />}
                                     color="bg-purple-500/10 text-purple-600"
-                                />
-                                <MiniStatCard
-                                    label="Inscritos Hoy"
-                                    value={asistencias.filter(a => new Date(a.fecha_registro).toDateString() === new Date().toDateString()).length}
-                                    icon={<ArrowUpRight size={20} className="text-emerald-500" />}
-                                    color="bg-emerald-500/10 text-emerald-600"
                                 />
                             </div>
 
@@ -484,11 +550,19 @@ export default function AsistenciaControlPage() {
                     )}
                 </div>
             </div>
+
+            {showConvocados && currentCap && (
+                <ModalConvocados
+                    capacitacion={currentCap}
+                    onClose={() => setShowConvocados(false)}
+                    onChange={() => fetchAsistencias(selectedCapacitacion)}
+                />
+            )}
         </div>
     );
 }
 
-function MiniStatCard({ label, value, icon, color }: { label: string, value: number, icon: React.ReactNode, color: string }) {
+function MiniStatCard({ label, value, icon, color }: { label: string, value: number | string, icon: React.ReactNode, color: string }) {
     return (
         <div className="card p-5 border-none shadow-lg group hover:scale-[1.02] transition-transform duration-300">
             <div className="flex items-center justify-between mb-4">
