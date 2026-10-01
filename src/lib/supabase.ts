@@ -27,6 +27,9 @@ export type Persona = {
     rol: 'estudiante' | 'docente' | 'asistente' | 'directivo' | 'estudiante avanzado' | 'agente municipal';
     eje?: string | null;
     premio_entregado?: boolean;
+    // Momento del alta. NULL en las personas cargadas antes de que existiera
+    // esta columna: se consideran las mas antiguas.
+    fecha_carga?: string | null;
 };
 
 export type Capacitacion = {

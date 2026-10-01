@@ -21,6 +21,7 @@ export default function MensajeriaPage() {
         apellido: string;
         correo: string | null;
         rol?: string;
+        fecha_carga?: string | null;
     };
     const [subject, setSubject] = useState('');
     const [message, setMessage] = useState('');
@@ -31,6 +32,11 @@ export default function MensajeriaPage() {
     const [selectedRole, setSelectedRole] = useState('');
     const [selectedCapacitacion, setSelectedCapacitacion] = useState('');
     const [recipientCount, setRecipientCount] = useState(0);
+    // Audiencia resuelta, deduplicada y ordenada de mas antiguo a mas reciente.
+    // Es la misma lista que se exporta y a la que se envia, asi que lo que se ve
+    // aca es exactamente lo que sale.
+    const [audience, setAudience] = useState<PersonaSimple[]>([]);
+    const [loadingAudience, setLoadingAudience] = useState(false);
     const [broadcastSubject, setBroadcastSubject] = useState('');
     const [broadcastMessage, setBroadcastMessage] = useState('');
     const [broadcastAttachments, setBroadcastAttachments] = useState<{ filename: string, content: string }[]>([]);
@@ -58,7 +64,7 @@ export default function MensajeriaPage() {
         // Search by DNI (exact) or Name/Surname/Role (partial)
         let query = supabase
             .from('personas')
-            .select('id, nombre, apellido, correo, dni, rol')
+            .select('id, nombre, apellido, correo, dni, rol, fecha_carga')
             .limit(10);
 
         // Check if search term is numeric (DNI)
@@ -97,8 +103,9 @@ export default function MensajeriaPage() {
             // Remove
             setSelectedPersonas(prev => prev.filter(p => p.id !== persona.id));
         } else {
-            // Add
-            setSelectedPersonas(prev => [...prev, persona]);
+            // Add. Se reordena por fecha de carga para que la lista de chips y la
+            // exportacion salgan siempre del mas antiguo al mas reciente.
+            setSelectedPersonas(prev => ordenarPorFechaCarga([...prev, persona]));
             setSearchTerm(''); // Clear search after adding one? Maybe user wants to add more. Let's keep search active but clear results if desired. 
             // Better UX: keep search results open to pick more, or clear?
             // User request: "que me deje seleccionar mas de un contacto" -> imply searching and picking multiple.
@@ -145,135 +152,178 @@ export default function MensajeriaPage() {
         }
     };
 
-    const copyEmailsToClipboard = (emails: string[]) => {
-        const chunks = [];
-        for (let i = 0; i < emails.length; i += 25) {
-            chunks.push(emails.slice(i, i + 25).join(', '));
-        }
-        const text = chunks.join('\n\n--- Grupo de 25 ---\n\n');
-        navigator.clipboard.writeText(text);
-        setStatus({ type: 'success', text: 'Correos copiados al portapapeles (separados cada 25).' });
-        setTimeout(() => setStatus(null), 3000);
+    const LOTE = 50;
+
+    const formatearMomento = (fecha: Date) =>
+        fecha.toLocaleString('es-AR', { dateStyle: 'long', timeStyle: 'short' });
+
+    const formatearFechaCarga = (fecha: string | null | undefined) => {
+        if (!fecha) return 'sin fecha de carga';
+        const d = new Date(fecha);
+        return Number.isNaN(d.getTime())
+            ? 'sin fecha de carga'
+            : d.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' });
     };
 
-    const exportEmailsToTxt = (emails: string[]) => {
+    // De mas antiguo a mas reciente. Quien no tiene fecha de carga se cargo antes
+    // de que existiera el registro, asi que va primero.
+    function ordenarPorFechaCarga<T extends { fecha_carga?: string | null }>(lista: T[]): T[] {
+        return [...lista].sort((a, b) => {
+            const ta = a.fecha_carga ? new Date(a.fecha_carga).getTime() : NaN;
+            const tb = b.fecha_carga ? new Date(b.fecha_carga).getTime() : NaN;
+            const aSinFecha = Number.isNaN(ta);
+            const bSinFecha = Number.isNaN(tb);
+            if (aSinFecha && bSinFecha) return 0;
+            if (aSinFecha) return -1;
+            if (bSinFecha) return 1;
+            return ta - tb;
+        });
+    }
+
+    const agrupar = (emails: string[]) => {
         const chunks = [];
-        for (let i = 0; i < emails.length; i += 25) {
-            chunks.push(`--- GRUPO ${(i / 25) + 1} ---\n` + emails.slice(i, i + 25).join(', '));
+        for (let i = 0; i < emails.length; i += LOTE) {
+            chunks.push(emails.slice(i, i + LOTE));
         }
-        const text = chunks.join('\n\n');
-        const blob = new Blob([text], { type: 'text/plain' });
+        return chunks;
+    };
+
+    const cantidadGrupos = (total: number) => Math.ceil(total / LOTE);
+
+    function descargarTxt(nombreArchivo: string, texto: string) {
+        // BOM para que el Bloc de notas de Windows respete las tildes.
+        const blob = new Blob(['\uFEFF' + texto], { type: 'text/plain;charset=utf-8' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'correos_seleccionados.txt';
+        a.download = nombreArchivo;
         a.click();
         URL.revokeObjectURL(url);
-        setStatus({ type: 'success', text: 'Archivo TXT exportado con éxito.' });
+    }
+
+    function armarTxt(emails: string[], contexto: string) {
+        const grupos = agrupar(emails);
+        const hoy = new Date().toISOString().slice(0, 10);
+        const cabecera = [
+            'LISTA DE CORREOS',
+            '=================',
+            `Fecha de exportacion: ${formatearMomento(new Date())}`,
+            `Cantidad de alumnos: ${emails.length}`,
+            `Cantidad de grupos de ${LOTE} correos: ${grupos.length}`,
+            `Correos por grupo: ${LOTE}`,
+            'Orden: del mas antiguo al mas reciente (fecha de carga)',
+            `Seleccion: ${contexto}`,
+            ''
+        ].join('\n');
+
+        const cuerpo = grupos
+            .map((grupo, i) => `--- GRUPO ${i + 1} de ${grupos.length} ---\n${grupo.join(', ')}`)
+            .join('\n\n');
+
+        return {
+            texto: cabecera + cuerpo,
+            archivo: `correos_${hoy}_${grupos.length}grupos.txt`
+        };
+    }
+
+    const copyEmailsToClipboard = (emails: string[]) => {
+        const texto = agrupar(emails)
+            .map(grupo => grupo.join(', '))
+            .join('\n\n--- Grupo de 50 ---\n\n');
+        navigator.clipboard.writeText(texto);
+        setStatus({ type: 'success', text: 'Correos copiados al portapapeles (separados cada 50).' });
         setTimeout(() => setStatus(null), 3000);
     };
 
-    const handleActionOnBroadcast = async (action: 'copy' | 'export') => {
-        setLoading(true);
-        try {
-            const emails = await getBroadcastEmails();
-            if (emails.length === 0) {
-                setStatus({ type: 'error', text: 'No hay correos para procesar.' });
-                return;
-            }
-            if (action === 'copy') copyEmailsToClipboard(emails);
-            else exportEmailsToTxt(emails);
-        } catch (error) {
-            setStatus({ type: 'error', text: 'Error al obtener los correos.' });
-        } finally {
-            setLoading(false);
+    const exportEmailsToTxt = (emails: string[], contexto: string) => {
+        if (emails.length === 0) {
+            setStatus({ type: 'error', text: 'No hay correos para exportar.' });
+            return;
         }
+        const { texto, archivo } = armarTxt(emails, contexto);
+        descargarTxt(archivo, texto);
+        setStatus({
+            type: 'success',
+            text: `TXT exportado: ${emails.length} alumnos en ${cantidadGrupos(emails.length)} grupos de ${LOTE}.`
+        });
+        setTimeout(() => setStatus(null), 3000);
     };
 
-    async function getBroadcastEmails(): Promise<string[]> {
+    function handleActionOnBroadcast(action: 'copy' | 'export') {
+        const emails = audience.map(p => p.correo as string);
+        if (emails.length === 0) {
+            setStatus({ type: 'error', text: 'No hay correos para procesar.' });
+            return;
+        }
+        const contexto = broadcastType === 'capacitacion'
+            ? `Capacitacion: ${capacitaciones.find(c => c.id === selectedCapacitacion)?.nombre ?? 'sin nombre'}`
+            : `Rol: ${selectedRole === 'todos' ? 'TODOS LOS REGISTRADOS' : selectedRole}`;
+
+        if (action === 'copy') copyEmailsToClipboard(emails);
+        else exportEmailsToTxt(emails, contexto);
+    }
+
+    // Audiencia deduplicada por correo y ordenada del mas antiguo al mas
+    // reciente. Alimenta el contador, la vista previa, el TXT y el envio, para
+    // que no puedan desincronizarse entre si.
+    async function fetchBroadcastRecipients(): Promise<PersonaSimple[]> {
         let recipients: PersonaSimple[] = [];
 
         if (broadcastType === 'capacitacion') {
             if (!selectedCapacitacion) return [];
-            const { data: asistencias } = await supabase
-                .from('asistencias')
-                .select('personas(id, nombre, correo)')
-                .eq('capacitacion_id', selectedCapacitacion);
-
-            if (asistencias) {
-                recipients = (asistencias as any[])
-                    .map(a => a.personas)
-                    .filter((p): p is PersonaSimple => !!p && !!p.correo);
-            }
-        } else {
-            if (!selectedRole) return [];
-            let query = supabase
-                .from('personas')
-                .select('id, nombre, apellido, correo')
-                .neq('correo', null)
-                .neq('correo', '');
-
-            if (selectedRole !== 'todos') {
-                query = query.ilike('rol', `%${selectedRole}%`);
-            }
-
-            const { data } = await query;
-            if (data) recipients = data as PersonaSimple[];
-        }
-
-        // Deduplicate and filter nulls
-        const uniqueEmails = Array.from(new Set(
-            recipients
-                .map(p => p.correo)
-                .filter((email): email is string => !!email && email.trim() !== '')
-        ));
-
-        return uniqueEmails;
-    }
-
-
-
-    async function fetchRecipientCount() {
-        setRecipientCount(0);
-
-        if (broadcastType === 'capacitacion') {
-            if (!selectedCapacitacion) return;
-            // Count unique people with emails in the training
             const { data } = await supabase
                 .from('asistencias')
-                .select('personas(id, correo)')
+                .select('personas(id, nombre, apellido, correo, rol, fecha_carga)')
                 .eq('capacitacion_id', selectedCapacitacion);
 
             if (data) {
-                const uniqueEmails = new Set(
-                    (data as any[])
-                        .map(a => a.personas?.correo)
-                        .filter(bit => bit && bit.length > 0)
-                );
-                setRecipientCount(uniqueEmails.size);
+                recipients = (data as any[])
+                    .map(a => a.personas)
+                    .filter((p): p is PersonaSimple => !!p && !!p.correo);
             }
-        } else {
-            // Role based count
-            if (!selectedRole) return;
+            // No se puede ordenar por una columna del recurso embebido desde el
+            // servidor, asi que el orden por fecha de carga lo aplica el caller.
+            return recipients;
+        }
 
-            let query = supabase
-                .from('personas')
-                .select('id', { count: 'exact', head: true })
-                .neq('correo', null)
-                .neq('correo', '');
+        if (!selectedRole) return [];
+        let query = supabase
+            .from('personas')
+            .select('id, nombre, apellido, correo, rol, fecha_carga')
+            .neq('correo', null)
+            .neq('correo', '');
 
-            if (selectedRole !== 'todos') {
-                // Assuming rol is stored as simple text. Using ilike for better matching
-                query = query.ilike('rol', `%${selectedRole}%`);
-            }
+        if (selectedRole !== 'todos') {
+            query = query.ilike('rol', `%${selectedRole}%`);
+        }
 
-            const { count } = await query;
-            setRecipientCount(count || 0);
+        const { data } = await query
+            .order('fecha_carga', { ascending: true, nullsFirst: true });
+
+        if (data) recipients = data as PersonaSimple[];
+
+        return recipients;
+    }
+
+    async function loadAudience() {
+        setLoadingAudience(true);
+        try {
+            const lista = ordenarPorFechaCarga(await fetchBroadcastRecipients());
+            const conCorreo = lista.filter(p => p.correo && p.correo.trim() !== '');
+            // Una fila por correo: si dos personas comparten mail se envia una vez.
+            const unicos = Array.from(new Map(conCorreo.map(p => [p.correo as string, p])).values());
+            setAudience(unicos);
+            setRecipientCount(unicos.length);
+        } catch {
+            setAudience([]);
+            setRecipientCount(0);
+        } finally {
+            setLoadingAudience(false);
         }
     }
 
     useEffect(() => {
-        fetchRecipientCount();
+        loadAudience();
     }, [broadcastType, selectedCapacitacion, selectedRole]);
 
     async function sendIndividualEmail(e: React.FormEvent) {
@@ -325,39 +375,10 @@ export default function MensajeriaPage() {
         setStatus({ type: 'success', text: 'Iniciando envío masivo... Por favor espera.' });
 
         try {
-
-            let recipients: PersonaSimple[] = [];
-
-            if (broadcastType === 'capacitacion') {
-                // 1. Fetch from attendance
-                const { data: asistencias } = await supabase
-                    .from('asistencias')
-                    .select('personas(id, nombre, correo)')
-                    .eq('capacitacion_id', selectedCapacitacion);
-
-                if (asistencias) {
-                    recipients = (asistencias as any[])
-                        .map(a => a.personas)
-                        .filter((p): p is PersonaSimple => !!p && !!p.correo);
-                }
-            } else {
-                // 2. Fetch from people table directly
-                let query = supabase
-                    .from('personas')
-                    .select('id, nombre, apellido, correo')
-                    .neq('correo', null)
-                    .neq('correo', '');
-
-                if (selectedRole !== 'todos') {
-                    query = query.ilike('rol', `%${selectedRole}%`);
-                }
-
-                const { data } = await query;
-                if (data) recipients = data as PersonaSimple[];
-            }
-
-            // Deduplicate recipients by email just in case
-            const uniqueRecipients = Array.from(new Map(recipients.map(item => [item.correo, item])).values());
+            // Se reutiliza la audiencia ya resuelta en pantalla (deduplicada y
+            // ordenada del mas antiguo al mas reciente) para que el envío salga
+            // en el mismo orden que muestra la vista previa y el TXT exportado.
+            const uniqueRecipients = audience;
 
             if (uniqueRecipients.length === 0) {
                 setStatus({ type: 'error', text: 'No hay destinatarios con correo válido para esta selección.' });
@@ -504,7 +525,10 @@ export default function MensajeriaPage() {
                                             <Copy size={12} /> Copiar
                                         </button>
                                         <button
-                                            onClick={() => exportEmailsToTxt(selectedPersonas.map(p => p.correo).filter((e): e is string => !!e))}
+                                            onClick={() => exportEmailsToTxt(
+                                                ordenarPorFechaCarga(selectedPersonas).map(p => p.correo).filter((e): e is string => !!e),
+                                                'Seleccion manual'
+                                            )}
                                             className="text-[10px] flex items-center gap-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 px-2 py-1 rounded transition-colors font-bold text-slate-600 dark:text-slate-400"
                                             title="Exportar a TXT"
                                         >
@@ -673,27 +697,30 @@ export default function MensajeriaPage() {
                         <div className="p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl border border-emerald-100 dark:border-emerald-800/50">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-sm font-medium text-emerald-800 dark:text-emerald-400">Destinatarios estimados:</p>
+                                    <p className="text-sm font-medium text-emerald-800 dark:text-emerald-400">
+                                        {loadingAudience ? 'Contando...' : 'Alumnos con correo:'}
+                                    </p>
                                     <p className="text-2xl font-bold text-emerald-900 dark:text-emerald-300">{recipientCount}</p>
+                                    <p className="text-[10px] text-emerald-700 dark:text-emerald-400 font-bold">
+                                        {cantidadGrupos(recipientCount)} grupo(s) de {LOTE} en el TXT
+                                    </p>
                                 </div>
                                 {recipientCount > 0 && (
                                     <div className="flex flex-col gap-2">
                                         <button
                                             type="button"
                                             onClick={() => handleActionOnBroadcast('copy')}
-                                            disabled={loading}
                                             className="text-[10px] flex items-center gap-1.5 bg-white dark:bg-emerald-900/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 px-2.5 py-1.5 rounded-lg border border-emerald-200 dark:border-emerald-800 transition-all font-bold text-emerald-700 dark:text-emerald-400 shadow-sm"
                                         >
-                                            {loading ? <Loader2 size={12} className="animate-spin" /> : <Copy size={12} />}
+                                            <Copy size={12} />
                                             Copiar Correos
                                         </button>
                                         <button
                                             type="button"
                                             onClick={() => handleActionOnBroadcast('export')}
-                                            disabled={loading}
                                             className="text-[10px] flex items-center gap-1.5 bg-white dark:bg-emerald-900/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 px-2.5 py-1.5 rounded-lg border border-emerald-200 dark:border-emerald-800 transition-all font-bold text-emerald-700 dark:text-emerald-400 shadow-sm"
                                         >
-                                            {loading ? <Loader2 size={12} className="animate-spin" /> : <Download size={12} />}
+                                            <Download size={12} />
                                             Exportar TXT
                                         </button>
                                     </div>
@@ -701,6 +728,46 @@ export default function MensajeriaPage() {
                             </div>
                             <p className="text-[10px] text-emerald-600 mt-1 uppercase tracking-wider font-bold">Se enviará un correo a cada uno</p>
                         </div>
+
+                        {/* Vista previa: el mismo orden del mas antiguo al mas
+                            reciente que usa la exportacion y el envio. */}
+                        {audience.length > 0 && (
+                            <details className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+                                <summary className="cursor-pointer select-none px-4 py-3 text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-700/50">
+                                    <span>Ver alumnos por fecha de carga</span>
+                                    <span className="text-emerald-600 dark:text-emerald-400 normal-case tracking-normal font-medium">
+                                        del mas antiguo al mas reciente
+                                    </span>
+                                </summary>
+                                <div className="max-h-72 overflow-y-auto border-t border-slate-100 dark:border-slate-700">
+                                    {audience.map((p, i) => (
+                                        <div
+                                            key={p.id}
+                                            className="flex items-center justify-between gap-3 px-4 py-2 text-xs border-b border-slate-50 dark:border-slate-700/60 last:border-0"
+                                        >
+                                            <div className="flex items-center gap-2 min-w-0">
+                                                <span className="w-7 text-right text-slate-400 font-mono shrink-0">{i + 1}</span>
+                                                <div className="min-w-0">
+                                                    <p className="font-semibold text-slate-800 dark:text-slate-200 truncate">
+                                                        {p.nombre} {p.apellido}
+                                                    </p>
+                                                    <p className="text-slate-500 truncate">{p.correo}</p>
+                                                </div>
+                                            </div>
+                                            <span className={`shrink-0 px-2 py-0.5 rounded font-mono text-[10px] ${p.fecha_carga
+                                                ? 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400'
+                                                : 'bg-slate-100 dark:bg-slate-700 text-slate-500'
+                                                }`}>
+                                                {formatearFechaCarga(p.fecha_carga)}
+                                            </span>
+                                        </div>
+                                    ))}
+                                </div>
+                                <p className="px-4 py-2 text-[10px] text-slate-500 bg-slate-50 dark:bg-slate-900/50 border-t border-slate-100 dark:border-slate-700">
+                                    &quot;sin fecha de carga&quot; = cargados antes de que existiera el registro de fecha.
+                                </p>
+                            </details>
+                        )}
 
                         <form onSubmit={sendBroadcastEmail} className="space-y-4 pt-4 border-t border-slate-100 dark:border-slate-800">
                             <div>
@@ -760,10 +827,10 @@ export default function MensajeriaPage() {
                             </div>
                             <button
                                 type="submit"
-                                disabled={sending || recipientCount === 0 || (broadcastType === 'capacitacion' && !selectedCapacitacion) || (broadcastType === 'rol' && !selectedRole)}
+                                disabled={sending || loadingAudience || audience.length === 0 || (broadcastType === 'capacitacion' && !selectedCapacitacion) || (broadcastType === 'rol' && !selectedRole)}
                                 className="w-full btn-primary h-12 flex items-center justify-center gap-2 !bg-emerald-600 hover:!bg-emerald-700 shadow-emerald-500/20"
                             >
-                                {sending ? <Loader2 className="animate-spin" /> : <><Users size={18} /> Enviar a Todos</>}
+                                {(sending || loadingAudience) ? <Loader2 className="animate-spin" /> : <><Users size={18} /> Enviar a Todos</>}
                             </button>
                         </form>
                     </div>
